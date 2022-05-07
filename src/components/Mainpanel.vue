@@ -1,11 +1,30 @@
 <template>
   <div
-    class=" mt-16 place-items-center  my-auto max-w-md mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden md:max-w-3xl"
+    class="
+      mt-16 
+      place-items-center  
+      my-auto
+      max-w-md 
+      mx-auto 
+    bg-gray-800 
+      rounded-xl 
+      shadow-2xl
+      overflow-hidden
+      md:max-w-3xl"
   >
-    <div class="md:flex  place-content-center p-4">
+    <div class="md:flex place-content-center p-4">
       <div class="p-8">
         <p
-          class="tracking-wide cursor-default  mt-2 text-lg leading-tight font-medium text-white text-center select-none"
+          class="
+            tracking-wide
+            cursor-default 
+            mt-2 
+            text-lg
+            leading-tight
+            font-medium 
+          text-white
+            text-center
+            select-none"
         >
           貼上 Youtube 影片連結
         </p>
@@ -17,7 +36,18 @@
             placeholder="https://www.youtube.com/..."
           />
           <button
-            class="mx-2 mt-3 text-center bg-indigo-400 hover:bg-indigo-600 w-16 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50 p-0.5 "
+            class="
+              mx-2 
+              mt-3 
+              text-center 
+            bg-indigo-400 
+            hover:bg-indigo-600 w-16 
+            text-white rounded-lg 
+              focus:outline-none
+              focus:ring-2 
+            focus:ring-indigo-600 
+              focus:ring-opacity-50 
+              p-0.5"
             @click="btn"
           >
             確認
@@ -39,7 +69,7 @@
 import { invoke } from '@tauri-apps/api/tauri'
 
 export default {
-  name: 'Main',
+  name: 'Mainpanel',
 
   data () {
     return {
@@ -54,7 +84,7 @@ export default {
       const invoke = window.__TAURI__.invoke
       // Invoke the command
       invoke('ytdl', { yturl: this.yturl })
-        .then(message => console.log(message))
+        .then(console.log('success'))
         .catch(error => console.error(error))
     }
   }

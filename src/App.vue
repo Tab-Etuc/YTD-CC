@@ -16,7 +16,12 @@
         px-3"
     >
       <div
-        class="w-1/2 h-8 flex justify-between items-center"
+        class="
+          w-1/2
+          h-8 
+          flex 
+          justify-between 
+          items-center"
         @mousedown="drag"
       >
         <img
@@ -29,21 +34,25 @@
         <p
           class="
           text-indigo-400
-           inset-y-0
+            inset-y-0
             right-0
-             cursor-default font-semibold select-none"
+            cursor-default 
+            font-semibold 
+            select-none"
         >
           YTD.CC
         </p>
       </div>
 
+      <!-- window controls wrapper -->
       <div class="w-28 h-8 flex">
+        <!-- winmin -->
         <svg @click="winmin" class="ml-1 cursor-pointer">
           <!-- circle-outline -->
           <circle
             class="
-            fill-current
-          text-amber-500"
+              fill-current
+            text-amber-500"
             cx="15"
             cy="15"
             r="10"
@@ -52,20 +61,21 @@
           <!-- circle-inline -->
           <circle
             class="
-           fill-current
-         text-slate-900"
+              fill-current
+            text-slate-900"
             cx="15"
             cy="15"
             r="8"
           />
         </svg>
 
-        <svg @click="winmax" class="cursor-pointer  ml-1">
+        <!-- winmax -->
+        <svg @click="winmax" class="cursor-pointer ml-1">
           <!-- circle-outline -->
           <circle
             class="
-          fill-current 
-        text-green-500"
+              fill-current 
+            text-green-500"
             cx="15"
             cy="15"
             r="10"
@@ -74,20 +84,21 @@
           <!-- circle-inline -->
           <circle
             class="
-          fill-current 
-        text-slate-900"
+              fill-current 
+            text-slate-900"
             cx="15"
             cy="15"
             r="8"
           />
         </svg>
 
-        <svg @click="quit" class="cursor-pointer  ml-1">
+        <!-- quit -->
+        <svg @click="quit" class="cursor-pointer ml-1">
           <!-- circle-outline -->
           <circle
             class="
-          fill-current 
-        text-rose-600"
+              fill-current 
+            text-rose-600"
             cx="15"
             cy="15"
             r="10"
@@ -96,8 +107,8 @@
           <!-- circle-inline -->
           <circle
             class="
-          fill-current 
-        text-slate-900"
+              fill-current 
+            text-slate-900"
             cx="15"
             cy="15"
             r="8"
@@ -105,55 +116,65 @@
         </svg>
       </div>
     </div>
-    <!-- <button
-      class="mx-24 mt-28 text-center bg-indigo-400 hover:bg-indigo-600 w-16 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50 p-0.5 "
-      @click="show('foo-css', 'success')"
-    >
-      <i class="icon ion-information-circled" />
-      SUCCESS
-    </button> -->
+
+    <!-- notification -->
     <notifications group="foo-css" position="bottom center" :speed="500" />
+
     <!-- Main panel -->
     <Mainpanel />
 
     <div
-      class="shadow-[-1px_-1px_3px_rgba(255,255,255,0.4)] 
-      shadow-[2px_2px_6px_rgba(0,0,0,0.8)]
-      shadow-[inset_-2px_-2px_10px_rgba(255,255,255,0.1)]
-      shadow-[inset_2px_2px_10px_rgba(0,0,0,0.8)]
-      opacity-75 fixed bottom-0 w-screen h-20 bg-slate-900 rounded-t-lg"
-    ></div>
+      class="
+        shadow-[-1px_-1px_3px_rgba(255,255,255,0.4)] 
+        shadow-[2px_2px_6px_rgba(0,0,0,0.8)]
+        shadow-[inset_-2px_-2px_10px_rgba(255,255,255,0.1)]
+        shadow-[inset_2px_2px_10px_rgba(0,0,0,0.8)]
+        opacity-75 
+        fixed 
+        bottom-0
+        w-screen 
+        h-20 
+      bg-slate-900 
+        rounded-t-lg"
+    />
   </div>
 </template>
 
 <script>
 // Components
-import Mainpanel from './components/Main.vue'
+import Mainpanel from './components/Mainpanel.vue'
 
 import { appWindow } from '@tauri-apps/api/window'
 
 appWindow.setDecorations(false)
+
 export default {
   name: 'App',
+
   components: {
     Mainpanel
   },
+
   data () {
     return {
       winMaximized: false,
       id: 1
     }
   },
+
   methods: {
     winmin () {
       appWindow.minimize()
     },
+
     winmax () {
       appWindow.toggleMaximize()
     },
+
     quit () {
       appWindow.close()
     },
+
     show (group, type = '') {
       const text = `
         This is notification text!
@@ -170,6 +191,7 @@ export default {
         }
       })
     },
+
     drag () {
       appWindow.startDragging()
     }
