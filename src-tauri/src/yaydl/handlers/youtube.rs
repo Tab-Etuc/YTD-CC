@@ -26,7 +26,6 @@ static mut VIDEO_INFO: String = String::new();
 static mut VIDEO_MIME: String = String::new();
 
 unsafe fn get_video_info(id: &str) -> Result<Value> {
-    println!("{}.", id);
 
     // We need to fetch the video information first.
     let video_url = "https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";

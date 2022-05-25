@@ -22,13 +22,9 @@ use indicatif::{ProgressBar, ProgressStyle};
 use std::{
     fs,
     io::{self, copy, Read},
-    path::{Path, PathBuf},
+    path::{Path},
 };
 use url::Url;
-
-mod definitions;
-mod ffmpeg;
-mod handlers;
 
 struct DownloadProgress<R> {
     inner: R,
@@ -43,8 +39,7 @@ impl<R: Read> Read for DownloadProgress<R> {
         })
     }
 }
-
-pub fn download(url: &str, filename: &str) -> Result<()> {
+pub fn main(url: &str, filename: &str) -> Result<()> {
     let url = Url::parse(url)?;
     let resp = ureq::get(url.as_str()).call()?;
     // Find the video size:
@@ -85,119 +80,6 @@ pub fn download(url: &str, filename: &str) -> Result<()> {
         .open(&file)?;
 
     let _ = copy(&mut source, &mut dest)?;
-
-    Ok(())
-}
-
-pub fn main(yturl: String) -> Result<()> {
-    let in_url = yturl;
-    println!("{}.",in_url);
-
-    let onlyaudio = false;
-    // let outputfile = true;
-    // let audioformat = true;
-
-    inventory::collect!(&'static dyn definitions::SiteDefinition);
-    let mut site_def_found = false;
-
-    for handler in inventory::iter::<&dyn definitions::SiteDefinition> {
-        // "15:15 And he found a pair of eyes, scanning the directories for files."
-        // https://kingjamesprogramming.tumblr.com/post/123368869357/1515-and-he-found-a-pair-of-eyes-scanning-the
-        // ------------------------------------
-
-        // Find a known handler for <in_url>:
-        if !handler.can_handle_url(&in_url) {
-            continue;
-        }
-
-        // This one is it.
-        site_def_found = true;
-        println!("Fetching from {}.", handler.display_name());
-        let video_exists = handler.does_video_exist(&in_url)?;
-        if !video_exists {
-            println!("The video could not be found. Invalid link?");
-        } else {
-            let video_title = handler.find_video_title(&in_url);
-            let vt = match video_title {
-                Err(_e) => "".to_string(),
-                Ok(title) => title,
-            };
-
-            // Usually, we already find errors here.
-
-            if vt.is_empty() {
-                println!("The video title could not be extracted. Invalid link?");
-            } else {
-                // if args.is_present("verbose") {
-                    println!("Title: {}", vt);
-                // }
-
-                let url = handler.find_video_direct_url(&in_url, onlyaudio)?;
-                let ext = handler.find_video_file_extension(&in_url, onlyaudio)?;
-
-                // Now let's download it:
-                let targetfile = format!(
-                    "{}.{}",
-                    vt.trim()
-                        .replace(&['|', '\'', '\"', ':', '\'', '\\', '/'][..], r#""#),
-                    ext
-                );
-
-                // if let Some(in_targetfile) = outputfile {
-                //     targetfile = in_targetfile.to_string();
-                // }
-                // if args.is_present("verbose") {
-                println!("Starting the download.");
-                // }
-
-                download(&url, &targetfile)?;
-
-                // Convert the file if needed.
-                let outputext = "mp3";
-                // if let Some(in_outputext) = audioformat {
-                //     outputext = &in_outputext;
-                // }
-
-                if onlyaudio && ext != outputext {
-                    // if args.is_present("verbose") {
-                    //     println!("Post-processing.");
-                    // }
-
-                    let inpath = Path::new(&targetfile);
-                    let mut outpathbuf = PathBuf::from(&targetfile);
-                    outpathbuf.set_extension(outputext);
-                    let outpath = &outpathbuf.as_path();
-
-                    ffmpeg::to_audio(inpath, outpath);
-
-                    // Get rid of the evidence.
-                    fs::remove_file(&targetfile)?;
-
-                    // Success!
-                    println!(
-                        "\"{}\" successfully downloaded.",
-                        outpathbuf
-                            .into_os_string()
-                            .into_string()
-                            .unwrap_or_else(|_| targetfile.to_string())
-                    );
-                } else {
-                    // ... just success!
-                    println!("\"{}\" successfully downloaded.", &targetfile);
-                }
-            }
-
-            // Stop looking for other handlers:
-            break;
-        }
-    }
-
-    if !site_def_found {
-        println!(
-            "yaydl could not find a site definition that would satisfy {}. Exiting.",
-            in_url
-        );
-    }
 
     Ok(())
 }

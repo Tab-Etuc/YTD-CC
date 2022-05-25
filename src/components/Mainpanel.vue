@@ -1,53 +1,72 @@
 <template>
   <div
     class="
-      mt-16 
-      place-items-center  
+      mt-16
+      place-items-center
       my-auto
-      max-w-md 
-      mx-auto 
-    bg-gray-800 
-      rounded-xl 
+      max-w-md
+      mx-auto
+      bg-gray-800
+      rounded-xl
       shadow-2xl
       overflow-hidden
-      md:max-w-3xl"
+      md:max-w-3xl
+    "
   >
     <div class="md:flex place-content-center p-4">
       <div class="p-8">
         <p
           class="
             tracking-wide
-            cursor-default 
-            mt-2 
+            cursor-default
+            mt-2
             text-lg
             leading-tight
-            font-medium 
-          text-white
-            text-center
-            select-none"
+            font-medium
+            text-white text-center
+            select-none
+          "
         >
           貼上 Youtube 影片連結
         </p>
         <hr class="mt-3" size="8px" align="center" width="100%" />
         <div>
           <input
-            v-model="yturl"
-            class="ml-2 mt-4 placeholder-gray-500  w-60 rounded-full px-3 pl-5 py-1  transition-all duration-700 ease-in-out focus:shadow-outline outline-indigo-400 hover:w-64"
+            v-model="url"
+            class="
+              ml-2
+              mt-4
+              placeholder-gray-500
+              w-60
+              rounded-full
+              px-3
+              pl-5
+              py-1
+              transition-all
+              duration-700
+              ease-in-out
+              focus:shadow-outline
+              outline-indigo-400
+              hover:w-64
+            "
             placeholder="https://www.youtube.com/..."
           />
           <button
             class="
-              mx-2 
-              mt-3 
-              text-center 
-            bg-indigo-400 
-            hover:bg-indigo-600 w-16 
-            text-white rounded-lg 
+              mx-2
+              mt-3
+              text-center
+              bg-indigo-400
+              hover:bg-indigo-600
+              w-16
+              text-white
+              rounded-lg
               focus:outline-none
-              focus:ring-2 
-            focus:ring-indigo-600 
-              focus:ring-opacity-50 
-              p-0.5"
+              focus:ring-2
+              focus:ring-indigo-600
+              focus:ring-opacity-50
+              p-0.5
+            "
             @click="btn"
           >
             確認
@@ -66,27 +85,33 @@
 </template>
 
 <script>
-import { invoke } from '@tauri-apps/api/tauri'
+import downloader from "../common/downloader";
 
 export default {
-  name: 'Mainpanel',
+  name: "Mainpanel",
 
-  data () {
+  data() {
     return {
-      yturl: '',
-      opt: ''
-    }
+      url: "",
+      opt: "",
+    };
   },
 
+  inject: ["showNotify"],
+
   methods: {
-    btn: function () {
-      // With the Tauri global script, enabled when `tauri.conf.json > build > withGlobalTauri` is set to true:
-      const invoke = window.__TAURI__.invoke
-      // Invoke the command
-      invoke('ytdl', { yturl: this.yturl })
-        .then(console.log('success'))
-        .catch(error => console.error(error))
-    }
-  }
-}
+    btn: async function () {
+      if (this.url == "")
+        return this.showNotify("foo-css", "請輸入連結！", "error");
+
+      if (!/^www\.youtube.com|be/.test(this.url) || !/v=|.be\//.test(this.url))
+        return this.showNotify("foo-css", "連結無效！", "error");
+
+      downloader(this.url);
+    },
+  },
+  mounted() {
+    window.showNotify = this.showNotify;
+  },
+};
 </script>
