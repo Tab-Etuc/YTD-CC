@@ -1,6 +1,7 @@
 import { http, invoke } from '@tauri-apps/api'
 import { Body } from '@tauri-apps/api/http'
 
+
 async function makeRequest (url, options = {}) {
   if (options.query) {
     const keys = Object.keys(options.query)
@@ -25,7 +26,7 @@ async function download (url, filename, onlyaudio, outputext) {
     filename,
     onlyaudio,
     outputext
-  })
+  }).then((message) => console.log(message))
 }
 // https://kevintsengtw.blogspot.com/2011/09/javascript-stringformat.html?
 String.prototype.format = function () {
