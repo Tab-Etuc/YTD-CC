@@ -1,73 +1,140 @@
 #![cfg_attr(
-  all(not(debug_assertions), target_os = "windows"),
-  windows_subsystem = "windows"
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
 )]
 
-mod yaydl;
 mod ffmpeg;
-use tauri::api::http::{ HttpRequestBuilder, ResponseType, ClientBuilder, Body, ResponseData };
 
 use anyhow::Result;
-use std::collections::HashMap;
 use std::{
-  fs,
-  path::{Path, PathBuf},
+    collections::HashMap,
+    fs,
+    io::{self, copy, Read},
+    path::{Path, PathBuf},
 };
+use tauri::api::http::{Body, ClientBuilder, HttpRequestBuilder, ResponseData, ResponseType};
 
+use indicatif::{ProgressBar, ProgressStyle};
+use url::Url;
+
+struct DownloadProgress<R> {
+    inner: R,
+    progress_bar: ProgressBar,
+}
+static mut progress: usize = 0;
+
+impl<R: Read> Read for DownloadProgress<R> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        self.inner.read(buf).map(|n| {
+            self.progress_bar.inc(n as u64);
+            unsafe {
+                progress += n;
+                println!("{}", progress)
+            };
+
+            n
+        })
+    }
+}
 
 fn main() {
-  tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![download_yt,web_request])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![download_yt, web_request])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
 
 #[tauri::command]
-async fn download_yt(url: &str, filename: &str, onlyaudio: bool, outputext: &str) -> Result<(), ()> {
-  yaydl::main(url, filename);
-  if onlyaudio {
-    let inpath = Path::new(&filename);
-    let mut outpathbuf = PathBuf::from(&filename);
-    outpathbuf.set_extension(outputext);
-    let outpath = &outpathbuf.as_path();
+async fn download_yt(
+    url: &str,
+    filename: &str,
+    onlyaudio: bool,
+    outputext: &str,
+) -> Result<(), ()> {
+    let url = Url::parse(url).unwrap();
+    let resp = ureq::get(url.as_str()).call().unwrap();
+    // Find the video size:
+    let total_size = resp
+        .header("Content-Length")
+        .unwrap_or("0")
+        .parse::<u64>()
+        .unwrap();
 
-    ffmpeg::to_audio(inpath, outpath);
+    let mut request = ureq::get(url.as_str());
 
-    // Get rid of the evidence.
-    fs::remove_file(&filename);
+    // Display a progress bar:
+    let pb = ProgressBar::new(total_size);
+    pb.set_style(ProgressStyle::default_bar()
+               .template("{spinner:.green} [{elapsed_precise}] [{bar:40.green/blue}] {bytes}/{total_bytes} ({eta})")
+               .progress_chars("#>-"));
 
-    // Success!
-    println!(
-        "\"{}\" successfully downloaded.",
-        outpathbuf
-            .into_os_string()
-            .into_string()
-            .unwrap_or_else(|_| filename.to_string())
-    );
-  Ok(())
-    
-} else {
-    // ... just success!
-    println!("\"{}\" successfully downloaded.", &filename);
-    Ok(())
-}
+    let file = Path::new(filename);
+
+    if file.exists() {
+        // Continue the file:
+        let size = file.metadata().unwrap().len() - 1;
+        // Override the range:
+        request = ureq::get(url.as_str())
+            .set("Range", &format!("bytes={}-", size))
+            .to_owned();
+        pb.inc(size);
+    }
+
+    let resp = request.call().unwrap();
+    let mut source = DownloadProgress {
+        progress_bar: pb,
+        inner: resp.into_reader(),
+    };
+
+    let mut dest = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&file)
+        .unwrap();
+
+    let _ = copy(&mut source, &mut dest).unwrap();
+
+    if onlyaudio {
+        let inpath = Path::new(&filename);
+        let mut outpathbuf = PathBuf::from(&filename);
+        outpathbuf.set_extension(outputext);
+        let outpath = &outpathbuf.as_path();
+
+        ffmpeg::to_audio(inpath, outpath);
+
+        // Get rid of the evidence.
+        fs::remove_file(&filename);
+
+        // Success!
+        println!(
+            "\"{}\" successfully downloaded.",
+            outpathbuf
+                .into_os_string()
+                .into_string()
+                .unwrap_or_else(|_| filename.to_string())
+        );
+        Ok(())
+    } else {
+        println!("\"{}\" successfully downloaded.", &filename);
+        Ok(())
+    }
 }
 
 #[tauri::command]
 async fn web_request(
-  url: String,
-  method: String,
-  body: Body,
-  query: HashMap<String, String>,
-  headers: HashMap<String, String>,
-  response_type: ResponseType,
+    url: String,
+    method: String,
+    body: Body,
+    query: HashMap<String, String>,
+    headers: HashMap<String, String>,
+    response_type: ResponseType,
 ) -> Result<ResponseData, String> {
     let method = &method;
     let client = ClientBuilder::new().max_redirections(3).build().unwrap();
     let mut request_builder = HttpRequestBuilder::new(method, url)
-    .unwrap()
-    .query(query)
-    .headers(headers);
+        .unwrap()
+        .query(query)
+        .headers(headers);
 
     if method.eq("POST") {
         request_builder = request_builder.body(body);
@@ -82,4 +149,3 @@ async fn web_request(
     }
     return Err("web request failed".into());
 }
-
