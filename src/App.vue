@@ -2,7 +2,7 @@
   <div
     class="w-screen h-screen overflow-hidden rounded-xl bg-slate-900 ring-1 ring-white/10 ring-inset"
   >
-    <div @mousedown="drag" class="sticky h-[1.1rem] w-screen  bg-slate-700">
+    <div @mousedown="drag" class="sticky h-[1.1rem] w-screen  ">
       <!-- window controls wrapper -->
       <div
         class="static top-0 left-0 w-28 h-8 flex rounded-xl mb-3 bg-slate-700"
@@ -82,9 +82,7 @@
     </div>
 
     <div class="static float-left w-[calc(100%-7rem)] h-[93%] ">
-      <Mainpanel />
-      
-      <modals-container></modals-container>
+      <router-view></router-view>
     </div>
 
     <!-- Notification -->
@@ -99,21 +97,15 @@
 
 <script>
 // Components
-import Mainpanel from './components/Mainpanel.vue'
 import Sidebar from './components/Sidebar.vue'
-import History from './components/History.vue'
 
-import { ModalsContainer } from 'vue-final-modal'
 
 import { appWindow } from '@tauri-apps/api/window'
 
 export default {
   name: 'App',
   components: {
-    Mainpanel,
-    Sidebar,
-    History,
-    ModalsContainer
+    Sidebar
   },
 
   data () {
