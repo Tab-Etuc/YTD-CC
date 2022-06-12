@@ -4,9 +4,7 @@
   >
     <div @mousedown="drag" class="sticky h-[1.1rem] w-screen  ">
       <!-- window controls wrapper -->
-      <div
-        class="static top-0 left-0 w-28 h-8 flex rounded-xl mb-3 bg-slate-700"
-      >
+      <div class="top-0 left-0 w-28 h-8 flex rounded-xl mb-3 bg-slate-700">
         <!-- Window minimize -->
         <svg
           @click="winmin"
@@ -77,15 +75,15 @@
         </svg>
       </div>
     </div>
-    <div class="static float-left h-screen w-28 ">
+
+    <div class="float-left h-screen w-28 ">
       <Sidebar />
     </div>
 
-    <div class="static float-left w-[calc(100%-7rem)] h-[93%] ">
-      <router-view></router-view>
-    </div>
+    <!-- 主畫面 -->
+    <router-view></router-view>
 
-    <!-- Notification -->
+    <!-- 通知 -->
     <notifications
       group="foo-css"
       position="bottom right"
@@ -98,7 +96,6 @@
 <script>
 // Components
 import Sidebar from './components/Sidebar.vue'
-
 
 import { appWindow } from '@tauri-apps/api/window'
 
