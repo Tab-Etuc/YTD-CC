@@ -2,8 +2,6 @@ import { createApp } from 'vue'
 import Notifications from '@kyvg/vue3-notification'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
-import VueSidebarMenu from 'vue-sidebar-menu'
-import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 import './assets/tailwind.css'
 
@@ -20,7 +18,6 @@ const router = createRouter({
 const app = createApp(App)
 app
   .use(Notifications)
-  .use(VueSidebarMenu)
   .use(router)
 
 app.mount('#app')
