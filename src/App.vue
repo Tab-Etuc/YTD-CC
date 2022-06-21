@@ -2,7 +2,7 @@
   <div
     class="w-screen h-screen overflow-hidden rounded-xl bg-slate-900 ring-1 ring-white/10 ring-inset"
   >
-    <div @mousedown="drag" class="sticky h-[1.1rem] w-screen  ">
+    <div @mousedown="drag" class="sticky h-[1.3rem] w-screen  ">
       <!-- window controls wrapper -->
       <div class="top-0 left-0 w-28 h-8 flex rounded-xl mb-3 bg-slate-700">
         <!-- Window minimize -->
@@ -81,7 +81,18 @@
     </div>
 
     <!-- 主畫面 -->
-    <router-view></router-view>
+    <router-view v-slot="{ Component }">
+      <transition
+        enter-active-class="duration-500 ease-out"
+        enter-from-class="transform opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="duration-400 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="transform opacity-0"
+      >
+        <component :is="Component" />
+      </transition>
+    </router-view>
 
     <!-- 通知 -->
     <notifications
