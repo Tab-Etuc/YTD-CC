@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
-import Notifications from '@kyvg/vue3-notification'
+import { createStore } from 'vuex'
 import { createRouter, createWebHistory } from 'vue-router'
+import Notifications from '@kyvg/vue3-notification'
+
 import App from './App.vue'
 
 import './assets/tailwind.css'
@@ -29,7 +31,22 @@ const router = createRouter({
     }
   ]
 })
+
+const store = createStore({
+  state () {
+    return {
+      count: 0
+    }
+  },
+  mutations: {
+    increment (state) {
+      state.count++
+    }
+  }
+})
+
 const app = createApp(App)
-app.use(Notifications).use(router)
+
+app.use(Notifications).use(router).use(store)
 
 app.mount('#app')

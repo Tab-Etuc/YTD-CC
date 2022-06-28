@@ -8,6 +8,21 @@
       class="
          mt-6 bg-slate-800 rounded-xl shadow-2xl ring-1 ring-white/10 ring-inset overflow-hidden w-[55rem] h-[33%]"
     >
+      <Teleport to="body">
+        <!-- use the modal component, pass in the prop -->
+        <YtDlModal
+          :show="showYtDlModal"
+          :videoId="videoId"
+          :videoInfoTitle="videoInfoTitle"
+          :videoInfoItags="videoInfoItags"
+          @close="showYtDlModal = false"
+        >
+          <!-- <template #header>
+            <h3>custom header</h3>
+          </template> -->
+        </YtDlModal>
+      </Teleport>
+
       <div class="flex flex-wrap place-content-center justify-center h-full">
         <div class="p-6">
           <p
@@ -25,6 +40,7 @@
             "
               placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=..."
             />
+
             <button
               class="
               mx-2 mt-3 text-center bg-blue-500 hover:bg-blue-600 w-16 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50 p-0.5
@@ -42,6 +58,14 @@
             <option value="mp3">MP3</option>
             <option value="mp4">MP4</option>
           </select> -->
+          <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-3">
+            <div
+              class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
+              :style="{ width: barValue }"
+            >
+              {{ barValue }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -88,39 +112,103 @@
 </template>
 
 <script>
+import { http, invoke } from '@tauri-apps/api'
+import { Body } from '@tauri-apps/api/http'
+
 // Components
 import History from './History.vue'
+import YtDlModal from './modal/YtDlModal.vue'
 
-import downloader from '../common/downloader'
 import bannerImg from '../assets/TDwZG1y.jpg'
 
 export default {
   name: 'Home',
   components: {
-    History
+    History,
+    YtDlModal
   },
 
   data () {
     return {
       ytUrl: '',
-      opt: '',
-      bannerImg: bannerImg
+      videoId: '',
+      videoInfoTitle: '',
+      videoInfoItags: '',
+      barValue: '0%',
+      bannerImg: bannerImg,
+      showYtDlModal: false
     }
   },
 
   inject: ['showNotify'],
 
   methods: {
+    makeRequest: async function (url, options = {}) {
+      if (options.query) {
+        const keys = Object.keys(options.query)
+        for (let i = 0; i < keys.length; i++) {
+          const value = options.query[keys[i]]
+          if (value !== undefined) options.query[keys[i]] = value.toString()
+        }
+      }
+      const response = await invoke('web_request', {
+        url,
+        body: options.body ?? http.Body.json({}),
+        method: options.method ?? 'GET',
+        query: options.query ?? {},
+        headers: options.headers ?? {},
+        responseType: { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 1
+      })
+      return response.data
+    },
+
     confirm: async function () {
+      // 檢查連結
       if (this.ytUrl == '')
         return this.showNotify('foo-css', '請輸入連結！', 'error')
 
-      if (
-        !/^www\.youtube.com|be/.test(this.ytUrl) ||
-        !/v=|.be\//.test(this.ytUrl)
-      )
+      if (/(www\.youtube\.com|be)(?=\/watch\?v=)/.test(this.ytUrl)) {
+        this.videoId = this.ytUrl.split('v=')[1].slice(0, 11)
+      } else if (/www\.youtu\.be\//.test(this.ytUrl)) {
+        this.videoId = this.ytUrl.split('.be/')[1].slice(0, 11)
+      } else {
         return this.showNotify('foo-css', '連結無效！', 'error')
-      downloader(this.ytUrl)
+      }
+
+      await this.find_video_info(this.videoId)
+        .then(() => {
+          console.log('123')
+          if (!this.videoInfoTitle || !this.videoInfoItags)
+            return this.showNotify('foo-css', '無法獲取影片資訊，連結無效？', 'error')
+          this.showYtDlModal = true
+        })
+        .catch()
+    },
+
+    find_video_info: async function (id) {
+      await this.makeRequest(
+        'https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        {
+          body: Body.json({
+            videoId: id,
+            context: {
+              client: {
+                clientName: 'ANDROID',
+                clientVersion: '16.02'
+              }
+            }
+          }),
+          method: 'POST',
+          responseType: 'JSON'
+        }
+      ).then(data => {
+        ;[this.videoInfoTitle, this.videoInfoItags] = [
+          data['videoDetails']['title'],
+          data['streamingData']['formats']
+        ]
+      }).catch(err=>console.log(err))
+
+      return
     }
   },
 

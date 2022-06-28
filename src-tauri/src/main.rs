@@ -21,17 +21,18 @@ struct DownloadProgress<R> {
     inner: R,
     progress_bar: ProgressBar,
 }
-static mut progress: usize = 0;
+
+static mut progress_size_now: usize = 0;
+static mut total_progress_size: u64 = 0;
 
 impl<R: Read> Read for DownloadProgress<R> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.inner.read(buf).map(|n| {
             self.progress_bar.inc(n as u64);
             unsafe {
-                progress += n;
-                println!("{}", progress)
+                progress_size_now += n;
+                println!("{}", progress_size_now)
             };
-
             n
         })
     }
@@ -39,7 +40,12 @@ impl<R: Read> Read for DownloadProgress<R> {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![download_yt, web_request])
+        .invoke_handler(tauri::generate_handler![
+            download_yt,
+            web_request,
+            getBarTotalSize,
+            getBarSizeNow
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -59,6 +65,7 @@ async fn download_yt(
         .unwrap_or("0")
         .parse::<u64>()
         .unwrap();
+    unsafe { total_progress_size = total_size };
 
     let mut request = ureq::get(url.as_str());
 
@@ -106,18 +113,28 @@ async fn download_yt(
         fs::remove_file(&filename);
 
         // Success!
-        println!(
-            "\"{}\" successfully downloaded.",
-            outpathbuf
-                .into_os_string()
-                .into_string()
-                .unwrap_or_else(|_| filename.to_string())
-        );
+        unsafe {
+            progress_size_now = 0;
+            total_progress_size = 0;
+        }
         Ok(())
     } else {
-        println!("\"{}\" successfully downloaded.", &filename);
+        unsafe {
+            progress_size_now = 0;
+            total_progress_size = 0;
+        }
         Ok(())
     }
+}
+
+#[tauri::command]
+fn getBarTotalSize() -> String {
+    unsafe { total_progress_size.to_string().into() }
+}
+
+#[tauri::command]
+fn getBarSizeNow() -> String {
+    unsafe { progress_size_now.to_string().into() }
 }
 
 #[tauri::command]

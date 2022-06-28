@@ -7,7 +7,7 @@
       class="relative flex flex-wrap place-content-center justify-center w-full h-full"
     >
       <!-- YTD.CC icon -->
-      <img class="absolute top-0 w-11 h-11 rounded-sm my-2" src="../assets/YTD.CC.png"/>
+      <img class="absolute top-0 w-11 h-11 rounded-sm my-2" src="../assets/YTD.CC.png" alt="YTD.CC Icon"/>
 
       <!-- Home icon -->
       <router-link to="/"

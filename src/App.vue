@@ -2,7 +2,7 @@
   <div
     class="w-screen h-screen overflow-hidden rounded-xl bg-slate-900 ring-1 ring-white/10 ring-inset"
   >
-    <div @mousedown="drag" class="sticky h-[1.3rem] w-screen  ">
+    <div @mousedown="drag" class="sticky h-8 w-screen  ">
       <!-- window controls wrapper -->
       <div class="top-0 left-0 w-28 h-8 flex rounded-xl mb-3 bg-slate-700">
         <!-- Window minimize -->
@@ -82,7 +82,7 @@
 
     <!-- 主畫面 -->
     <router-view v-slot="{ Component }">
-      <transition
+      <Transition
         enter-active-class="duration-500 ease-out"
         enter-from-class="transform opacity-0"
         enter-to-class="opacity-100"
@@ -91,7 +91,7 @@
         leave-to-class="transform opacity-0"
       >
         <component :is="Component" />
-      </transition>
+      </Transition>
     </router-view>
 
     <!-- 通知 -->
@@ -131,6 +131,7 @@ export default {
   async mounted () {
     appWindow.setDecorations(false)
   },
+
   methods: {
     winmin () {
       appWindow.minimize()
