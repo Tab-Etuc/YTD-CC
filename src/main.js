@@ -1,5 +1,4 @@
 import { createApp } from 'vue'
-import { createStore } from 'vuex'
 import { createRouter, createWebHistory } from 'vue-router'
 import Notifications from '@kyvg/vue3-notification'
 
@@ -8,7 +7,7 @@ import App from './App.vue'
 import './assets/tailwind.css'
 
 import Home from './components/Home.vue'
-const About = { template: '<div class="w-12 h-12 bg-white"/>' }
+const About = { template: '' }
 
 const router = createRouter({
   history: createWebHistory(),
@@ -32,21 +31,8 @@ const router = createRouter({
   ]
 })
 
-const store = createStore({
-  state () {
-    return {
-      count: 0
-    }
-  },
-  mutations: {
-    increment (state) {
-      state.count++
-    }
-  }
-})
-
 const app = createApp(App)
 
-app.use(Notifications).use(router).use(store)
+app.use(Notifications).use(router)
 
 app.mount('#app')

@@ -14,6 +14,7 @@
           :show="showYtDlModal"
           :videoId="videoId"
           :videoInfoTitle="videoInfoTitle"
+          :videoInfoAuthor="videoInfoAuthor"
           :videoInfoItags="videoInfoItags"
           @close="showYtDlModal = false"
         >
@@ -58,14 +59,6 @@
             <option value="mp3">MP3</option>
             <option value="mp4">MP4</option>
           </select> -->
-          <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700 mt-3">
-            <div
-              class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
-              :style="{ width: barValue }"
-            >
-              {{ barValue }}
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -133,8 +126,8 @@ export default {
       ytUrl: '',
       videoId: '',
       videoInfoTitle: '',
-      videoInfoItags: '',
-      barValue: '0%',
+      videoInfoAuthor: '',
+      videoInfoItags: [],
       bannerImg: bannerImg,
       showYtDlModal: false
     }
@@ -177,9 +170,12 @@ export default {
 
       await this.find_video_info(this.videoId)
         .then(() => {
-          console.log('123')
           if (!this.videoInfoTitle || !this.videoInfoItags)
-            return this.showNotify('foo-css', '無法獲取影片資訊，連結無效？', 'error')
+            return this.showNotify(
+              'foo-css',
+              '無法獲取影片資訊，連結無效？',
+              'error'
+            )
           this.showYtDlModal = true
         })
         .catch()
@@ -201,12 +197,15 @@ export default {
           method: 'POST',
           responseType: 'JSON'
         }
-      ).then(data => {
-        ;[this.videoInfoTitle, this.videoInfoItags] = [
-          data['videoDetails']['title'],
-          data['streamingData']['formats']
-        ]
-      }).catch(err=>console.log(err))
+      )
+        .then(data => {
+          ;[this.videoInfoTitle, this.videoInfoItags, this.videoInfoAuthor] = [
+            data['videoDetails']['title'],
+            data['streamingData']['formats'],
+            data['videoDetails']['author']
+          ]
+        })
+        .catch()
 
       return
     }

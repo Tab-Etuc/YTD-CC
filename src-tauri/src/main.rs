@@ -43,8 +43,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             download_yt,
             web_request,
-            getBarTotalSize,
-            getBarSizeNow
+            get_bar_total_size,
+            get_bar_size_now
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -128,12 +128,12 @@ async fn download_yt(
 }
 
 #[tauri::command]
-fn getBarTotalSize() -> String {
+fn get_bar_total_size() -> String {
     unsafe { total_progress_size.to_string().into() }
 }
 
 #[tauri::command]
-fn getBarSizeNow() -> String {
+fn get_bar_size_now() -> String {
     unsafe { progress_size_now.to_string().into() }
 }
 
