@@ -1,11 +1,8 @@
 <template>
   <div
-    class="w-screen h-screen overflow-hidden rounded-xl bg-slate-900 ring-1 ring-white/10 ring-inset"
+    class="w-screen h-screen overflow-hidden bg-slate-900 ring-1 ring-white/10 ring-inset"
   >
-
-
     <div @mousedown="drag" class="sticky h-8 w-screen  ">
-
       <!-- !!! 這裡實際使用起來很卡，原因有待釐清   -->
       <!-- window controls wrapper -->
       <div class="top-0 left-0 w-28 h-8 flex rounded-xl mb-3 bg-slate-700">
@@ -120,18 +117,6 @@ export default {
     Sidebar
   },
 
-  data () {
-    return {
-      id: 1
-    }
-  },
-
-  provide () {
-    return {
-      showNotify: this.showNotify
-    }
-  },
-
   async mounted () {
     appWindow.setDecorations(false)
   },
@@ -151,20 +136,6 @@ export default {
 
     drag () {
       appWindow.startDragging()
-    },
-
-    showNotify (group, msg, type = '') {
-      const text = `
-        ${msg}
-        <br>
-        Date: ${new Date()}
-      `
-      this.$notify({
-        group,
-        title: `${type} #${this.id++}`,
-        text,
-        type
-      })
     }
   }
 }

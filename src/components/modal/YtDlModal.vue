@@ -169,7 +169,7 @@
                   id="mp3"
                   value="mp3"
                   title="MP3"
-                  v-model="opt"
+                  v-model="fileFormat"
                 />
                 <input
                   type="radio"
@@ -177,7 +177,7 @@
                   id="mp4"
                   value="mp4"
                   title="MP4"
-                  v-model="opt"
+                  v-model="fileFormat"
                 />
               </summary>
               <ul class="list">
@@ -194,7 +194,7 @@
 
             <button
               class="flex float-right bg-blue-500 hover:bg-blue-600 w-16 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50 h-7"
-              @click="test"
+              @click="check"
             >
               <a
                 class="flex text-center text-white items-center justify-center w-full h-full"
@@ -384,19 +384,23 @@ export default {
   data () {
     return {
       barValue: '0%',
-      opt: '',
+      fileFormat: '',
       inDownload: false
     }
   },
 
   methods: {
     test: function () {
-      console.log(this.opt)
+      console.log(this.fileFormat)
     },
     check: async function () {
       const onlyaudio = false
 
-      let url_to_choose = ''
+      if (this.fileFormat == 'mp3') onlyaudio = true
+
+      this.inDownload = true
+
+      let urlToChoose = ''
 
       // 未來改成使用者自選畫質
       let vq1 = 'tiny'
@@ -412,9 +416,9 @@ export default {
       let aq3 = 'AUDIO_QUALITY_HIGH'
 
       let last_aq = ''
-      for (var itag in video_info_itags) {
-        let this_aq = video_info_itags[itag]['audioQuality']
-        let this_vq = video_info_itags[itag]['quality']
+      for (var itag in this.videoInfoItags) {
+        let this_aq = this.videoInfoItags[itag]['audioQuality']
+        let this_vq = this.videoInfoItags[itag]['quality']
         let VIDEO_MIME = ''
 
         let is_better_audio =
@@ -450,33 +454,33 @@ export default {
         // If audio: Try to download the best audio quality.
         // If video: Try to download the best combination.
         if (
-          (((onlyaudio && video_info_itags[itag]['mimeType']) ||
-            (!onlyaudio && video_info_itags[itag]['mimeType'])) &&
-            (!onlyaudio || video_info_itags[itag]['quality'] != null) &&
-            video_info_itags[itag]['audioQuality'] != null &&
+          (((onlyaudio && this.videoInfoItags[itag]['mimeType']) ||
+            (!onlyaudio && this.videoInfoItags[itag]['mimeType'])) &&
+            (!onlyaudio || this.videoInfoItags[itag]['quality'] != null) &&
+            this.videoInfoItags[itag]['audioQuality'] != null &&
             ((onlyaudio && this_vq.is_empty()) ||
               (!onlyaudio && last_vq == '' && this_vq != ''))) ||
           is_better_quality
         ) {
-          VIDEO_MIME = video_info_itags[itag]['mimeType']
-          url_to_choose = video_info_itags[itag]['url']
+          VIDEO_MIME = this.videoInfoItags[itag]['mimeType']
+          urlToChoose = this.videoInfoItags[itag]['url']
 
           last_vq = this_vq
           last_aq = this_aq
         }
       }
-      if (!url_to_choose) {
+      if (!urlToChoose) {
         this.showNotify('foo-css', '下載失敗', 'error')
         return
       } else {
         let ext = 'mp4'
         let targetfile =
-          video_info_title.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, '') +
+          this.videoInfoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, '') +
           '.' +
           ext
 
         console.log(targetfile)
-        this.downloadYT(url_to_choose, targetfile, false, ext)
+        this.downloadYT(urlToChoose, targetfile, onlyaudio, ext)
       }
     },
 
@@ -503,33 +507,23 @@ export default {
       }).then(() => {
         clearInterval(changeBarValue)
         console.log('已停止迴圈')
+        that.$emit('close')
+        that.$notify({
+          group: 'foo-css',
+          title: '影片下載成功！',
+          text: `${that.videoInfoTitle}`,
+          type: 'success'
+        })
+
         that.barValue = '0%'
+        that.inDownload = false
       })
     },
 
-    does_video_exist: async function (id) {
-      var video_info_is_playable,
-        video_info_has_details = ''
-      await this.get_video_info(id)
-        .then(data => {
-          video_info_is_playable = data['playabilityStatus']['status']
-          video_info_has_details = data['videoDetails']
-          if (
-            video_info_is_playable == null ||
-            video_info_has_details == null ||
-            Error
-          )
-            return
-        })
-        .catch(err => {
-          console.log(err)
-        })
-
-      if (video_info_is_playable == 'OK' && video_info_has_details != null)
-        return true
-    },
-
     get_video_duration: function () {
+      // 每更新一次進度條，此函式變會調用一次
+      // 預計日後直接將 影片時長 存成變數
+
       console.log(this.videoInfoItags)
       function millisToMinutesAndSeconds (millis) {
         var minutes = Math.floor(millis / 60000)

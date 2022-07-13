@@ -133,8 +133,6 @@ export default {
     }
   },
 
-  inject: ['showNotify'],
-
   methods: {
     makeRequest: async function (url, options = {}) {
       if (options.query) {
@@ -158,24 +156,32 @@ export default {
     confirm: async function () {
       // 檢查連結
       if (this.ytUrl == '')
-        return this.showNotify('foo-css', '請輸入連結！', 'error')
-
+        return this.$notify({
+          group: 'foo-css',
+          title: '請輸入連結！',
+          type: 'error'
+        })
       if (/(www\.youtube\.com|be)(?=\/watch\?v=)/.test(this.ytUrl)) {
         this.videoId = this.ytUrl.split('v=')[1].slice(0, 11)
       } else if (/www\.youtu\.be\//.test(this.ytUrl)) {
         this.videoId = this.ytUrl.split('.be/')[1].slice(0, 11)
       } else {
-        return this.showNotify('foo-css', '連結無效！', 'error')
+        return this.$notify({
+          group: 'foo-css',
+          title: '連結無效！',
+          type: 'error'
+        })
       }
 
       await this.find_video_info(this.videoId)
         .then(() => {
           if (!this.videoInfoTitle || !this.videoInfoItags)
-            return this.showNotify(
-              'foo-css',
-              '無法獲取影片資訊，連結無效？',
-              'error'
-            )
+            return this.$notify({
+              group: 'foo-css',
+              title: '無法獲取影片資訊，連結無效？',
+              text: `${that.videoInfoTitle}`,
+              type: 'success'
+            })
           this.showYtDlModal = true
         })
         .catch()
@@ -209,10 +215,6 @@ export default {
 
       return
     }
-  },
-
-  mounted () {
-    window.showNotify = this.showNotify
   }
 }
 </script>
