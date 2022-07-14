@@ -394,7 +394,7 @@ export default {
       console.log(this.fileFormat)
     },
     check: async function () {
-      const onlyaudio = false
+      let onlyaudio = false
 
       if (this.fileFormat == 'mp3') onlyaudio = true
 
@@ -458,7 +458,7 @@ export default {
             (!onlyaudio && this.videoInfoItags[itag]['mimeType'])) &&
             (!onlyaudio || this.videoInfoItags[itag]['quality'] != null) &&
             this.videoInfoItags[itag]['audioQuality'] != null &&
-            ((onlyaudio && this_vq.is_empty()) ||
+            ((onlyaudio && !this_vq) ||
               (!onlyaudio && last_vq == '' && this_vq != ''))) ||
           is_better_quality
         ) {
