@@ -179,8 +179,8 @@ export default {
             return this.$notify({
               group: 'foo-css',
               title: '無法獲取影片資訊，連結無效？',
-              text: `${that.videoInfoTitle}`,
-              type: 'success'
+              text: `${this.videoInfoTitle}`,
+              type: 'error'
             })
           this.showYtDlModal = true
         })
