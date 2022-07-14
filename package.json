@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@kyvg/vue3-notification": "^2.3.4",
-    "@tauri-apps/api": "^1.0.0-rc.3",
+    "@tauri-apps/api": "^1.0.2",
     "autoprefixer": "^10",
     "module-from-string": "^3.1.4",
     "nprogress": "^0.2.0",
@@ -24,7 +24,7 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.0.0-rc.8",
+    "@tauri-apps/cli": "^1.0.3",
     "@vitejs/plugin-vue": "^2.3.1",
     "autoprefixer": "^10.4.4",
     "postcss": "^8.4.12",
