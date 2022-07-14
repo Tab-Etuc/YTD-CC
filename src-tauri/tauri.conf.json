@@ -7,8 +7,7 @@
     "distDir": "../dist",
     "devPath": "http://localhost:3000",
     "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
-    "withGlobalTauri": true
+    "beforeBuildCommand": "npm run build"
   },
   "tauri": {
     "bundle": {
@@ -23,18 +22,16 @@
         "icons/icon.ico"
       ],
       "resources": [],
-      "externalBin": [],
+      "externalBin": ["ffmpeg"],
       "copyright": "",
       "category": "DeveloperTool",
       "shortDescription": "",
       "longDescription": "",
       "deb": {
-        "depends": [],
-        "useBootstrapper": false
+        "depends": []
       },
       "macOS": {
         "frameworks": [],
-        "useBootstrapper": false,
         "exceptionDomain": "",
         "signingIdentity": null,
         "providerShortName": null,
@@ -51,6 +48,10 @@
     },
     "allowlist": {
       "all": true,
+      "shell": {
+        "sidecar": true,
+        "scope": [{ "name": "ffmpeg", "sidecar": true }]
+      },
       "http": {
         "all": true,
         "request": true
