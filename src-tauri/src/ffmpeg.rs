@@ -28,7 +28,7 @@ pub fn to_audio(inputfile: &Path, outputfile: &Path) {
         .arg(inputfile)
         .arg("-vn") // Skip the video streams.
         .arg("-loglevel")
-        .arg("quiet") // Shut the fuck up.
+        .arg("quiet") // Shut the fuck up. // O_O
         .arg(outputfile)
         .output()
         .expect("Could not find ffmpeg - no processing is done.");
