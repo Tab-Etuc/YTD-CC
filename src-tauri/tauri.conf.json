@@ -50,10 +50,11 @@
       "all": true,
       "shell": {
         "sidecar": true,
-        "scope": [{ "name": "ffmpeg", "sidecar": true }]
+        "scope": [{ "name": "ffmpeg", "args": true, "sidecar": true }]
       },
       "http": {
         "all": true,
+        "scope": ["https://*/*"],
         "request": true
       }
     },
