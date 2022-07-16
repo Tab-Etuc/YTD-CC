@@ -7,12 +7,10 @@ mod ffmpeg;
 
 use anyhow::Result;
 use std::{
-    collections::HashMap,
     fs,
     io::{self, copy, Read},
     path::{Path, PathBuf},
 };
-use tauri::api::http::{Body, ClientBuilder, HttpRequestBuilder, ResponseData, ResponseType};
 
 use indicatif::{ProgressBar, ProgressStyle};
 use url::Url;
@@ -22,16 +20,15 @@ struct DownloadProgress<R> {
     progress_bar: ProgressBar,
 }
 
-static mut progress_size_now: usize = 0;
-static mut total_progress_size: u64 = 0;
+static mut PROGRESS_SIZE_NOW: usize = 0;
+static mut TOTAL_PROGRESS_SIZE: u64 = 0;
 
 impl<R: Read> Read for DownloadProgress<R> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.inner.read(buf).map(|n| {
             self.progress_bar.inc(n as u64);
             unsafe {
-                progress_size_now += n;
-                println!("{}", progress_size_now)
+                PROGRESS_SIZE_NOW += n;
             };
             n
         })
@@ -42,7 +39,6 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             download_yt,
-            web_request,
             get_bar_total_size,
             get_bar_size_now
         ])
@@ -51,12 +47,7 @@ fn main() {
 }
 
 #[tauri::command]
-async fn download_yt(
-    url: &str,
-    filename: &str,
-    onlyaudio: bool,
-    outputext: &str,
-) -> Result<(), ()> {
+async fn download_yt(url: &str, filename: &str, onlyaudio: bool) -> Result<(), ()> {
     let url = Url::parse(url).unwrap();
     let resp = ureq::get(url.as_str()).call().unwrap();
     // Find the video size:
@@ -65,7 +56,7 @@ async fn download_yt(
         .unwrap_or("0")
         .parse::<u64>()
         .unwrap();
-    unsafe { total_progress_size = total_size };
+    unsafe { TOTAL_PROGRESS_SIZE = total_size };
 
     let mut request = ureq::get(url.as_str());
 
@@ -104,24 +95,23 @@ async fn download_yt(
     if onlyaudio {
         let inpath = Path::new(&filename);
         let mut outpathbuf = PathBuf::from(&filename);
-        outpathbuf.set_extension(outputext);
+        outpathbuf.set_extension("mp3");
         let outpath = &outpathbuf.as_path();
 
         ffmpeg::to_audio(inpath, outpath);
-
         // Get rid of the evidence.
-        fs::remove_file(&filename);
+        fs::remove_file(&filename).unwrap();
 
         // Success!
         unsafe {
-            progress_size_now = 0;
-            total_progress_size = 0;
+            PROGRESS_SIZE_NOW = 0;
+            TOTAL_PROGRESS_SIZE = 0;
         }
         Ok(())
     } else {
         unsafe {
-            progress_size_now = 0;
-            total_progress_size = 0;
+            PROGRESS_SIZE_NOW = 0;
+            TOTAL_PROGRESS_SIZE = 0;
         }
         Ok(())
     }
@@ -129,40 +119,10 @@ async fn download_yt(
 
 #[tauri::command]
 fn get_bar_total_size() -> String {
-    unsafe { total_progress_size.to_string().into() }
+    unsafe { TOTAL_PROGRESS_SIZE.to_string().into() }
 }
 
 #[tauri::command]
 fn get_bar_size_now() -> String {
-    unsafe { progress_size_now.to_string().into() }
-}
-
-#[tauri::command]
-async fn web_request(
-    url: String,
-    method: String,
-    body: Body,
-    query: HashMap<String, String>,
-    headers: HashMap<String, String>,
-    response_type: ResponseType,
-) -> Result<ResponseData, String> {
-    let method = &method;
-    let client = ClientBuilder::new().max_redirections(3).build().unwrap();
-    let mut request_builder = HttpRequestBuilder::new(method, url)
-        .unwrap()
-        .query(query)
-        .headers(headers);
-
-    if method.eq("POST") {
-        request_builder = request_builder.body(body);
-    }
-
-    let request = request_builder.response_type(response_type);
-    if let Ok(response) = client.send(request).await {
-        if let Ok(result) = response.read().await {
-            return Ok(result);
-        }
-        return Err("response read failed".into());
-    }
-    return Err("web request failed".into());
+    unsafe { PROGRESS_SIZE_NOW.to_string().into() }
 }
