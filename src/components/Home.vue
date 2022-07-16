@@ -11,12 +11,14 @@
       <Teleport to="body">
         <!-- use the modal component, pass in the prop -->
         <YtDlModal
-          :show="showYtDlModal"
+          :showModal="showYtDlModal"
           :videoId="videoId"
-          :videoInfoTitle="videoInfoTitle"
-          :videoInfoAuthor="videoInfoAuthor"
-          :videoInfoItags="videoInfoItags"
-          @close="showYtDlModal = false"
+          :videoTitle="videoTitle"
+          :videoAuthor="videoAuthor"
+          :videoItags="videoItags"
+          :videoDuration="videoDuration"
+          :videoQualitys="videoQualitys"
+          @closeModal="showYtDlModal = false"
         >
           <!-- <template #header>
             <h3>custom header</h3>
@@ -105,8 +107,7 @@
 </template>
 
 <script>
-import { http, invoke } from '@tauri-apps/api'
-import { Body } from '@tauri-apps/api/http'
+import { Body, fetch } from '@tauri-apps/api/http'
 
 // Components
 import History from './History.vue'
@@ -125,9 +126,11 @@ export default {
     return {
       ytUrl: '',
       videoId: '',
-      videoInfoTitle: '',
-      videoInfoAuthor: '',
-      videoInfoItags: [],
+      videoTitle: '',
+      videoAuthor: '',
+      videoItags: [],
+      videoDuration: '',
+      videoQualitys: [],
       bannerImg: bannerImg,
       showYtDlModal: false
     }
@@ -135,21 +138,17 @@ export default {
 
   methods: {
     makeRequest: async function (url, options = {}) {
-      if (options.query) {
-        const keys = Object.keys(options.query)
-        for (let i = 0; i < keys.length; i++) {
-          const value = options.query[keys[i]]
-          if (value !== undefined) options.query[keys[i]] = value.toString()
-        }
-      }
-      const response = await invoke('web_request', {
-        url,
-        body: options.body ?? http.Body.json({}),
-        method: options.method ?? 'GET',
+      const response = await fetch(url, {
+        body: options.body ?? Body.text(''),
         query: options.query ?? {},
+        method: options.method ?? 'get',
         headers: options.headers ?? {},
-        responseType: { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 1
+        responseType: { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 2
       })
+      if (!response.ok) throw new Error(`${response.status} ${response.data}`)
+      if (typeof response.data == JSON) {
+        response.data = JSON.parse(response.data)
+      }
       return response.data
     },
 
@@ -175,11 +174,11 @@ export default {
 
       await this.find_video_info(this.videoId)
         .then(() => {
-          if (!this.videoInfoTitle || !this.videoInfoItags)
+          if (!this.videoTitle || !this.videoItags)
             return this.$notify({
               group: 'foo-css',
               title: '無法獲取影片資訊，連結無效？',
-              text: `${this.videoInfoTitle}`,
+              text: `${this.videoTitle}`,
               type: 'error'
             })
           this.showYtDlModal = true
@@ -205,14 +204,35 @@ export default {
         }
       )
         .then(data => {
-          ;[this.videoInfoTitle, this.videoInfoItags, this.videoInfoAuthor] = [
+          function millisToMinutesAndSeconds (millis) {
+            var minutes = Math.floor(millis / 60000)
+            var seconds = ((millis % 60000) / 1000).toFixed(0)
+            return minutes + ':' + (seconds < 10 ? '0' : '') + seconds
+          }
+
+          ;[
+            this.videoTitle,
+            this.videoItags,
+            this.videoAuthor,
+            this.videoDuration,
+            this.videoQualitys
+          ] = [
             data['videoDetails']['title'],
             data['streamingData']['formats'],
-            data['videoDetails']['author']
+            data['videoDetails']['author'],
+            millisToMinutesAndSeconds(
+              data['streamingData']['formats'][0]['approxDurationMs']
+            ),
+            [
+              ...new Set( // 移除重複值
+                data['streamingData']['adaptiveFormats'].map(a => {
+                  return a['qualityLabel'] // 得到可下載之影片畫質
+                })
+              )
+            ].filter(a => a) // 移除空值 ( undefined... )
           ]
         })
         .catch()
-
       return
     }
   }

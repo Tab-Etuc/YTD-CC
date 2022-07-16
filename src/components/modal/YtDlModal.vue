@@ -8,7 +8,7 @@
     leave-to-class="transform opacity-0"
   >
     <div
-      v-if="show"
+      v-if="showModal"
       class="fixed z-[9998] bottom-0 left-0 w-full h-[calc(100%-32px)] bg-black/50 table transition duration-300 rounded-b-xl"
     >
       <div class="table-cell align-middle">
@@ -24,7 +24,7 @@
               />
               <div class="w-[80%] h-full ml-3 ">
                 <p class="text-white text-lg truncate">
-                  {{ this.videoInfoTitle }}
+                  {{ videoTitle }}
                 </p>
                 <hr class="mt-2 w-full content-center h-2" />
                 <div class="flex space-x-4">
@@ -39,9 +39,7 @@
                       d="M224 256c70.7 0 128-57.31 128-128s-57.3-128-128-128C153.3 0 96 57.31 96 128S153.3 256 224 256zM274.7 304H173.3C77.61 304 0 381.6 0 477.3c0 19.14 15.52 34.67 34.66 34.67h378.7C432.5 512 448 496.5 448 477.3C448 381.6 370.4 304 274.7 304z"
                     />
                   </svg>
-                  <span class="text-white text-lg">{{
-                    this.videoInfoAuthor
-                  }}</span>
+                  <span class="text-white text-lg">{{ videoAuthor }}</span>
 
                   <!-- play icon -->
                   <svg
@@ -113,7 +111,7 @@
                     </g>
                   </svg>
                   <span class="text-white text-lg ">
-                    {{ get_video_duration() }}
+                    {{ videoDuration }}
                   </span>
                 </div>
               </div>
@@ -124,7 +122,7 @@
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             class="absolute right-[16vw] z-1 w-8 h-8 fill-red-500"
-            @click="$emit('close')"
+            @click="$emit('closeModal')"
           >
             <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
             <path
@@ -158,14 +156,14 @@
               <summary class="summary">
                 <input
                   type="radio"
-                  name="item"
+                  name="format"
                   id="default"
                   title="檔案格式"
                   checked
                 />
                 <input
                   type="radio"
-                  name="item"
+                  name="format"
                   id="mp3"
                   value="mp3"
                   title="MP3"
@@ -173,7 +171,7 @@
                 />
                 <input
                   type="radio"
-                  name="item"
+                  name="format"
                   id="mp4"
                   value="mp4"
                   title="MP4"
@@ -187,10 +185,18 @@
                   </label>
                 </li>
                 <li>
-                  <label for="mp4">MP4</label>
+                  <label for="mp4">
+                    MP4
+                  </label>
                 </li>
               </ul>
             </details>
+
+            <select>
+              <option value="0" selected disabled>Select:</option>
+              <option value="1">MP3</option>
+              <option value="2">MP4</option>
+            </select>
 
             <button
               class="flex float-right bg-blue-500 hover:bg-blue-600 w-16 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50 h-7"
@@ -208,177 +214,19 @@
   </Transition>
 </template>
 
-<style>
-/* 不知道怎麼改成 TailwindCSS 以後再說ㄅ  */
-
-.shim-green {
-  position: relative;
-  overflow: hidden;
-  background-color: rgba(65, 100, 255, 0.7);
-}
-.shim-green::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    rgba(233, 233, 233, 1) 0,
-    rgba(233, 233, 233, 0.9) 50%,
-    rgba(233, 233, 233, 0.8) 100%
-  );
-  animation: shimmer 2s ease-out infinite;
-  content: '';
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(0%);
-    opacity: 0;
-  }
-}
-
-summary {
-  cursor: pointer;
-  width: 100%;
-  height: 1.75rem;
-  border-radius: 5px;
-  background-color: #ddd;
-  list-style: none;
-}
-
-summary::-webkit-details-marker {
-  display: none;
-}
-
-details[open] summary:before {
-  content: '';
-  display: block;
-  width: 100vw;
-  height: 100vh;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
-summary:after {
-  position: absolute;
-  top: 50%;
-  bottom: 70%; /* 不知道為甚麼填 50% 不像置中 ;w;  */
-  right: 4px;
-  content: '';
-  display: inline-block;
-  width: 0.5rem;
-  height: 0.5rem;
-  margin: auto;
-  border-bottom: 1px solid currentColor;
-  border-left: 1px solid currentColor;
-  border-bottom-left-radius: 2px;
-  transform: rotate(45deg) translate(50%, 0%);
-  transform-origin: center center;
-  transition: transform ease-in-out 100ms;
-}
-
-summary:focus {
-  outline: none;
-}
-
-details[open] summary:after {
-  transform: rotate(-45deg) translate(0%, 0%);
-}
-
-ul {
-  width: 100%;
-  background: #ddd;
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
-  padding: 1rem;
-  margin: 0;
-  box-sizing: border-box;
-  border-radius: 5px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-li {
-  margin: 0;
-  padding: 1rem 0;
-  border-bottom: 1px solid #ccc;
-}
-
-li:first-child {
-  padding-top: 0;
-}
-
-li:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-/* FAKE SELECT */
-
-summary.radios {
-  counter-reset: radios;
-}
-
-summary.radios:before {
-  content: var(--selection);
-}
-
-input[type='radio'] {
-  counter-increment: radios;
-  appearance: none;
-  display: none;
-}
-
-input[type='radio']:checked {
-  display: inline;
-  --display: block;
-}
-
-input[type='radio']:after {
-  content: attr(title);
-  display: inline;
-  font-size: 1.1rem;
-  margin-left: 4px;
-}
-
-ul.list {
-  counter-reset: labels;
-}
-
-label {
-  width: 100%;
-  display: flex;
-  cursor: pointer;
-  justify-content: space-between;
-}
-
-label span {
-  --display: none;
-  display: var(--display);
-  width: 1rem;
-  height: 1rem;
-  border: 1px solid #727272;
-  border-radius: 3px;
-}
-</style>
-
 <script>
 import { invoke } from '@tauri-apps/api'
 
 export default {
   name: 'YtDlModal',
   props: {
-    show: Boolean,
+    showModal: Boolean,
     videoId: String,
-    videoInfoTitle: String,
-    videoInfoAuthor: String,
-    videoInfoItags: Array
+    videoTitle: String,
+    videoAuthor: String,
+    videoItags: Array,
+    videoDuration: String,
+    videoQuality: Array
   },
 
   data () {
@@ -416,9 +264,9 @@ export default {
       let aq3 = 'AUDIO_QUALITY_HIGH'
 
       let last_aq = ''
-      for (var itag in this.videoInfoItags) {
-        let this_aq = this.videoInfoItags[itag]['audioQuality']
-        let this_vq = this.videoInfoItags[itag]['quality']
+      for (var itag in this.videoItags) {
+        let this_aq = this.videoItags[itag]['audioQuality']
+        let this_vq = this.videoItags[itag]['quality']
         let VIDEO_MIME = ''
 
         let is_better_audio =
@@ -454,16 +302,16 @@ export default {
         // If audio: Try to download the best audio quality.
         // If video: Try to download the best combination.
         if (
-          (((onlyaudio && this.videoInfoItags[itag]['mimeType']) ||
-            (!onlyaudio && this.videoInfoItags[itag]['mimeType'])) &&
-            (!onlyaudio || this.videoInfoItags[itag]['quality'] != null) &&
-            this.videoInfoItags[itag]['audioQuality'] != null &&
+          (((onlyaudio && this.videoItags[itag]['mimeType']) ||
+            (!onlyaudio && this.videoItags[itag]['mimeType'])) &&
+            (!onlyaudio || this.videoItags[itag]['quality'] != null) &&
+            this.videoItags[itag]['audioQuality'] != null &&
             ((onlyaudio && !this_vq) ||
               (!onlyaudio && last_vq == '' && this_vq != ''))) ||
           is_better_quality
         ) {
-          VIDEO_MIME = this.videoInfoItags[itag]['mimeType']
-          urlToChoose = this.videoInfoItags[itag]['url']
+          VIDEO_MIME = this.videoItags[itag]['mimeType']
+          urlToChoose = this.videoItags[itag]['url']
 
           last_vq = this_vq
           last_aq = this_aq
@@ -475,17 +323,19 @@ export default {
       } else {
         let ext = 'mp4'
         let targetfile =
-          this.videoInfoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, '') +
+          this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, '') +
           '.' +
           ext
 
         console.log(targetfile)
-        this.downloadYT(urlToChoose, targetfile, onlyaudio, ext)
+        this.downloadYT(urlToChoose, targetfile, onlyaudio)
       }
     },
 
     downloadYT: async function (url, filename, onlyaudio, outputext) {
       let that = this
+      // 這邊如果後端的程式沒有在一秒內執行 進度條就不會動了
+      // 預計改成由後端發出事件 在此接收後才 invoke('get_bar_total_size')
       setTimeout(async () => {
         await invoke('get_bar_total_size').then(totalSize => {
           console.log(totalSize)
@@ -507,33 +357,113 @@ export default {
       }).then(() => {
         clearInterval(changeBarValue)
         console.log('已停止迴圈')
-        that.$emit('close')
+        that.$emit('closeModal')
         that.$notify({
           group: 'foo-css',
           title: '影片下載成功！',
-          text: `${that.videoInfoTitle}`,
+          text: `${that.videoTitle}`,
           type: 'success'
         })
 
         that.barValue = '0%'
         that.inDownload = false
       })
-    },
-
-    get_video_duration: function () {
-      // 每更新一次進度條，此函式變會調用一次
-      // 預計日後直接將 影片時長 存成變數
-
-      console.log(this.videoInfoItags)
-      function millisToMinutesAndSeconds (millis) {
-        var minutes = Math.floor(millis / 60000)
-        var seconds = ((millis % 60000) / 1000).toFixed(0)
-        return minutes + ':' + (seconds < 10 ? '0' : '') + seconds
-      }
-      return millisToMinutesAndSeconds(
-        this.videoInfoItags[0]['approxDurationMs']
-      )
     }
   }
 }
 </script>
+
+<style>
+/* 不知道怎麼改成 TailwindCSS 以後再說ㄅ  */
+
+.shim-green {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(65, 100, 255, 0.7);
+}
+.shim-green::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(233, 233, 233, 1) 0,
+    rgba(233, 233, 233, 0.9) 50%,
+    rgba(233, 233, 233, 0.8) 100%
+  );
+  animation: shimmer 2s ease-out infinite;
+  content: '';
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(0%);
+    opacity: 0;
+  }
+}
+
+/* The container must be positioned relative: */
+.custom-select {
+  position: relative;
+  font-family: Arial;
+}
+
+.custom-select select {
+  display: none; /*hide original SELECT element: */
+}
+
+.select-selected {
+  background-color: DodgerBlue;
+}
+
+/* Style the arrow inside the select element: */
+.select-selected:after {
+  position: absolute;
+  content: '';
+  top: 14px;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  border-color: #fff transparent transparent transparent;
+}
+
+/* Point the arrow upwards when the select box is open (active): */
+.select-selected.select-arrow-active:after {
+  border-color: transparent transparent #fff transparent;
+  top: 7px;
+}
+
+/* style the items (options), including the selected item: */
+.select-items div,
+.select-selected {
+  color: #ffffff;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
+  cursor: pointer;
+}
+
+/* Style items (options): */
+.select-items {
+  position: absolute;
+  background-color: DodgerBlue;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 99;
+}
+
+/* Hide the items when the select box is closed: */
+.select-hide {
+  display: none;
+}
+
+.select-items div:hover,
+.same-as-selected {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+</style>
