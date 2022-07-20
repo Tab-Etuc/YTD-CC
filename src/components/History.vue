@@ -1,16 +1,16 @@
 <template>
   <div
-    class="absolute right-5 h-[90%] w-[27%] mt-6 bg-slate-800 rounded-xl shadow-2xl ring-1 ring-white/10 ring-inset overflow-hidden hidden xl:block"
+    class="absolute right-5 mt-6 hidden h-[90%] w-[27%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10 xl:block"
   >
     <header
-      class="absolute top-0 h-[4rem] w-full bg-blue-500 rounded-b-xl flex"
+      class="absolute top-0 flex h-[4rem] w-full rounded-b-xl bg-blue-500"
     >
-      <div class="flex w-[full] h-[2rem] my-auto">
+      <div class="my-auto flex h-[2rem] w-[full]">
         <!-- History icon -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
-          class="static flex fill-white ml-4 w-8 h-8"
+          class="static ml-4 flex h-8 w-8 fill-white"
           viewBox="0 0 32 32"
           version="1.1"
         >
@@ -24,8 +24,7 @@
           </g>
         </svg>
         <p
-          class="
-            tracking-wide cursor-defaultmt-2 text-xl leading-tight font-mediu text-white  select-none ml-4 my-auto"
+          class="cursor-defaultmt-2 font-mediu my-auto ml-4 select-none text-xl leading-tight tracking-wide text-white"
         >
           歷史
         </p>
@@ -36,6 +35,6 @@
 
 <script>
 export default {
-  name: 'History'
-}
+  name: "History",
+};
 </script>
