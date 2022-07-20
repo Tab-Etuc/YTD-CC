@@ -1,22 +1,26 @@
 <template>
   <div
-    class="
-    w-20 h-[90%] mt-6 m-auto p-4 bg-slate-700 rounded-xl shadow-2xl ring-1 ring-white/10 ring-inset flex "
+    class="m-auto mt-6 flex h-[90%] w-20 rounded-xl bg-slate-700 p-4 shadow-2xl ring-1 ring-inset ring-white/10"
   >
     <div
-      class="relative flex flex-wrap place-content-center justify-center w-full h-full"
+      class="relative flex h-full w-full flex-wrap place-content-center justify-center"
     >
       <!-- YTD.CC icon -->
-      <img class="absolute top-0 w-11 h-11 rounded-sm my-2" src="../assets/YTD.CC.png" alt="YTD.CC Icon"/>
+      <img
+        class="absolute top-0 my-2 h-11 w-11 rounded-sm"
+        src="../assets/YTD.CC.png"
+        alt="YTD.CC Icon"
+      />
 
       <!-- Home icon -->
-      <router-link to="/"
-        class="flex w-12 h-12 bg-slate-500/50 rounded-xl my-2 hover:bg-blue-500 cursor-pointer"
+      <router-link
+        to="/"
+        class="my-2 flex h-12 w-12 cursor-pointer rounded-xl bg-slate-500/50 hover:bg-blue-500"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 576 512"
-          class="flex m-auto w-8 h-8 fill-white hover:fill-blue-100"
+          class="m-auto flex h-8 w-8 fill-white hover:fill-blue-100"
         >
           <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
           <path
@@ -26,13 +30,14 @@
       </router-link>
 
       <!-- History icon -->
-      <router-link to="/history"
-        class="flex w-12 h-12 bg-slate-500/50 rounded-xl my-2 hover:bg-blue-500 cursor-pointer"
+      <router-link
+        to="/history"
+        class="my-2 flex h-12 w-12 cursor-pointer rounded-xl bg-slate-500/50 hover:bg-blue-500"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
-          class="flex m-auto w-9 h-9 fill-white hover:fill-blue-100"
+          class="m-auto flex h-9 w-9 fill-white hover:fill-blue-100"
           viewBox="0 0 32 32"
           version="1.1"
         >
@@ -48,13 +53,14 @@
       </router-link>
 
       <!-- About icon -->
-      <router-link to="/about"
-        class="flex w-12 h-12 bg-slate-500/50 rounded-xl my-2 hover:bg-blue-500 cursor-pointer"
+      <router-link
+        to="/about"
+        class="my-2 flex h-12 w-12 cursor-pointer rounded-xl bg-slate-500/50 hover:bg-blue-500"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 512 512"
-          class="flex m-auto w-8 h-8 fill-white hover:fill-blue-100"
+          class="m-auto flex h-8 w-8 fill-white hover:fill-blue-100"
         >
           <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
           <path
@@ -64,13 +70,14 @@
       </router-link>
 
       <!-- Settings icon -->
-      <router-link to="/settings"
-        class="absolute bottom-0 w-12 h-12 flex bg-slate-500/50 rounded-xl my-2 hover:bg-blue-500 cursor-pointer"
+      <router-link
+        to="/settings"
+        class="absolute bottom-0 my-2 flex h-12 w-12 cursor-pointer rounded-xl bg-slate-500/50 hover:bg-blue-500"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 512 512"
-          class="flex m-auto w-8 h-8 fill-white hover:fill-blue-100"
+          class="m-auto flex h-8 w-8 fill-white hover:fill-blue-100"
         >
           <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
           <path
@@ -84,6 +91,6 @@
 
 <script>
 export default {
-  name: 'Sidebar'
-}
+  name: "Sidebar",
+};
 </script>
