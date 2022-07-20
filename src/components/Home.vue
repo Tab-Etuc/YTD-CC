@@ -1,12 +1,11 @@
 <template>
-  <div class="relative float-left w-[calc(100%-7rem)] h-screen ">
+  <div class="relative float-left h-screen w-[calc(100%-7rem)]">
     <!-- 右側歷史紀錄 History -->
     <History />
 
     <!-- Main Download Panel -->
     <div
-      class="
-         mt-6 bg-slate-800 rounded-xl shadow-2xl ring-1 ring-white/10 ring-inset overflow-hidden w-[55rem] h-[33%]"
+      class="mt-6 h-[33%] w-[55rem] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10"
     >
       <Teleport to="body">
         <!-- use the modal component, pass in the prop -->
@@ -15,39 +14,32 @@
           :videoId="videoId"
           :videoTitle="videoTitle"
           :videoAuthor="videoAuthor"
-          :videoItags="videoItags"
+          :videoAdaptiveDownloadUrl="videoAdaptiveDownloadUrl"
+          :videoDownloadUrl="videoDownloadUrl"
           :videoDuration="videoDuration"
           :videoQualitys="videoQualitys"
           @closeModal="showYtDlModal = false"
         >
-          <!-- <template #header>
-            <h3>custom header</h3>
-          </template> -->
         </YtDlModal>
       </Teleport>
 
-      <div class="flex flex-wrap place-content-center justify-center h-full">
+      <div class="flex h-full flex-wrap place-content-center justify-center">
         <div class="p-6">
           <p
-            class="
-            tracking-wide cursor-defaultmt-2 text-xl leading-tight font-mediu text-white text-center select-none mb-5"
+            class="cursor-defaultmt-2 font-mediu mb-5 select-none text-center text-xl leading-tight tracking-wide text-white"
           >
             貼上 Youtube 影片連結
           </p>
-          <hr class="mt-3 w-full content-center h-2" />
+          <hr class="mt-3 h-2 w-full content-center" />
           <div>
             <input
               v-model="ytUrl"
-              class="
-              mx-2 mt-4 placeholder-gray-500 w-[28rem] rounded-full px-3 pl-5 py-1 transition-all duration-700 ease-in-out focus:shadow-outline outline-indigo-400 hover:w-[30rem]
-            "
+              class="focus:shadow-outline mx-2 mt-4 w-[28rem] rounded-full px-3 py-1 pl-5 placeholder-gray-500 outline-indigo-400 transition-all duration-700 ease-in-out hover:w-[30rem]"
               placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=..."
             />
 
             <button
-              class="
-              mx-2 mt-3 text-center bg-blue-500 hover:bg-blue-600 w-16 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50 p-0.5
-            "
+              class="mx-2 mt-3 w-16 rounded-lg bg-blue-500 p-0.5 text-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50"
               @click="confirm"
             >
               確認
@@ -66,20 +58,20 @@
     </div>
 
     <!-- Banner  -->
-    <div class="absolute w-[55rem] h-[55%] mt-3">
-      <div class="absolute right-0 w-[18rem] h-full">
+    <div class="absolute mt-3 h-[55%] w-[55rem]">
+      <div class="absolute right-0 h-full w-[18rem]">
         <div
-          class="absolute right-0 bottom-0 w-[18rem] h-[calc(100%-2rem)] rounded-b-xl bg-slate-900/60 transition transform duration-700 hover:backdrop-blur-sm"
+          class="absolute right-0 bottom-0 h-[calc(100%-2rem)] w-[18rem] transform rounded-b-xl bg-slate-900/60 transition duration-700 hover:backdrop-blur-sm"
         />
         <header
-          class="absolute right-0 flex w-[18rem] h-[4rem] rounded-xl bg-blue-500"
+          class="absolute right-0 flex h-[4rem] w-[18rem] rounded-xl bg-blue-500"
         >
-          <div class="flex w-[18rem] h-[2rem] my-auto">
+          <div class="my-auto flex h-[2rem] w-[18rem]">
             <!-- Bar chart icon -->
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
-              class="static fill-white ml-4 w-7 h-7 my-auto"
+              class="static my-auto ml-4 h-7 w-7 fill-white"
               viewBox="0 0 32 32"
               version="1.1"
             >
@@ -90,7 +82,7 @@
               </g>
             </svg>
             <p
-              class="static tracking-wide cursor-default ml-3 my-auto text-xl leading-tight font-mediu text-white select-none"
+              class="font-mediu static my-auto ml-3 cursor-default select-none text-xl leading-tight tracking-wide text-white"
             >
               紀錄
             </p>
@@ -98,7 +90,7 @@
         </header>
       </div>
       <img
-        class="object-cover w-[55rem] h-full rounded-xl"
+        class="h-full w-[55rem] rounded-xl object-cover"
         :src="bannerImg"
         alt="banner"
       />
@@ -107,134 +99,167 @@
 </template>
 
 <script>
-import { Body, fetch } from '@tauri-apps/api/http'
+import { Body, fetch } from "@tauri-apps/api/http";
 
 // Components
-import History from './History.vue'
-import YtDlModal from './modal/YtDlModal.vue'
+import History from "./History.vue";
+import YtDlModal from "./modal/YtDlModal.vue";
 
-import bannerImg from '../assets/TDwZG1y.jpg'
+import bannerImg from "../assets/TDwZG1y.jpg";
 
 export default {
-  name: 'Home',
+  name: "Home",
   components: {
     History,
-    YtDlModal
+    YtDlModal,
   },
 
-  data () {
+  data() {
     return {
-      ytUrl: '',
-      videoId: '',
-      videoTitle: '',
-      videoAuthor: '',
-      videoItags: [],
-      videoDuration: '',
+      ytUrl: "",
+      videoId: "",
+      videoTitle: "",
+      videoAuthor: "",
+      videoDownloadUrl: [],
+      videoAdaptiveDownloadUrl: [],
+      videoDuration: "",
       videoQualitys: [],
       bannerImg: bannerImg,
-      showYtDlModal: false
-    }
+      showYtDlModal: false,
+    };
   },
 
   methods: {
     makeRequest: async function (url, options = {}) {
       const response = await fetch(url, {
-        body: options.body ?? Body.text(''),
+        body: options.body ?? Body.text(""),
         query: options.query ?? {},
-        method: options.method ?? 'get',
+        method: options.method ?? "get",
         headers: options.headers ?? {},
-        responseType: { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 2
-      })
-      if (!response.ok) throw new Error(`${response.status} ${response.data}`)
+        responseType:
+          { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 2,
+      });
+      if (!response.ok) throw new Error(`${response.status} ${response.data}`);
       if (typeof response.data == JSON) {
-        response.data = JSON.parse(response.data)
+        response.data = JSON.parse(response.data);
       }
-      return response.data
+      return response.data;
     },
 
     confirm: async function () {
       // 檢查連結
-      if (this.ytUrl == '')
+      if (this.ytUrl == "")
         return this.$notify({
-          group: 'foo-css',
-          title: '請輸入連結！',
-          type: 'error'
-        })
+          group: "foo-css",
+          title: "請輸入連結！",
+          type: "error",
+        });
       if (/(www\.youtube\.com|be)(?=\/watch\?v=)/.test(this.ytUrl)) {
-        this.videoId = this.ytUrl.split('v=')[1].slice(0, 11)
+        this.videoId = this.ytUrl.split("v=")[1].slice(0, 11);
       } else if (/www\.youtu\.be\//.test(this.ytUrl)) {
-        this.videoId = this.ytUrl.split('.be/')[1].slice(0, 11)
+        this.videoId = this.ytUrl.split(".be/")[1].slice(0, 11);
       } else {
         return this.$notify({
-          group: 'foo-css',
-          title: '連結無效！',
-          type: 'error'
-        })
+          group: "foo-css",
+          title: "連結無效！",
+          type: "error",
+        });
       }
 
       await this.find_video_info(this.videoId)
         .then(() => {
-          if (!this.videoTitle || !this.videoItags)
+          if (!this.videoTitle || !this.videoAdaptiveDownloadUrl)
             return this.$notify({
-              group: 'foo-css',
-              title: '無法獲取影片資訊，連結無效？',
+              group: "foo-css",
+              title: "無法獲取影片資訊，連結無效？",
               text: `${this.videoTitle}`,
-              type: 'error'
-            })
-          this.showYtDlModal = true
+              type: "error",
+            });
+          this.showYtDlModal = true;
         })
-        .catch()
+        .catch();
     },
 
     find_video_info: async function (id) {
       await this.makeRequest(
-        'https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+        "https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
         {
           body: Body.json({
             videoId: id,
             context: {
               client: {
-                clientName: 'ANDROID',
-                clientVersion: '16.02'
-              }
-            }
+                clientName: "ANDROID",
+                clientVersion: "16.02",
+              },
+            },
           }),
-          method: 'POST',
-          responseType: 'JSON'
+          method: "POST",
+          responseType: "JSON",
         }
       )
-        .then(data => {
-          function millisToMinutesAndSeconds (millis) {
-            var minutes = Math.floor(millis / 60000)
-            var seconds = ((millis % 60000) / 1000).toFixed(0)
-            return minutes + ':' + (seconds < 10 ? '0' : '') + seconds
+        .then((data) => {
+          function millisToMinutesAndSeconds(millis) {
+            var minutes = Math.floor(millis / 60000);
+            var seconds = ((millis % 60000) / 1000).toFixed(0);
+            return (
+              minutes + "分鐘 " + (seconds < 10 ? "0" : "") + seconds + "秒"
+            );
           }
 
-          ;[
+          [
             this.videoTitle,
-            this.videoItags,
+            this.videoDownloadUrl,
+            this.videoAdaptiveDownloadUrl,
             this.videoAuthor,
             this.videoDuration,
-            this.videoQualitys
+            this.videoQualitys,
           ] = [
-            data['videoDetails']['title'],
-            data['streamingData']['formats'],
-            data['videoDetails']['author'],
+            data["videoDetails"]["title"], // String - 影片標題
+
+            data["streamingData"]["formats"].map((a) => {
+              var rObj = {};
+              rObj["影片畫質"] = a["qualityLabel"];
+              rObj["url"] = a["url"];
+              return rObj;
+            }), // Array - 一般影片下載連結
+
+            data["streamingData"]["adaptiveFormats"]
+              .filter((a) => {
+                if (a["audioQuality"]) return false;
+                if (
+                  a["qualityLabel"].includes("144p") ||
+                  a["qualityLabel"].includes("360p") ||
+                  a["qualityLabel"].includes("720p")
+                )
+                  return false;
+                return true;
+              })
+              .map((a) => {
+                let rObj = {};
+                rObj[a["qualityLabel"]] = a["url"];
+                return rObj;
+              }), //  Array - (僅視訊畫面)影片下載連結
+
+            data["videoDetails"]["author"], // String - 影片上傳者
+
             millisToMinutesAndSeconds(
-              data['streamingData']['formats'][0]['approxDurationMs']
-            ),
+              data["streamingData"]["formats"][0]["approxDurationMs"]
+            ), // String - 影片時數
+
             [
               ...new Set( // 移除重複值
-                data['streamingData']['adaptiveFormats'].map(a => {
-                  return a['qualityLabel'] // 得到可下載之影片畫質
-                })
-              )
-            ].filter(a => a) // 移除空值 ( undefined... )
-          ]
+                data["streamingData"]["adaptiveFormats"]
+                  .filter((a) => !a["audioQuality"]) // 將僅有音訊的檔案排除
+                  .map((a) => {
+                    return a["qualityLabel"]; // 獲取可下載之影片畫質
+                  })
+              ),
+            ], // Array - 影片畫質
+          ];
         })
-        .catch()
-      return
-    }
-  }
-}
+        .catch();
+      return;
+    },
+  },
+};
 </script>
