@@ -1,15 +1,15 @@
 <template>
   <div
-    class="w-screen h-screen overflow-hidden bg-slate-900 ring-1 ring-white/10 ring-inset"
+    class="h-screen w-screen overflow-hidden bg-slate-900 ring-1 ring-inset ring-white/10"
   >
-    <div @mousedown="drag" class="sticky h-8 w-screen  ">
+    <div @mousedown="drag" class="sticky h-8 w-screen">
       <!-- !!! 這裡實際使用起來很卡，原因有待釐清   -->
       <!-- window controls wrapper -->
-      <div class="top-0 left-0 w-28 h-8 flex rounded-xl mb-3 bg-slate-700">
+      <div class="top-0 left-0 mb-3 flex h-8 w-28 rounded-xl bg-slate-700">
         <!-- Window minimize -->
         <svg
           @click="winmin"
-          class="cursor-pointer my-auto  mx-auto w-6 h-6 fill-slate-200 hover:fill-slate-50"
+          class="my-auto mx-auto h-6 w-6 cursor-pointer fill-slate-200 hover:fill-slate-50"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -32,7 +32,7 @@
         <!-- Window maximize -->
         <svg
           @click="winmax"
-          class="cursor-pointer my-auto mx-auto w-6 h-6 stroke-slate-200 hover:stroke-slate-50"
+          class="my-auto mx-auto h-6 w-6 cursor-pointer stroke-slate-200 hover:stroke-slate-50"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -66,7 +66,7 @@
         <!-- Window close -->
         <svg
           @click="quit"
-          class="cursor-pointer my-auto mx-auto w-6 h-6  fill-slate-200 hover:fill-slate-50"
+          class="my-auto mx-auto h-6 w-6 cursor-pointer fill-slate-200 hover:fill-slate-50"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -77,7 +77,7 @@
       </div>
     </div>
 
-    <div class="float-left h-screen w-28 ">
+    <div class="float-left h-screen w-28">
       <Sidebar />
     </div>
 
@@ -107,36 +107,36 @@
 
 <script>
 // Components
-import Sidebar from './components/Sidebar.vue'
+import Sidebar from "./components/Sidebar.vue";
 
-import { appWindow } from '@tauri-apps/api/window'
+import { appWindow } from "@tauri-apps/api/window";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    Sidebar
+    Sidebar,
   },
 
-  async mounted () {
-    appWindow.setDecorations(false)
+  async mounted() {
+    appWindow.setDecorations(false);
   },
 
   methods: {
-    winmin () {
-      appWindow.minimize()
+    winmin() {
+      appWindow.minimize();
     },
 
-    winmax () {
-      appWindow.toggleMaximize()
+    winmax() {
+      appWindow.toggleMaximize();
     },
 
-    quit () {
-      appWindow.close()
+    quit() {
+      appWindow.close();
     },
 
-    drag () {
-      appWindow.startDragging()
-    }
-  }
-}
+    drag() {
+      appWindow.startDragging();
+    },
+  },
+};
 </script>
