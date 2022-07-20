@@ -9,37 +9,40 @@
   >
     <div
       v-if="showModal"
-      class="fixed z-[9998] bottom-0 left-0 w-full h-[calc(100%-32px)] bg-black/50 table transition duration-300 rounded-b-xl"
+      class="fixed bottom-0 left-0 z-50 table h-[calc(100%-32px)] w-full rounded-b-xl bg-black/50 transition duration-300"
     >
       <div class="table-cell align-middle">
         <div class="flex w-screen">
           <div
-            class="flex w-[60vw] mx-auto p-8 bg-slate-800 ring-1 ring-white/10 ring-inset border-slate-500 border-b transition-all duration-300 shadow-2xl rounded-t-lg justify-center"
+            class="mx-auto flex w-[60vw] justify-center rounded-t-lg border-b border-slate-500 bg-slate-800 p-8 shadow-2xl ring-1 ring-inset ring-white/10 transition-all duration-300"
           >
-            <div class="flex w-full h-full">
+            <div class="flex h-full w-full">
               <img
-                :src="`//img.youtube.com/vi/${videoId}/maxresdefault.jpg`"
+                :src="`//img.youtube.com/vi/${videoId}/0.jpg`"
+                error
                 alt="YtVideoThumbnail"
-                class="w-32 h-[72px] rounded-md"
+                class="h-[72px] w-32 rounded-md"
               />
-              <div class="w-[80%] h-full ml-3 ">
-                <p class="text-white text-lg truncate">
+              <div class="ml-3 h-full w-[80%]">
+                <p class="truncate text-lg text-white">
                   {{ videoTitle }}
                 </p>
-                <hr class="mt-2 w-full content-center h-2" />
+                <hr class="mt-2 h-2 w-full content-center" />
                 <div class="flex space-x-4">
                   <!-- author icon -->
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 448 512"
-                    class="w-6 h-6  fill-white"
+                    class="h-6 w-6 fill-white"
                   >
                     <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
                     <path
                       d="M224 256c70.7 0 128-57.31 128-128s-57.3-128-128-128C153.3 0 96 57.31 96 128S153.3 256 224 256zM274.7 304H173.3C77.61 304 0 381.6 0 477.3c0 19.14 15.52 34.67 34.66 34.67h378.7C432.5 512 448 496.5 448 477.3C448 381.6 370.4 304 274.7 304z"
                     />
                   </svg>
-                  <span class="text-white text-lg">{{ videoAuthor }}</span>
+                  <span class="w-1/3 truncate text-lg text-white">{{
+                    videoAuthor
+                  }}</span>
 
                   <!-- play icon -->
                   <svg
@@ -47,7 +50,7 @@
                     xmlns:xlink="http://www.w3.org/1999/xlink"
                     viewBox="0 0 32 32"
                     version="1.1"
-                    class="w-6 h-6 first: items-center"
+                    class="h-6 w-6"
                   >
                     <defs>
                       <filter
@@ -71,7 +74,7 @@
                             y="0"
                             width="32"
                             height="32"
-                            style="fill:rgb(100%,100%,100%);stroke:none;"
+                            style="fill: rgb(100%, 100%, 100%); stroke: none"
                           />
                         </g>
                       </mask>
@@ -80,7 +83,11 @@
                       </clipPath>
                       <g id="surface5" clip-path="url(#clip1)">
                         <path
-                          style=" stroke:none;fill-rule:evenodd;fill:rgb(100%,100%,100%);"
+                          style="
+                            stroke: none;
+                            fill-rule: evenodd;
+                            fill: rgb(100%, 100%, 100%);
+                          "
                           d="M 14.53125 -0.03125 C 15.488281 -0.03125 16.449219 -0.03125 17.40625 -0.03125 C 23.007812 0.648438 27.226562 3.421875 30.0625 8.28125 C 31.105469 10.25 31.742188 12.332031 31.96875 14.53125 C 31.96875 15.488281 31.96875 16.449219 31.96875 17.40625 C 31.289062 23.007812 28.515625 27.226562 23.65625 30.0625 C 21.6875 31.105469 19.605469 31.742188 17.40625 31.96875 C 16.449219 31.96875 15.488281 31.96875 14.53125 31.96875 C 8.929688 31.289062 4.710938 28.515625 1.875 23.65625 C 0.832031 21.6875 0.195312 19.605469 -0.03125 17.40625 C -0.03125 16.449219 -0.03125 15.488281 -0.03125 14.53125 C 0.648438 8.929688 3.421875 4.710938 8.28125 1.875 C 10.25 0.832031 12.332031 0.195312 14.53125 -0.03125 Z M 15.15625 1.59375 C 20.761719 1.503906 25.105469 3.777344 28.1875 8.40625 C 30.535156 12.398438 30.953125 16.585938 29.4375 20.96875 C 27.324219 26.125 23.523438 29.199219 18.03125 30.1875 C 12.316406 30.792969 7.722656 28.824219 4.25 24.28125 C 1.46875 20.140625 0.886719 15.703125 2.5 10.96875 C 4.335938 6.402344 7.617188 3.433594 12.34375 2.0625 C 13.277344 1.835938 14.214844 1.679688 15.15625 1.59375 Z M 12.78125 11.15625 C 15.214844 12.726562 17.632812 14.332031 20.03125 15.96875 C 17.644531 17.589844 15.25 19.191406 12.84375 20.78125 C 12.78125 17.574219 12.761719 14.363281 12.78125 11.15625 Z M 12.78125 11.15625 "
                         />
                       </g>
@@ -91,7 +98,7 @@
                             y="0"
                             width="32"
                             height="32"
-                            style="fill:rgb(100%,100%,100%);stroke:none;"
+                            style="fill: rgb(100%, 100%, 100%); stroke: none"
                           />
                         </g>
                       </mask>
@@ -100,7 +107,11 @@
                       </clipPath>
                       <g id="surface8" clip-path="url(#clip2)">
                         <path
-                          style=" stroke:none;fill-rule:evenodd;fill:rgb(100%,100%,100%);"
+                          style="
+                            stroke: none;
+                            fill-rule: evenodd;
+                            fill: rgb(100%, 100%, 100%);
+                          "
                           d="M 11.96875 9.03125 C 12.351562 8.984375 12.703125 9.054688 13.03125 9.25 C 15.90625 11.167969 18.78125 13.082031 21.65625 15 C 22.324219 15.644531 22.324219 16.292969 21.65625 16.9375 C 18.671875 18.941406 15.671875 20.921875 12.65625 22.875 C 11.972656 23.027344 11.480469 22.789062 11.1875 22.15625 C 11.144531 18.03125 11.144531 13.90625 11.1875 9.78125 C 11.359375 9.429688 11.621094 9.179688 11.96875 9.03125 Z M 12.78125 11.15625 C 12.761719 14.363281 12.78125 17.574219 12.84375 20.78125 C 15.25 19.191406 17.644531 17.589844 20.03125 15.96875 C 17.632812 14.332031 15.214844 12.726562 12.78125 11.15625 Z M 12.78125 11.15625 "
                         />
                       </g>
@@ -110,7 +121,7 @@
                       <use xlink:href="#surface8" mask="url(#mask1)" />
                     </g>
                   </svg>
-                  <span class="text-white text-lg ">
+                  <span class="w-1/2 text-lg text-white">
                     {{ videoDuration }}
                   </span>
                 </div>
@@ -121,7 +132,7 @@
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
-            class="absolute right-[16vw] z-1 w-8 h-8 fill-red-500"
+            class="z-1 absolute right-[16vw] h-8 w-8 fill-red-500"
             @click="$emit('closeModal')"
           >
             <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
@@ -132,17 +143,17 @@
         </div>
 
         <div
-          class="relative bg-slate-600 mx-auto rounded-b-xl w-[60vw] h-[8vh]  flex"
+          class="relative mx-auto flex w-[60vw] rounded-b-xl bg-slate-600 p-4"
         >
           <div
             v-if="inDownload"
-            class="relative w-[90%] h-6 bg-gray-200 rounded-xl m-auto "
+            class="relative m-auto h-6 w-[90%] rounded-xl bg-gray-200"
           >
             <div
               :style="{ width: barValue }"
-              class="absolute top-0 h-6 rounded-xl shim-green "
+              class="shim-green absolute top-0 h-6 rounded-xl"
             >
-              <span class="relative font-medium text-blue-100 my-auto ml-8">{{
+              <span class="relative my-auto ml-8 font-medium text-blue-100">{{
                 barValue
               }}</span>
             </div>
@@ -150,62 +161,82 @@
 
           <div
             v-if="!inDownload"
-            class="flex justify-around h-[50%] w-full my-auto mx-3"
+            class="my-auto mx-3 flex w-full justify-around"
           >
-            <details class="relative w-[7rem] mr-4 open:z-[1]">
-              <summary class="summary">
-                <input
-                  type="radio"
-                  name="format"
-                  id="default"
-                  title="檔案格式"
-                  checked
-                />
-                <input
-                  type="radio"
-                  name="format"
-                  id="mp3"
-                  value="mp3"
-                  title="MP3"
-                  v-model="fileFormat"
-                />
-                <input
-                  type="radio"
-                  name="format"
-                  id="mp4"
-                  value="mp4"
-                  title="MP4"
-                  v-model="fileFormat"
-                />
-              </summary>
-              <ul class="list">
-                <li>
-                  <label for="mp3">
+            <div class="relative flex h-7 w-[7rem]">
+              <input
+                type="text"
+                class="absolute top-0 left-0 h-full w-full cursor-pointer rounded-md border-none bg-white p-3 shadow-2xl outline-none"
+                :placeholder="formatTitle"
+                readonly
+              />
+              <div
+                class="absolute h-full w-full cursor-pointer before:absolute before:right-3 before:top-2 before:z-50 before:h-2 before:w-2 before:-rotate-45 before:border-2 before:border-black before:border-t-white before:border-r-white before:duration-300 data-active:before:top-3 data-active:before:-rotate-[225deg]"
+                :data-active="formatActive"
+                @click="
+                  formatActive ? (formatActive = false) : (formatActive = true)
+                "
+              >
+                <ul
+                  class="absolute top-9 hidden w-full rounded-b-md bg-white data-active:block"
+                  :data-active="formatActive"
+                >
+                  <li
+                    class="relative select-none p-3 hover:bg-blue-400 hover:text-white"
+                    @click="this.formatTitle = 'MP3'"
+                  >
                     MP3
-                  </label>
-                </li>
-                <li>
-                  <label for="mp4">
+                  </li>
+                  <li
+                    class="relative select-none rounded-b-md p-3 hover:bg-blue-400 hover:text-white"
+                    @click="this.formatTitle = 'MP4'"
+                  >
                     MP4
-                  </label>
-                </li>
-              </ul>
-            </details>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-            <select>
-              <option value="0" selected disabled>Select:</option>
-              <option value="1">MP3</option>
-              <option value="2">MP4</option>
-            </select>
+            <div v-if="formatTitle != 'MP3'" class="relative flex h-7 w-[7rem]">
+              <input
+                type="text"
+                class="absolute top-0 left-0 h-full w-full cursor-pointer rounded-md border-none bg-white p-3 shadow-2xl outline-none"
+                :placeholder="qualityTitle"
+                readonly
+              />
+              <div
+                class="absolute h-full w-full cursor-pointer before:absolute before:right-3 before:top-2 before:z-50 before:h-2 before:w-2 before:-rotate-45 before:border-2 before:border-black before:border-t-white before:border-r-white before:duration-300 data-active:before:top-3 data-active:before:-rotate-[225deg]"
+                :data-active="qualityActive"
+                @click="
+                  qualityActive
+                    ? (qualityActive = false)
+                    : (qualityActive = true)
+                "
+              >
+                <ul
+                  class="scrollbar-thumb-rounded-full scrollbar-track-rounded-full absolute top-9 hidden h-[11rem] w-full overflow-auto rounded-b-md bg-white scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-900 hover:scrollbar-thumb-gray-900 data-active:block"
+                  :data-active="qualityActive"
+                >
+                  <li
+                    class="relative select-none p-3 last:rounded-b-md hover:bg-blue-400 hover:text-white"
+                    v-for="quality in videoQualitys"
+                    :key="quality"
+                    @click="this.qualityTitle = quality"
+                  >
+                    {{ quality }}
+                  </li>
+                </ul>
+              </div>
+            </div>
 
             <button
-              class="flex float-right bg-blue-500 hover:bg-blue-600 w-16 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50 h-7"
+              class="float-right flex h-7 w-16 rounded-lg bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50"
               @click="check"
             >
               <a
-                class="flex text-center text-white items-center justify-center w-full h-full"
-                >下載</a
-              >
+                class="flex h-full w-full select-none items-center justify-center text-center text-white"
+                >下載
+              </a>
             </button>
           </div>
         </div>
@@ -215,162 +246,153 @@
 </template>
 
 <script>
-import { invoke } from '@tauri-apps/api'
+// .\ffmpeg-x86_64-pc-windows-msvc.exe -i "../YTD.CC - Temporary Video.mp4" -i "../YTD.CC - Temporary Audio.mp4" -c:v copy -c:a aac output.mp4
+import { invoke } from "@tauri-apps/api";
+
+var temAudio = "YTD.CC - Temporary Audio.mp4";
+var temVideo = "YTD.CC - Temporary Video.mp4";
+var targetfile = "";
 
 export default {
-  name: 'YtDlModal',
+  name: "YtDlModal",
   props: {
     showModal: Boolean,
     videoId: String,
     videoTitle: String,
     videoAuthor: String,
-    videoItags: Array,
+    videoAdaptiveDownloadUrl: Array,
+    videoDownloadUrl: Array,
     videoDuration: String,
-    videoQuality: Array
+    videoQualitys: Array,
   },
 
-  data () {
+  data() {
     return {
-      barValue: '0%',
-      fileFormat: '',
-      inDownload: false
-    }
+      barValue: "0%",
+      formatTitle: "檔案格式",
+      qualityTitle: "影片畫質",
+      formatActive: false,
+      qualityActive: false,
+      inDownload: false,
+      needToDownloadAudioFile: false,
+      needToMerge: false,
+    };
   },
 
   methods: {
-    test: function () {
-      console.log(this.fileFormat)
-    },
     check: async function () {
-      let onlyaudio = false
+      console.log(this.videoAdaptiveDownloadUrl);
+      console.log(this.videoDownloadUrl);
 
-      if (this.fileFormat == 'mp3') onlyaudio = true
+      if (this.formatTitle == "檔案格式")
+        return this.$notify({
+          group: "foo-css",
+          title: "請選擇檔案格式！",
+          type: "error",
+        });
 
-      this.inDownload = true
+      if (this.qualityTitle == "影片畫質" && this.formatTitle != "MP3")
+        return this.$notify({
+          group: "foo-css",
+          title: "請選擇影片畫質！",
+          type: "error",
+        });
 
-      let urlToChoose = ''
+      this.inDownload = true;
 
-      // 未來改成使用者自選畫質
-      let vq1 = 'tiny'
-      let vq2 = 'small'
-      let vq3 = 'medium'
-      let vq4 = 'large'
-      let vq5 = 'hd720'
-      let vq6 = 'hd1080'
-      let last_vq = ''
+      targetfile =
+        this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, "") + // Windows 檔案命名規則
+        "." +
+        "mp4";
+      let onlyaudio = false;
 
-      let aq1 = 'AUDIO_QUALITY_LOW'
-      let aq2 = 'AUDIO_QUALITY_MEDIUM'
-      let aq3 = 'AUDIO_QUALITY_HIGH'
+      if (this.formatTitle == "MP4") {
+        if (this.videoDownloadUrl.includes(this.qualityTitle)) {
+          this.downloadToComputer(
+            this.videoDownloadUrl.filter(
+              (a) => a["影片畫質"] === this.qualityTitle
+            )[0]["url"],
+            targetfile,
+            onlyaudio
+          );
+        } else {
+          console.log(
+            this.videoAdaptiveDownloadUrl.filter(
+              (a) => a[this.qualityTitle]
+            )[0]["1080p"]
+          );
 
-      let last_aq = ''
-      for (var itag in this.videoItags) {
-        let this_aq = this.videoItags[itag]['audioQuality']
-        let this_vq = this.videoItags[itag]['quality']
-        let VIDEO_MIME = ''
-
-        let is_better_audio =
-          (last_aq == '' && this_aq != '') ||
-          (last_aq == aq1 && (this_aq == aq2 || this_aq == aq3)) ||
-          (last_aq == aq2 && this_aq == aq3)
-        let is_same_or_better_audio = last_aq == this_aq || is_better_audio
-
-        let is_better_video =
-          (last_vq == '' && this_vq != '') ||
-          (last_vq == vq1 &&
-            (this_vq == vq2 ||
-              this_vq == vq3 ||
-              this_vq == vq4 ||
-              this_vq == vq5 ||
-              this_vq == vq6)) ||
-          (last_vq == vq2 &&
-            (this_vq == vq3 ||
-              this_vq == vq4 ||
-              this_vq == vq5 ||
-              this_vq == vq6)) ||
-          (last_vq == vq3 &&
-            (this_vq == vq4 || this_vq == vq5 || this_vq == vq6)) ||
-          (last_vq == vq4 && (this_vq == vq5 || this_vq == vq6)) ||
-          (last_vq == vq5 && this_vq == vq6)
-        let is_same_or_better_video = last_vq == this_vq || is_better_video
-
-        let is_better_quality =
-          (is_better_audio && is_same_or_better_video) ||
-          (is_better_video && is_same_or_better_audio) ||
-          (onlyaudio && is_better_audio)
-
-        // If audio: Try to download the best audio quality.
-        // If video: Try to download the best combination.
-        if (
-          (((onlyaudio && this.videoItags[itag]['mimeType']) ||
-            (!onlyaudio && this.videoItags[itag]['mimeType'])) &&
-            (!onlyaudio || this.videoItags[itag]['quality'] != null) &&
-            this.videoItags[itag]['audioQuality'] != null &&
-            ((onlyaudio && !this_vq) ||
-              (!onlyaudio && last_vq == '' && this_vq != ''))) ||
-          is_better_quality
-        ) {
-          VIDEO_MIME = this.videoItags[itag]['mimeType']
-          urlToChoose = this.videoItags[itag]['url']
-
-          last_vq = this_vq
-          last_aq = this_aq
+          this.needToDownloadAudioFile = true;
+          this.needToMerge = true;
+          await this.downloadToComputer(
+            this.videoAdaptiveDownloadUrl.filter(
+              (a) => a[this.qualityTitle]
+            )[0][this.qualityTitle],
+            temVideo,
+            false
+          );
         }
-      }
-      if (!urlToChoose) {
-        this.showNotify('foo-css', '下載失敗', 'error')
-        return
       } else {
-        let ext = 'mp4'
-        let targetfile =
-          this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, '') +
-          '.' +
-          ext
-
-        console.log(targetfile)
-        this.downloadYT(urlToChoose, targetfile, onlyaudio)
+        onlyaudio = true;
+        this.downloadToComputer(
+          this.videoDownloadUrl.pop()["url"],
+          targetfile,
+          onlyaudio
+        );
       }
     },
 
-    downloadYT: async function (url, filename, onlyaudio, outputext) {
-      let that = this
+    downloadToComputer: async function (url, filename, onlyaudio) {
+      let that = this;
+      var changeBarValue;
+
       // 這邊如果後端的程式沒有在一秒內執行 進度條就不會動了
       // 預計改成由後端發出事件 在此接收後才 invoke('get_bar_total_size')
       setTimeout(async () => {
-        await invoke('get_bar_total_size').then(totalSize => {
-          console.log(totalSize)
+        await invoke("get_bar_total_size").then((totalSize) => {
+          console.log(totalSize);
           changeBarValue = setInterval(async () => {
-            await invoke('get_bar_size_now').then(size => {
+            await invoke("get_bar_size_now").then((size) => {
               that.barValue =
-                parseInt(Math.round((size / totalSize) * 100)) + '%'
-            })
-          }, 300)
-        })
-      }, 1000)
-      var changeBarValue
+                parseInt(Math.round((size / totalSize) * 100)) + "%";
+            });
+          }, 300);
+        });
+      }, 2000);
 
-      await invoke('download_yt', {
+      console.log(url);
+      await invoke("download_youtube", {
         url,
         filename,
         onlyaudio,
-        outputext
       }).then(() => {
-        clearInterval(changeBarValue)
-        console.log('已停止迴圈')
-        that.$emit('closeModal')
-        that.$notify({
-          group: 'foo-css',
-          title: '影片下載成功！',
-          text: `${that.videoTitle}`,
-          type: 'success'
-        })
+        clearInterval(changeBarValue);
+        console.log("已停止迴圈");
+        that.barValue = "0%";
+        if (that.needToDownloadAudioFile) {
+          that.downloadToComputer(
+            that.videoDownloadUrl[0]["url"],
+            temAudio,
+            false
+          );
+          that.needToDownloadAudioFile = false;
+        } else if (that.needToMerge) {
+          invoke("merge", { temVideo, temAudio, targetfile });
+        } else {
+          that.$emit("closeModal");
+          that.$notify({
+            group: "foo-css",
+            title: "影片下載成功！",
+            text: `${that.videoTitle}`,
+            type: "success",
+          });
 
-        that.barValue = '0%'
-        that.inDownload = false
-      })
-    }
-  }
-}
+          that.inDownload = false;
+        }
+      });
+    },
+  },
+};
 </script>
 
 <style>
@@ -395,7 +417,7 @@ export default {
     rgba(233, 233, 233, 0.8) 100%
   );
   animation: shimmer 2s ease-out infinite;
-  content: '';
+  content: "";
 }
 
 @keyframes shimmer {
@@ -403,67 +425,5 @@ export default {
     transform: translateX(0%);
     opacity: 0;
   }
-}
-
-/* The container must be positioned relative: */
-.custom-select {
-  position: relative;
-  font-family: Arial;
-}
-
-.custom-select select {
-  display: none; /*hide original SELECT element: */
-}
-
-.select-selected {
-  background-color: DodgerBlue;
-}
-
-/* Style the arrow inside the select element: */
-.select-selected:after {
-  position: absolute;
-  content: '';
-  top: 14px;
-  right: 10px;
-  width: 0;
-  height: 0;
-  border: 6px solid transparent;
-  border-color: #fff transparent transparent transparent;
-}
-
-/* Point the arrow upwards when the select box is open (active): */
-.select-selected.select-arrow-active:after {
-  border-color: transparent transparent #fff transparent;
-  top: 7px;
-}
-
-/* style the items (options), including the selected item: */
-.select-items div,
-.select-selected {
-  color: #ffffff;
-  padding: 8px 16px;
-  border: 1px solid transparent;
-  border-color: transparent transparent rgba(0, 0, 0, 0.1) transparent;
-  cursor: pointer;
-}
-
-/* Style items (options): */
-.select-items {
-  position: absolute;
-  background-color: DodgerBlue;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 99;
-}
-
-/* Hide the items when the select box is closed: */
-.select-hide {
-  display: none;
-}
-
-.select-items div:hover,
-.same-as-selected {
-  background-color: rgba(0, 0, 0, 0.1);
 }
 </style>
