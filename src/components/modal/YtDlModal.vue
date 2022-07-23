@@ -246,8 +246,9 @@
 </template>
 
 <script>
-// .\ffmpeg-x86_64-pc-windows-msvc.exe -i "../YTD.CC - Temporary Video.mp4" -i "../YTD.CC - Temporary Audio.mp4" -c:v copy -c:a aac output.mp4
 import { invoke } from "@tauri-apps/api";
+import { listen } from "@tauri-apps/api/event";
+import { writeTextFile, BaseDirectory } from "@tauri-apps/api/fs";
 
 var temAudio = "YTD.CC - Temporary Audio.mp4";
 var temVideo = "YTD.CC - Temporary Video.mp4";
@@ -281,9 +282,6 @@ export default {
 
   methods: {
     check: async function () {
-      console.log(this.videoAdaptiveDownloadUrl);
-      console.log(this.videoDownloadUrl);
-
       if (this.formatTitle == "檔案格式")
         return this.$notify({
           group: "foo-css",
@@ -305,25 +303,17 @@ export default {
         "." +
         "mp4";
       let onlyaudio = false;
-
+      // 下載視訊
       if (this.formatTitle == "MP4") {
-        if (this.videoDownloadUrl.includes(this.qualityTitle)) {
-          this.downloadToComputer(
-            this.videoDownloadUrl.filter(
-              (a) => a["影片畫質"] === this.qualityTitle
-            )[0]["url"],
-            targetfile,
-            onlyaudio
-          );
+        let urlTocheck = this.videoDownloadUrl.filter(
+          (a) => a["影片畫質"] == this.qualityTitle
+        )[0]["url"];
+        if (urlTocheck) {
+          this.downloadToComputer(urlTocheck, targetfile, onlyaudio);
         } else {
-          console.log(
-            this.videoAdaptiveDownloadUrl.filter(
-              (a) => a[this.qualityTitle]
-            )[0]["1080p"]
-          );
-
           this.needToDownloadAudioFile = true;
           this.needToMerge = true;
+
           await this.downloadToComputer(
             this.videoAdaptiveDownloadUrl.filter(
               (a) => a[this.qualityTitle]
@@ -332,13 +322,12 @@ export default {
             false
           );
         }
+
+        // 下載音訊
       } else {
         onlyaudio = true;
-        this.downloadToComputer(
-          this.videoDownloadUrl.pop()["url"],
-          targetfile,
-          onlyaudio
-        );
+        const url = this.videoDownloadUrl.pop()["url"];
+        this.downloadToComputer(url, targetfile, onlyaudio);
       }
     },
 
@@ -346,19 +335,28 @@ export default {
       let that = this;
       var changeBarValue;
 
-      // 這邊如果後端的程式沒有在一秒內執行 進度條就不會動了
-      // 預計改成由後端發出事件 在此接收後才 invoke('get_bar_total_size')
-      setTimeout(async () => {
-        await invoke("get_bar_total_size").then((totalSize) => {
-          console.log(totalSize);
-          changeBarValue = setInterval(async () => {
-            await invoke("get_bar_size_now").then((size) => {
-              that.barValue =
-                parseInt(Math.round((size / totalSize) * 100)) + "%";
-            });
-          }, 300);
+      function doneMsg() {
+        that.$emit("closeModal");
+        that.$notify({
+          group: "foo-css",
+          title: "影片下載成功！",
+          text: `${that.videoTitle}`,
+          type: "success",
         });
-      }, 2000);
+
+        that.inDownload = false;
+      }
+
+      await listen("inDownload", async (event) => {
+        changeBarValue = setInterval(async () => {
+          await invoke("get_bar_size_now").then((size) => {
+            that.barValue =
+              parseInt(Math.round((size / event.payload) * 100)) + "%";
+          });
+        }, 300);
+      }).then(() => {
+        console.log("123");
+      });
 
       console.log(url);
       await invoke("download_youtube", {
@@ -371,25 +369,28 @@ export default {
         that.barValue = "0%";
         if (that.needToDownloadAudioFile) {
           that.downloadToComputer(
-            that.videoDownloadUrl[0]["url"],
+            that.videoDownloadUrl.pop()["url"],
             temAudio,
             false
           );
+
           that.needToDownloadAudioFile = false;
         } else if (that.needToMerge) {
-          invoke("merge", { temVideo, temAudio, targetfile });
-        } else {
-          that.$emit("closeModal");
-          that.$notify({
-            group: "foo-css",
-            title: "影片下載成功！",
-            text: `${that.videoTitle}`,
-            type: "success",
+          invoke("merge", {
+            videofile: temVideo,
+            audiofile: temAudio,
+            filename: targetfile,
+          }).then(() => {
+            doneMsg();
           });
 
-          that.inDownload = false;
+          that.needToMerge = false;
+        } else {
+          doneMsg();
         }
       });
+
+      await writeTextFile("log.json", "123", { dir: BaseDirectory.App });
     },
   },
 };
