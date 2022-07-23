@@ -12,8 +12,11 @@ use std::{
     io::{self, copy, Read},
     path::{Path, PathBuf},
 };
-
 use url::Url;
+
+use tauri::{Manager, Window};
+// use window_vibrancy::{self, NSVisualEffectMaterial};
+
 struct DownloadProgress<'a, R> {
     inner: R,
     progress_bar: &'a ProgressBar,
@@ -30,22 +33,33 @@ impl<R: Read> Read for DownloadProgress<'_, R> {
 }
 
 static mut PROGRESS_SIZE_NOW: usize = 0;
-static mut TOTAL_PROGRESS_SIZE: u64 = 0;
 
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            let window = app.get_window("main").unwrap();
+            window.set_decorations(false)?;
+
+            // #[cfg(target_os = "macos")]
+            // window_vibrancy::apply_vibrancy(&window, NSVisualEffectMaterial::AppearanceBased).expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+            
+            // #[cfg(target_os = "windows")]
+            // window_vibrancy::apply_blur(&window, Some((18, 18, 18, 125))).expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             download_youtube,
             merge,
-            get_bar_total_size,
             get_bar_size_now
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
+
+
 #[tauri::command]
-async fn download_youtube(url: &str, filename: &str, onlyaudio: bool) -> Result<(), ()> {
+async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: bool) -> Result<(), ()> {
     let url = Url::parse(url).unwrap();
     
     let resp = ureq::get(url.as_str()).call().unwrap();
@@ -55,7 +69,8 @@ async fn download_youtube(url: &str, filename: &str, onlyaudio: bool) -> Result<
         .unwrap_or("0")
         .parse::<u64>()
         .unwrap();
-    unsafe { TOTAL_PROGRESS_SIZE = total_size };
+
+    window.emit("inDownload", total_size ).unwrap();
 
     let request = ureq::get(url.as_str());
 
@@ -71,7 +86,7 @@ async fn download_youtube(url: &str, filename: &str, onlyaudio: bool) -> Result<
     let mut source = DownloadProgress {
         progress_bar: &pb,
         inner: resp.into_reader(),
-    };
+    }; 
 
     let mut dest = fs::OpenOptions::new()
         .create(true)
@@ -93,7 +108,6 @@ async fn download_youtube(url: &str, filename: &str, onlyaudio: bool) -> Result<
 
     unsafe {
             PROGRESS_SIZE_NOW = 0;
-            TOTAL_PROGRESS_SIZE = 0;
     }
     Ok(())
 }
@@ -107,11 +121,8 @@ async fn merge(videofile: String, audiofile: String, filename: String) {
     let outpath = &outpathbuf.as_path();
 
     ffmpeg::merge(videopath, audiopath, outpath);
-}
-
-#[tauri::command]
-fn get_bar_total_size() -> String {
-    unsafe { TOTAL_PROGRESS_SIZE.to_string().into() }
+    fs::remove_file(&videopath).unwrap();
+    fs::remove_file(&audiopath).unwrap();
 }
 
 #[tauri::command]
