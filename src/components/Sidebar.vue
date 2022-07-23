@@ -7,7 +7,7 @@
     >
       <!-- YTD.CC icon -->
       <img
-        class="absolute top-0 my-2 h-11 w-11 rounded-sm"
+        class="absolute top-0 my-2 h-11 w-11 select-none rounded-sm"
         src="../assets/YTD.CC.png"
         alt="YTD.CC Icon"
       />
