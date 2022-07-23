@@ -13,7 +13,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "YTD.CC",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -40,9 +40,14 @@
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
-        "timestampUrl": ""
+        "timestampUrl": "",
+        "wix": {
+          "dialogImagePath": "icons/installer_bg.png",
+          "bannerPath": "icons/installer_banner.png"
+      }
       }
     },
+    "macOSPrivateApi": true,
     "updater": {
       "active": false
     },
@@ -56,6 +61,10 @@
         "all": true,
         "scope": ["https://*/*"],
         "request": true
+      },
+      "fs": {
+        "all": true,
+        "scope": ["$APP/"]
       }
     },
     "windows": [
@@ -64,7 +73,8 @@
         "width": 1000,
         "height": 600,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "transparent": true
       }
     ],
     "security": {
