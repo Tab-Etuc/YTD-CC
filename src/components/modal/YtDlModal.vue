@@ -18,7 +18,7 @@
           >
             <div class="flex h-full w-full">
               <img
-                :src="`//img.youtube.com/vi/${videoId}/0.jpg`"
+                :src="`//img.youtube.com/vi/${videoId}/default.jpg`"
                 error
                 alt="YtVideoThumbnail"
                 class="h-[72px] w-32 rounded-md"
@@ -183,13 +183,13 @@
                 >
                   <li
                     class="relative select-none p-3 hover:bg-blue-400 hover:text-white"
-                    @click="this.formatTitle = 'MP3'"
+                    @click="formatTitle = 'MP3'"
                   >
                     MP3
                   </li>
                   <li
                     class="relative select-none rounded-b-md p-3 hover:bg-blue-400 hover:text-white"
-                    @click="this.formatTitle = 'MP4'"
+                    @click="formatTitle = 'MP4'"
                   >
                     MP4
                   </li>
@@ -221,7 +221,7 @@
                     class="relative select-none p-3 last:rounded-b-md hover:bg-blue-400 hover:text-white"
                     v-for="quality in videoQualitys"
                     :key="quality"
-                    @click="this.qualityTitle = quality"
+                    @click="qualityTitle = quality"
                   >
                     {{ quality }}
                   </li>
@@ -247,8 +247,9 @@
 
 <script>
 import { invoke } from "@tauri-apps/api";
+import { sendNotification } from "@tauri-apps/api/notification";
 import { listen } from "@tauri-apps/api/event";
-import { writeTextFile, BaseDirectory } from "@tauri-apps/api/fs";
+import { writeTextFile, readTextFile, BaseDirectory } from "@tauri-apps/api/fs";
 
 var temAudio = "YTD.CC - Temporary Audio.mp4";
 var temVideo = "YTD.CC - Temporary Video.mp4";
@@ -280,6 +281,14 @@ export default {
     };
   },
 
+  mounted() {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        this.$emit("closeModal");
+      }
+    });
+  },
+
   methods: {
     check: async function () {
       if (this.formatTitle == "檔案格式")
@@ -298,18 +307,23 @@ export default {
 
       this.inDownload = true;
 
-      targetfile =
-        this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, "") + // Windows 檔案命名規則
-        "." +
-        "mp4";
+      targetfile = this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, ""); // Windows 檔案命名規則
+
       let onlyaudio = false;
       // 下載視訊
       if (this.formatTitle == "MP4") {
+        console.log(this.videoDownloadUrl);
+        console.log(this.videoQualitys);
+        console.log(this.qualityTitle);
         let urlTocheck = this.videoDownloadUrl.filter(
           (a) => a["影片畫質"] == this.qualityTitle
         )[0]["url"];
         if (urlTocheck) {
-          this.downloadToComputer(urlTocheck, targetfile, onlyaudio);
+          this.downloadToComputer(
+            urlTocheck,
+            targetfile + "." + this.formatTitle,
+            onlyaudio
+          );
         } else {
           this.needToDownloadAudioFile = true;
           this.needToMerge = true;
@@ -326,8 +340,12 @@ export default {
         // 下載音訊
       } else {
         onlyaudio = true;
-        const url = this.videoDownloadUrl.pop()["url"];
-        this.downloadToComputer(url, targetfile, onlyaudio);
+        const tepUrl = this.videoDownloadUrl.pop()["url"];
+        this.downloadToComputer(
+          tepUrl,
+          targetfile + "." + this.formatTitle,
+          onlyaudio
+        );
       }
     },
 
@@ -343,6 +361,8 @@ export default {
           text: `${that.videoTitle}`,
           type: "success",
         });
+
+        sendNotification({ title: targetfile, body: "影片下載成功！" });
 
         that.inDownload = false;
       }
@@ -363,34 +383,89 @@ export default {
         url,
         filename,
         onlyaudio,
-      }).then(() => {
-        clearInterval(changeBarValue);
-        console.log("已停止迴圈");
-        that.barValue = "0%";
-        if (that.needToDownloadAudioFile) {
-          that.downloadToComputer(
-            that.videoDownloadUrl.pop()["url"],
-            temAudio,
-            false
-          );
+      })
+        .then(() => {
+          clearInterval(changeBarValue);
+          console.log("已停止迴圈");
+          that.barValue = "0%";
+          if (that.needToDownloadAudioFile) {
+            let tepUrl = that.videoDownloadUrl.pop()["url"];
+            that.downloadToComputer(tepUrl, temAudio, false);
 
-          that.needToDownloadAudioFile = false;
-        } else if (that.needToMerge) {
-          invoke("merge", {
-            videofile: temVideo,
-            audiofile: temAudio,
-            filename: targetfile,
-          }).then(() => {
+            that.needToDownloadAudioFile = false;
+          } else if (that.needToMerge) {
+            invoke("merge", {
+              videofile: temVideo,
+              audiofile: temAudio,
+              filename: targetfile + "." + this.formatTitle,
+            }).then(() => {
+              doneMsg();
+            });
+
+            that.needToMerge = false;
+          } else {
             doneMsg();
+          }
+        })
+        .catch((err) => {
+          that.$notify({
+            group: "foo-css",
+            title: "error c",
+            text: `${err}`,
+            type: "success",
+          });
+        });
+      try {
+        // 如果檔案存在
+        var log = await readTextFile("log.json", {
+          dir: BaseDirectory.App,
+        });
+
+        try {
+          let data = JSON.parse(log);
+
+          "MP3" == this.formatTitle
+            ? data["下載次數統計"]["MP3"]++
+            : data["下載次數統計"]["MP4"]++;
+
+          data["歷程記錄"].push({
+            影片名稱: targetfile,
+            檔案格式: this.formatTitle,
+            影片時長: this.videoDuration,
+            影片背景: `//img.youtube.com/vi/${this.videoId}/default.jpg`,
           });
 
-          that.needToMerge = false;
-        } else {
-          doneMsg();
-        }
-      });
+          await writeTextFile(
+            { path: "log.json", contents: JSON.stringify(data) },
+            { dir: BaseDirectory.App }
+          ).catch((err) => console.log(err));
+        } catch {}
+      } catch {
+        // 如果是第一次下載 或 檔案已遺失
+        let mp3Count = 0,
+          mp4Count = 0;
+        "MP3" == this.formatTitle ? mp3Count++ : mp4Count++;
 
-      await writeTextFile("log.json", "123", { dir: BaseDirectory.App });
+        const jsonData = {
+          下載次數統計: {
+            MP3: mp3Count,
+            MP4: mp4Count,
+          },
+          歷程記錄: [
+            {
+              影片名稱: targetfile,
+              檔案格式: this.formatTitle,
+              影片時長: this.videoDuration,
+              影片背景: `//img.youtube.com/vi/${this.videoId}/default.jpg`,
+            },
+          ],
+        };
+
+        await writeTextFile(
+          { path: "log.json", contents: JSON.stringify(jsonData) },
+          { dir: BaseDirectory.App }
+        ).catch((err) => console.log(err));
+      }
     },
   },
 };
