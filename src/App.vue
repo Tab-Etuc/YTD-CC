@@ -2,10 +2,9 @@
   <div
     class="h-screen w-screen overflow-hidden rounded-xl bg-slate-900 ring-1 ring-inset ring-white/10"
   >
-    <div @mousedown="drag" class="right-0 flex h-8 w-[calc(100%-7rem)]">
-      <!-- window controls wrapper -->
-    </div>
+    <div @mousedown="drag" class="right-0 flex h-8 w-[calc(100%-7rem)]" />
 
+    <!-- window controls wrapper -->
     <div
       class="absolute top-0 left-0 mb-3 flex h-8 w-28 rounded-xl bg-slate-700"
     >
@@ -111,11 +110,23 @@
 import Sidebar from "./components/Sidebar.vue";
 
 import { appWindow } from "@tauri-apps/api/window";
+import {
+  isPermissionGranted,
+  requestPermission,
+} from "@tauri-apps/api/notification";
 
 export default {
   name: "App",
   components: {
     Sidebar,
+  },
+
+  async mounted() {
+    let permissionGranted = await isPermissionGranted();
+    if (!permissionGranted) {
+      const permission = await requestPermission();
+      permissionGranted = permission === "granted";
+    }
   },
 
   methods: {
