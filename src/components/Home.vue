@@ -1,6 +1,6 @@
 <template>
   <div class="relative float-left h-screen w-[calc(100%-7rem)]">
-    <!-- 右側歷史紀錄 History -->
+    <!-- 右側歷程記錄 History -->
     <History />
 
     <!-- Main Download Panel -->
@@ -36,6 +36,7 @@
               v-model="ytUrl"
               class="focus:shadow-outline mx-2 mt-4 w-[28rem] rounded-full px-3 py-1 pl-5 placeholder-gray-500 outline-indigo-400 transition-all duration-700 ease-in-out hover:w-[30rem]"
               placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=..."
+              @keyup.enter="confirm"
             />
 
             <button
@@ -45,14 +46,6 @@
               確認
             </button>
           </div>
-
-          <!-- <select
-            class="mx-2 bg-indigo-400 text-white rounded-lg w-16 p-1 "
-            v-model="opt"
-          >
-            <option value="mp3">MP3</option>
-            <option value="mp4">MP4</option>
-          </select> -->
         </div>
       </div>
     </div>
@@ -84,7 +77,7 @@
             <p
               class="font-mediu static my-auto ml-3 cursor-default select-none text-xl leading-tight tracking-wide text-white"
             >
-              紀錄
+              統計
             </p>
           </div>
         </header>
@@ -254,7 +247,9 @@ export default {
                     return a["qualityLabel"]; // 獲取可下載之影片畫質
                   })
               ),
-            ], // Array - 影片畫質
+            ].map(
+              (a) => ("720p60" == a && (a = "720p"), a) // 當值為 "720p60" 時替換成 "720p"
+            ), // Array - 影片畫質
           ];
         })
         .catch();
