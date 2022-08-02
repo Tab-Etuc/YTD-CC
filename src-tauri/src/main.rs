@@ -46,7 +46,8 @@ fn main() {
             // #[cfg(target_os = "windows")]
             // window_vibrancy::apply_blur(&window, Some((18, 18, 18, 125))).expect("Unsupported platform! 'apply_blur' is only supported on Windows");
             Ok(())
-        })
+        }
+        )
         .invoke_handler(tauri::generate_handler![
             download_youtube,
             merge,
@@ -59,7 +60,7 @@ fn main() {
 
 
 #[tauri::command]
-async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: bool) -> Result<(), ()> {
+async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: bool) -> Result<(), String> {
     let url = Url::parse(url).unwrap();
     
     let resp = ureq::get(url.as_str()).call().unwrap();
@@ -91,9 +92,11 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
     let mut dest = fs::OpenOptions::new()
         .create(true)
         .append(true)
-        .open(&file).unwrap();
+        .open(&file)
+        .unwrap();
 
     let _ = copy(&mut source, &mut dest).unwrap();
+
     if onlyaudio{    
         let inpath = Path::new(&filename);
         let mut outpathbuf = PathBuf::from(&filename);
