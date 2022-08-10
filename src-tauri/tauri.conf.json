@@ -44,7 +44,7 @@
         "wix": {
           "dialogImagePath": "icons/installer_bg.png",
           "bannerPath": "icons/installer_banner.png"
-      }
+        }
       }
     },
     "macOSPrivateApi": true,
@@ -55,7 +55,8 @@
       "all": true,
       "shell": {
         "sidecar": true,
-        "scope": [{ "name": "ffmpeg", "args": true, "sidecar": true }]
+        "scope": [{ "name": "ffmpeg", "args": true, "sidecar": true }],
+        "open": true
       },
       "http": {
         "all": true,
