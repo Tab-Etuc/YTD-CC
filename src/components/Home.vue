@@ -53,34 +53,37 @@
     <!-- Banner  -->
     <div class="absolute mt-3 h-[55%] w-[55rem]">
       <div class="absolute right-0 h-full w-[18rem]">
-        <div
-          class="absolute right-0 bottom-0 h-[calc(100%-2rem)] w-[18rem] transform rounded-b-xl bg-slate-900/60 transition duration-700 hover:backdrop-blur-sm"
-        />
-        <header
-          class="absolute right-0 flex h-[4rem] w-[18rem] rounded-xl bg-blue-500"
+        <div class="absolute right-0 bottom-0 h-[calc(100%-2rem)] w-[18rem]" />
+        <!-- <div
+          class="h-full w-full transform rounded-b-xl bg-slate-900/60 transition duration-700 hover:backdrop-blur-sm"
         >
-          <div class="my-auto flex h-[2rem] w-[18rem]">
-            <!-- Bar chart icon -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              class="static my-auto ml-4 h-7 w-7 fill-white"
-              viewBox="0 0 32 32"
-              version="1.1"
-            >
-              <g id="surface1">
-                <path
-                  d="M 30 10 L 22 10 L 22 30 L 20 30 L 20 0 L 12 0 L 12 30 L 10 30 L 10 16 L 2 16 L 2 30 L 0 30 L 0 32 L 32 32 L 32 30 L 30 30 Z M 30 10 "
-                />
-              </g>
-            </svg>
-            <p
-              class="font-mediu static my-auto ml-3 cursor-default select-none text-xl leading-tight tracking-wide text-white"
-            >
-              統計
-            </p>
-          </div>
-        </header>
+          <header class="flex h-[4rem] w-[18rem] rounded-xl bg-blue-500">
+            <div class="my-auto flex h-[2rem] w-[18rem]">
+              Bar chart icon
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                class="static my-auto ml-4 h-7 w-7 fill-white"
+                viewBox="0 0 32 32"
+                version="1.1"
+              >
+                <g id="surface1">
+                  <path
+                    d="M 30 10 L 22 10 L 22 30 L 20 30 L 20 0 L 12 0 L 12 30 L 10 30 L 10 16 L 2 16 L 2 30 L 0 30 L 0 32 L 32 32 L 32 30 L 30 30 Z M 30 10 "
+                  />
+                </g>
+              </svg>
+              <p
+                class="font-mediu static my-auto ml-3 cursor-default select-none text-xl leading-tight tracking-wide text-white"
+              >
+                統計
+              </p>
+            </div>
+          </header>
+          <DownloadCountChart
+            class="m-atuo flex h-[calc(100%-4rem)] w-full items-center"
+          /> 
+        </div> -->
       </div>
       <img
         class="h-full w-[55rem] rounded-xl object-cover"
@@ -97,6 +100,7 @@ import { Body, fetch } from "@tauri-apps/api/http";
 // Components
 import History from "./History.vue";
 import YtDlModal from "./modal/YtDlModal.vue";
+import DownloadCountChart from "./DownloadCountChart.vue";
 
 import bannerImg from "../assets/TDwZG1y.jpg";
 
@@ -105,6 +109,7 @@ export default {
   components: {
     History,
     YtDlModal,
+    DownloadCountChart,
   },
 
   data() {
@@ -123,7 +128,7 @@ export default {
   },
 
   methods: {
-    makeRequest: async function (url, options = {}) {
+    async makeRequest(url, options = {}) {
       const response = await fetch(url, {
         body: options.body ?? Body.text(""),
         query: options.query ?? {},
@@ -139,7 +144,7 @@ export default {
       return response.data;
     },
 
-    confirm: async function () {
+    async confirm() {
       // 檢查連結
       if (this.ytUrl == "")
         return this.$notify({
@@ -173,7 +178,7 @@ export default {
         .catch();
     },
 
-    find_video_info: async function (id) {
+    async find_video_info(id) {
       await this.makeRequest(
         "https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
         {
