@@ -2,9 +2,7 @@
   <div
     class="absolute right-5 mt-6 hidden h-[90%] w-[27%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10 xl:block"
   >
-    <header
-      class="absolute top-0 flex h-[4rem] w-full rounded-b-xl bg-blue-500"
-    >
+    <header class="flex h-[4rem] w-full rounded-b-xl bg-blue-500">
       <div class="my-auto flex h-[2rem] w-[full]">
         <!-- History icon -->
         <svg
@@ -26,15 +24,51 @@
         <p
           class="cursor-defaultmt-2 font-mediu my-auto ml-4 select-none text-xl leading-tight tracking-wide text-white"
         >
-          歷史
+          歷程記錄
         </p>
       </div>
     </header>
+
+    <div
+      class="scrollbar-thumb-rounded-full scrollbar-track-rounded-full h-full w-full overflow-auto rounded-tr-lg scrollbar-thin scrollbar-track-slate-800 scrollbar-thumb-gray-100 hover:scrollbar-thumb-gray-200"
+    >
+      <ui
+        v-for="i in historyList"
+        :key="i"
+        class="flex h-20 w-full list-none odd:bg-slate-800 even:bg-slate-700"
+      >
+        <li class="flex w-full">
+          <img
+            :src="i.影片背景"
+            class="my-auto ml-2 h-[80%] w-[30%] rounded-md"
+          />
+          <span class="mx-auto mt-2 h-5 w-3/5 truncate text-sm text-white">{{
+            i.影片名稱
+          }}</span>
+        </li>
+      </ui>
+      <li class="flex h-20 w-full" />
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   name: "History",
+  data() {
+    return {};
+  },
+
+  computed: {
+    historyList() {
+      return this.$store.state.historyList;
+    },
+  },
+
+  async created() {
+    await this.$store.dispatch("Set_History_List");
+  },
+
+  methods: {},
 };
 </script>
