@@ -80,6 +80,8 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
     let file = Path::new(&filename);
 
     if file.exists() {
+
+
         return Ok(());
     }
 
