@@ -966,7 +966,6 @@ module.exports = {
     "disabled",
   ],
   plugins: [
-    require("tailwind-scrollbar-hide"),
     require("tailwind-scrollbar"),
     plugin(function ({ addVariant, e }) {
       addVariant("data-active", ({ modifySelectors, separator }) => {
