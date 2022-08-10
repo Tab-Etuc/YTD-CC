@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
+import store from "./store";
 import Notifications from "@kyvg/vue3-notification";
 
 import App from "./App.vue";
@@ -7,7 +8,8 @@ import App from "./App.vue";
 import "./assets/tailwind.css";
 
 import Home from "./components/Home.vue";
-const About = { template: "" };
+import About from "./components/views/About.vue";
+const temp = { template: "" };
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,7 +20,7 @@ const router = createRouter({
     },
     {
       path: "/history",
-      component: About,
+      component: temp,
     },
     {
       path: "/about",
@@ -26,12 +28,12 @@ const router = createRouter({
     },
     {
       path: "/settings",
-      component: About,
+      component: temp,
     },
   ],
 });
 
-const app = createApp(App);
+const app = createApp(App).use(store);
 
 app.use(Notifications).use(router);
 
