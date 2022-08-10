@@ -146,21 +146,21 @@
           class="relative mx-auto flex w-[60vw] rounded-b-xl bg-slate-600 p-4"
         >
           <div
-            v-if="inDownload"
+            v-if="isDownloading"
             class="relative m-auto h-6 w-[90%] rounded-xl bg-gray-200"
           >
             <div
-              :style="{ width: barValue }"
+              :style="{ width: downloadProgressBarValue }"
               class="shim-green absolute top-0 h-6 rounded-xl"
             >
               <span class="relative my-auto ml-8 font-medium text-blue-100">{{
-                barValue
+                downloadProgressBarValue
               }}</span>
             </div>
           </div>
 
           <div
-            v-if="!inDownload"
+            v-if="!isDownloading"
             class="my-auto mx-3 flex w-full justify-around"
           >
             <div class="relative flex h-7 w-[7rem]">
@@ -251,6 +251,8 @@ import { sendNotification } from "@tauri-apps/api/notification";
 import { listen } from "@tauri-apps/api/event";
 import { writeTextFile, readTextFile, BaseDirectory } from "@tauri-apps/api/fs";
 
+import { mapState, mapActions, mapGetters } from "vuex";
+
 var temAudio = "YTD.CC - Temporary Audio.mp4";
 var temVideo = "YTD.CC - Temporary Video.mp4";
 var targetfile = "";
@@ -275,10 +277,13 @@ export default {
       qualityTitle: "影片畫質",
       formatActive: false,
       qualityActive: false,
-      inDownload: false,
       needToDownloadAudioFile: false,
       needToMerge: false,
     };
+  },
+
+  computed: {
+    ...mapState(["isDownloading", "downloadProgressBarValue"]),
   },
 
   mounted() {
@@ -290,7 +295,7 @@ export default {
   },
 
   methods: {
-    check: async function () {
+    async check() {
       if (this.formatTitle == "檔案格式")
         return this.$notify({
           group: "foo-css",
@@ -305,7 +310,7 @@ export default {
           type: "error",
         });
 
-      this.inDownload = true;
+      this.$store.commit("UPDATE_STATUS", true);
 
       targetfile = this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, ""); // Windows 檔案命名規則
 
@@ -315,18 +320,23 @@ export default {
         console.log(this.videoDownloadUrl);
         console.log(this.videoQualitys);
         console.log(this.qualityTitle);
+        console.log(this.videoAdaptiveDownloadUrl);
+
         let urlTocheck = this.videoDownloadUrl.filter(
           (a) => a["影片畫質"] == this.qualityTitle
-        )[0]["url"];
+        )[0];
+
         if (urlTocheck) {
           this.downloadToComputer(
-            urlTocheck,
+            urlTocheck["url"],
             targetfile + "." + this.formatTitle,
             onlyaudio
           );
+          console.log("5555");
         } else {
           this.needToDownloadAudioFile = true;
           this.needToMerge = true;
+          console.log("123");
 
           await this.downloadToComputer(
             this.videoAdaptiveDownloadUrl.filter(
@@ -349,7 +359,7 @@ export default {
       }
     },
 
-    downloadToComputer: async function (url, filename, onlyaudio) {
+    async downloadToComputer(url, filename, onlyaudio) {
       let that = this;
       var changeBarValue;
 
@@ -357,25 +367,26 @@ export default {
         that.$emit("closeModal");
         that.$notify({
           group: "foo-css",
-          title: "影片下載成功！",
+          title: "下載成功！",
           text: `${that.videoTitle}`,
           type: "success",
         });
 
-        sendNotification({ title: targetfile, body: "影片下載成功！" });
-
-        that.inDownload = false;
+        sendNotification({ title: targetfile, body: "下載成功！" });
+        that.$store.commit("UPDATE_STATUS", false);
       }
 
       await listen("inDownload", async (event) => {
         changeBarValue = setInterval(async () => {
           await invoke("get_bar_size_now").then((size) => {
-            that.barValue =
-              parseInt(Math.round((size / event.payload) * 100)) + "%";
+            console.log(size);
+
+            that.$store.commit(
+              "SET_BAR_VALUE",
+              parseInt(Math.round((size / event.payload) * 100)) + "%"
+            );
           });
-        }, 300);
-      }).then(() => {
-        console.log("123");
+        }, 100);
       });
 
       console.log(url);
@@ -383,38 +394,30 @@ export default {
         url,
         filename,
         onlyaudio,
-      })
-        .then(() => {
-          clearInterval(changeBarValue);
-          console.log("已停止迴圈");
-          that.barValue = "0%";
-          if (that.needToDownloadAudioFile) {
-            let tepUrl = that.videoDownloadUrl.pop()["url"];
-            that.downloadToComputer(tepUrl, temAudio, false);
+      }).then(() => {
+        clearInterval(changeBarValue);
+        console.log("已停止迴圈");
+        that.$store.commit("SET_BAR_VALUE", "0%");
+        if (that.needToDownloadAudioFile) {
+          let tepUrl = that.videoDownloadUrl.pop()["url"];
+          that.downloadToComputer(tepUrl, temAudio, false);
 
-            that.needToDownloadAudioFile = false;
-          } else if (that.needToMerge) {
-            invoke("merge", {
-              videofile: temVideo,
-              audiofile: temAudio,
-              filename: targetfile + "." + this.formatTitle,
-            }).then(() => {
-              doneMsg();
-            });
-
-            that.needToMerge = false;
-          } else {
+          that.needToDownloadAudioFile = false;
+        } else if (that.needToMerge) {
+          invoke("merge", {
+            videofile: temVideo,
+            audiofile: temAudio,
+            filename: targetfile + "." + this.formatTitle,
+          }).then(() => {
             doneMsg();
-          }
-        })
-        .catch((err) => {
-          that.$notify({
-            group: "foo-css",
-            title: "error c",
-            text: `${err}`,
-            type: "success",
           });
-        });
+
+          that.needToMerge = false;
+        } else {
+          doneMsg();
+        }
+      });
+
       try {
         // 如果檔案存在
         var log = await readTextFile("log.json", {
@@ -439,6 +442,7 @@ export default {
             { path: "log.json", contents: JSON.stringify(data) },
             { dir: BaseDirectory.App }
           ).catch((err) => console.log(err));
+          this.$store.dispatch("Set_History_List");
         } catch {}
       } catch {
         // 如果是第一次下載 或 檔案已遺失
@@ -465,6 +469,7 @@ export default {
           { path: "log.json", contents: JSON.stringify(jsonData) },
           { dir: BaseDirectory.App }
         ).catch((err) => console.log(err));
+        this.$store.dispatch("Set_History_List");
       }
     },
   },
