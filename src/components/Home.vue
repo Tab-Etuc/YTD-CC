@@ -5,7 +5,7 @@
 
     <!-- Main Download Panel -->
     <div
-      class="mt-6 h-[33%] w-[55rem] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10"
+      class="mt-6 h-[33%] w-[55rem] rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10"
     >
       <Teleport to="body">
         <!-- use the modal component, pass in the prop -->
@@ -26,7 +26,7 @@
       <div class="flex h-full flex-wrap place-content-center justify-center">
         <div class="p-6">
           <p
-            class="cursor-defaultmt-2 font-mediu mb-5 select-none text-center text-xl leading-tight tracking-wide text-white"
+            class="cursor-defaultmt-2 mb-5 select-none text-center text-xl font-medium leading-tight tracking-wide text-white"
           >
             貼上 Youtube 影片連結
           </p>
