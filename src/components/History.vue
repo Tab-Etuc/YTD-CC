@@ -40,6 +40,7 @@
         <li class="flex w-full">
           <img
             :src="i.影片背景"
+            loading="lazy"
             class="my-auto ml-2 h-[80%] w-[30%] rounded-md"
           />
           <span class="mx-auto mt-2 h-5 w-3/5 truncate text-sm text-white">{{
