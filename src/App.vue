@@ -91,7 +91,7 @@
         leave-from-class="opacity-100"
         leave-to-class="transform opacity-0"
       >
-        <component :is="Component" />
+        <component :is="Component" class="overflow-hidden" />
       </Transition>
     </router-view>
 
