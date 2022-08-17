@@ -48,6 +48,13 @@
           }}</span>
         </li>
       </ui>
+
+      <div
+        v-if="historyList == ''"
+        class="flex h-full w-full items-center justify-center"
+      >
+        <p class="text-center text-lg text-white">空無一物</p>
+      </div>
       <li class="flex h-20 w-full" />
     </div>
   </div>
