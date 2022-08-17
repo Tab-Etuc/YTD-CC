@@ -21,11 +21,14 @@ export default createStore({
   },
   actions: {
     async Set_History_List({ commit }) {
-      var log = await readTextFile("log.json", {
+      await readTextFile("history.json", {
         dir: BaseDirectory.App,
-      });
-
-      commit("SET_HISTORY_LIST", JSON.parse(log)["歷程記錄"].reverse());
+      })
+        .then((log) => {
+          const data = JSON.parse(log)["歷程記錄"]?.reverse() ?? {};
+          commit("SET_HISTORY_LIST", data);
+        })
+        .catch((err) => console.warn(err));
     },
   },
   modules: {},
