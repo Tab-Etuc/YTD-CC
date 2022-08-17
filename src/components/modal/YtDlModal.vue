@@ -250,6 +250,7 @@ import { invoke } from "@tauri-apps/api";
 import { sendNotification } from "@tauri-apps/api/notification";
 import { listen } from "@tauri-apps/api/event";
 import { writeTextFile, readTextFile, BaseDirectory } from "@tauri-apps/api/fs";
+import { appDir } from "@tauri-apps/api/path";
 
 import { mapState, mapActions, mapGetters } from "vuex";
 
@@ -332,11 +333,9 @@ export default {
             targetfile + "." + this.formatTitle,
             onlyaudio
           );
-          console.log("5555");
         } else {
           this.needToDownloadAudioFile = true;
           this.needToMerge = true;
-          console.log("123");
 
           await this.downloadToComputer(
             this.videoAdaptiveDownloadUrl.filter(
@@ -379,7 +378,7 @@ export default {
       await listen("inDownload", async (event) => {
         changeBarValue = setInterval(async () => {
           await invoke("get_bar_size_now").then((size) => {
-            console.log(size);
+            // console.log(size);
 
             that.$store.commit(
               "SET_BAR_VALUE",
@@ -420,11 +419,12 @@ export default {
 
       try {
         // 如果檔案存在
-        var log = await readTextFile("log.json", {
+        var log = await readTextFile("history.json", {
           dir: BaseDirectory.App,
         });
 
         try {
+          console.log("123");
           let data = JSON.parse(log);
 
           "MP3" == this.formatTitle
@@ -438,13 +438,16 @@ export default {
             影片背景: `//img.youtube.com/vi/${this.videoId}/default.jpg`,
           });
 
-          await writeTextFile(
-            { path: "log.json", contents: JSON.stringify(data) },
-            { dir: BaseDirectory.App }
-          ).catch((err) => console.log(err));
+          await invoke("write_file", {
+            path: `${await appDir()}/history.json`,
+            contents: JSON.stringify(data),
+          }).catch((err) => console.log(err));
           this.$store.dispatch("Set_History_List");
-        } catch {}
-      } catch {
+        } catch (err) {
+          console.log(err);
+        }
+      } catch (err) {
+        console.log(err);
         // 如果是第一次下載 或 檔案已遺失
         let mp3Count = 0,
           mp4Count = 0;
@@ -465,10 +468,10 @@ export default {
           ],
         };
 
-        await writeTextFile(
-          { path: "log.json", contents: JSON.stringify(jsonData) },
-          { dir: BaseDirectory.App }
-        ).catch((err) => console.log(err));
+        await invoke("write_file", {
+          path: `${await appDir()}/history.json`,
+          contents: JSON.stringify(jsonData),
+        }).catch((err) => console.log(err));
         this.$store.dispatch("Set_History_List");
       }
     },
