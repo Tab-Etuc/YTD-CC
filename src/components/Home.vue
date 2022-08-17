@@ -102,7 +102,7 @@ import History from "./History.vue";
 import YtDlModal from "./modal/YtDlModal.vue";
 import DownloadCountChart from "./DownloadCountChart.vue";
 
-import bannerImg from "../assets/TDwZG1y.jpg";
+import bannerImg from "../assets/home_banner.webp";
 
 export default {
   name: "Home",
