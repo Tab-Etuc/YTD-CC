@@ -51,7 +51,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             download_youtube,
             merge,
-            get_bar_size_now
+            get_bar_size_now,
+            write_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -71,7 +72,7 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
         .parse::<u64>()
         .unwrap();
 
-    window.emit("inDownload", total_size ).unwrap();
+
 
     let request = ureq::get(url.as_str());
 
@@ -84,7 +85,7 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
 
         return Ok(());
     }
-
+    window.emit("inDownload", total_size ).unwrap();
     let resp = request.call().unwrap();
     let mut source = DownloadProgress {
         progress_bar: &pb,
@@ -134,3 +135,15 @@ async fn merge(videofile: String, audiofile: String, filename: String) {
 fn get_bar_size_now() -> String {
     unsafe { PROGRESS_SIZE_NOW.to_string().into() }
 }
+
+#[tauri::command]
+fn write_file(path: PathBuf, contents: String) -> Result<(), String> {
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+
+    let result = std::fs::write(path, contents);
+    if result.is_ok() {
+        return Ok(result.unwrap());
+    }
+    return Err(result.unwrap_err().to_string());
+}
+
