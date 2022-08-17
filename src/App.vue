@@ -121,11 +121,17 @@ export default {
     Sidebar,
   },
 
-  async mounted() {
+  async created() {
     let permissionGranted = await isPermissionGranted();
     if (!permissionGranted) {
       const permission = await requestPermission();
       permissionGranted = permission === "granted";
+
+      this.$notify({
+        group: "foo-css",
+        title: "11111",
+        type: "error",
+      });
     }
   },
 
