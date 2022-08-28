@@ -1,34 +1,35 @@
-import { createApp } from "vue";
-import { createRouter, createWebHistory } from "vue-router";
-import store from "./store";
-import Notifications from "@kyvg/vue3-notification";
+import { createApp } from 'vue';
+import { createRouter, createWebHistory } from 'vue-router';
+import store from './store';
+import Notifications from '@kyvg/vue3-notification';
 
-import App from "./App.vue";
+import App from './App.vue';
 
-import "./assets/tailwind.css";
+import './assets/tailwind.css';
 
-import Home from "./components/Home.vue";
-import About from "./components/views/About.vue";
-const temp = { template: "" };
+import Home from './components/views/Home.vue';
+import About from './components/views/About.vue';
+import Settings from './components/views/Settings.vue';
+const temp = { template: '' };
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      path: "/",
+      path: '/',
       component: Home,
     },
     {
-      path: "/history",
+      path: '/history',
       component: temp,
     },
     {
-      path: "/about",
+      path: '/about',
       component: About,
     },
     {
-      path: "/settings",
-      component: temp,
+      path: '/settings',
+      component: Settings,
     },
   ],
 });
@@ -37,4 +38,4 @@ const app = createApp(App).use(store);
 
 app.use(Notifications).use(router);
 
-app.mount("#app");
+app.mount('#app');
