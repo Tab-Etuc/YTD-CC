@@ -43,9 +43,34 @@
             loading="lazy"
             class="my-auto ml-2 h-[80%] w-[30%] rounded-md"
           />
-          <span class="mx-auto mt-2 h-5 w-3/5 truncate text-sm text-white">{{
-            i.影片名稱
-          }}</span>
+
+          <div class="text-md ml-3 h-full w-full text-white">
+            <p class="w-[60%] truncate">{{ i.影片名稱 }}</p>
+            <div class="mt-3 flex h-full w-[70%] flex-wrap space-x-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 448 512"
+                class="h-6 w-6 fill-blue-300"
+              >
+                <!--! Font Awesome Pro 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+                <path
+                  d="M272 0C289.7 0 304 14.33 304 32C304 49.67 289.7 64 272 64H256V98.45C293.5 104.2 327.7 120 355.7 143L377.4 121.4C389.9 108.9 410.1 108.9 422.6 121.4C435.1 133.9 435.1 154.1 422.6 166.6L398.5 190.8C419.7 223.3 432 262.2 432 304C432 418.9 338.9 512 224 512C109.1 512 16 418.9 16 304C16 200 92.32 113.8 192 98.45V64H176C158.3 64 144 49.67 144 32C144 14.33 158.3 0 176 0L272 0zM248 192C248 178.7 237.3 168 224 168C210.7 168 200 178.7 200 192V320C200 333.3 210.7 344 224 344C237.3 344 248 333.3 248 320V192z"
+                />
+              </svg>
+              <span class="h-5 truncate">{{ i.影片時長 }}</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 384 512"
+                class="h-6 w-6 fill-blue-300"
+              >
+                <!--! Font Awesome Pro 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+                <path
+                  d="M0 64C0 28.65 28.65 0 64 0H224V128C224 145.7 238.3 160 256 160H384V448C384 483.3 355.3 512 320 512H64C28.65 512 0 483.3 0 448V64zM256 128V0L384 128H256z"
+                />
+              </svg>
+              <span class="h-5 truncate">{{ i.檔案格式 }}</span>
+            </div>
+          </div>
         </li>
       </ui>
 
@@ -62,7 +87,7 @@
 
 <script>
 export default {
-  name: "History",
+  name: 'History',
   data() {
     return {};
   },
@@ -74,7 +99,7 @@ export default {
   },
 
   async created() {
-    await this.$store.dispatch("Set_History_List");
+    await this.$store.dispatch('Set_History_List');
   },
 
   methods: {},
