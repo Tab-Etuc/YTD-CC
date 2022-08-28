@@ -14,8 +14,7 @@ use std::{
 };
 use url::Url;
 
-use tauri::{Manager, Window};
-// use window_vibrancy::{self, NSVisualEffectMaterial};
+use tauri::Window;
 
 struct DownloadProgress<'a, R> {
     inner: R,
@@ -36,18 +35,6 @@ static mut PROGRESS_SIZE_NOW: usize = 0;
 
 fn main() {
     tauri::Builder::default()
-        .setup(|app| {
-            let window = app.get_window("main").unwrap();
-            window.set_decorations(false)?;
-
-            // #[cfg(target_os = "macos")]
-            // window_vibrancy::apply_vibrancy(&window, NSVisualEffectMaterial::AppearanceBased).expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
-            
-            // #[cfg(target_os = "windows")]
-            // window_vibrancy::apply_blur(&window, Some((18, 18, 18, 125))).expect("Unsupported platform! 'apply_blur' is only supported on Windows");
-            Ok(())
-        }
-        )
         .invoke_handler(tauri::generate_handler![
             download_youtube,
             merge,
@@ -72,19 +59,14 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
         .parse::<u64>()
         .unwrap();
 
-
-
     let request = ureq::get(url.as_str());
 
     let pb = ProgressBar::new(total_size);
     pb.set_style(ProgressStyle::default_bar().template("{spinner:.green} [{elapsed_precise}] [{bar:40.green/blue}] {bytes}/{total_bytes} ({eta})").progress_chars("#>-"));
     let file = Path::new(&filename);
 
-    if file.exists() {
+    if file.exists() { return Ok(()) };
 
-
-        return Ok(());
-    }
     window.emit("inDownload", total_size ).unwrap();
     let resp = request.call().unwrap();
     let mut source = DownloadProgress {
@@ -112,9 +94,7 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
         fs::remove_file(&filename).unwrap();
     }
 
-    unsafe {
-            PROGRESS_SIZE_NOW = 0;
-    }
+    unsafe { PROGRESS_SIZE_NOW = 0 };
     Ok(())
 }
 
