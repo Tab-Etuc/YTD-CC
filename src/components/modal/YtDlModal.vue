@@ -18,8 +18,7 @@
           >
             <div class="flex h-full w-full">
               <img
-                :src="`//img.youtube.com/vi/${videoId}/default.jpg`"
-                error
+                :src="`//i3.ytimg.com/vi/${videoId}/maxresdefault.jpg`"
                 alt="YtVideoThumbnail"
                 class="h-[72px] w-32 rounded-md"
               />
@@ -435,7 +434,7 @@ export default {
             影片名稱: targetfile,
             檔案格式: this.formatTitle,
             影片時長: this.videoDuration,
-            影片背景: `//img.youtube.com/vi/${this.videoId}/default.jpg`,
+            影片背景: `//i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`,
           });
 
           await invoke("write_file", {
@@ -463,7 +462,7 @@ export default {
               影片名稱: targetfile,
               檔案格式: this.formatTitle,
               影片時長: this.videoDuration,
-              影片背景: `//img.youtube.com/vi/${this.videoId}/default.jpg`,
+              影片背景: `//i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`,
             },
           ],
         };
