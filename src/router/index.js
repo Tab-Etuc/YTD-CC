@@ -1,19 +1,30 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-// 以上是官方的元件
+import { createRouter, createWebHistory } from 'vue-router';
 
-import Home from '../components/Mainpanel.vue';
 // 自訂的分頁元件
-
-Vue.use(VueRouter);
-// 啟用
+import Home from '../components/views/Home.vue';
+import About from '../components/views/About.vue';
+import Settings from '../components/views/Settings.vue';
+const temp = { template: '' };
 
 // 本文件需要匯出給Entry:main.js使用
-export default new VueRouter({
-    // 開始定義路徑，後面接物件陣列
-    routes: [{
-        name: '首頁', // 元件接下來會呈現的名稱
-        path: '/', // 對應的虛擬路徑
-        component: Home // 對應的元件，本文件上面自訂的分頁元件名稱
-    }, ],
+export default createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/',
+      component: Home,
+    },
+    {
+      path: '/history',
+      component: temp,
+    },
+    {
+      path: '/about',
+      component: About,
+    },
+    {
+      path: '/settings',
+      component: Settings,
+    },
+  ],
 });
