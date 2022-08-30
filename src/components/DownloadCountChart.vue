@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { Doughnut } from "vue-chartjs";
+import { Doughnut } from 'vue-chartjs';
 import {
   Chart as ChartJS,
   Title,
@@ -21,24 +21,24 @@ import {
   Legend,
   ArcElement,
   CategoryScale,
-} from "chart.js";
+} from 'chart.js';
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
 export default {
-  name: "BarChart",
+  name: 'BarChart',
   components: { Doughnut },
   props: {
     chartId: {
       type: String,
-      default: "bar-chart",
+      default: 'bar-chart',
     },
     datasetIdKey: {
       type: String,
-      default: "label",
+      default: 'label',
     },
     cssClasses: {
-      default: "",
+      default: '',
       type: String,
     },
     styles: {
@@ -53,13 +53,13 @@ export default {
   data() {
     return {
       chartData: {
-        labels: ["MP3", "MP4"],
+        labels: ['MP3', 'MP4'],
         datasets: [
           {
             data: [10, 70],
-            label: "Download count chart",
-            backgroundColor: ["rgb(54, 162, 235)", "rgb(255, 205, 86)"],
-            color: "#666",
+            label: 'Download count chart',
+            backgroundColor: ['rgb(54, 162, 235)', 'rgb(255, 205, 86)'],
+            color: '#666',
           },
         ],
       },
