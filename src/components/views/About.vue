@@ -77,7 +77,7 @@
               alt=""
               class="my-auto mx-5 h-12"
             />
-            <img src="../../assets/vue_logo.svg" alt="" class="mx-5 h-24" />
+            <img src="../../assets/vue_logo.svg" alt="" class="mx-5 h-14" />
           </div>
           <img
             src="../../assets/tailwindcss-logotype-white.svg"
