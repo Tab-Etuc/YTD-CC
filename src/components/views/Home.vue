@@ -18,7 +18,7 @@
           :videoDownloadUrl="videoDownloadUrl"
           :videoDuration="videoDuration"
           :videoQualitys="videoQualitys"
-          @closeModal="showYtDlModal = false"
+          @close-modal="showYtDlModal = false"
         >
         </YtDlModal>
       </Teleport>
@@ -95,17 +95,17 @@
 </template>
 
 <script>
-import { Body, fetch } from "@tauri-apps/api/http";
+import { Body, fetch } from '@tauri-apps/api/http';
 
 // Components
-import History from "../History.vue";
-import YtDlModal from "../modal/YtDlModal.vue";
-import DownloadCountChart from "../DownloadCountChart.vue";
+import History from '../History.vue';
+import YtDlModal from '../modal/YtDlModal.vue';
+import DownloadCountChart from '../DownloadCountChart.vue';
 
-import bannerImg from "../../assets/home_banner.webp";
+import bannerImg from '../../assets/home_banner.webp';
 
 export default {
-  name: "Home",
+  name: 'Home',
   components: {
     History,
     YtDlModal,
@@ -114,13 +114,13 @@ export default {
 
   data() {
     return {
-      ytUrl: "",
-      videoId: "",
-      videoTitle: "",
-      videoAuthor: "",
+      ytUrl: '',
+      videoId: '',
+      videoTitle: '',
+      videoAuthor: '',
       videoDownloadUrl: [],
       videoAdaptiveDownloadUrl: [],
-      videoDuration: "",
+      videoDuration: '',
       videoQualitys: [],
       bannerImg: bannerImg,
       showYtDlModal: false,
@@ -130,9 +130,9 @@ export default {
   methods: {
     async makeRequest(url, options = {}) {
       const response = await fetch(url, {
-        body: options.body ?? Body.text(""),
+        body: options.body ?? Body.text(''),
         query: options.query ?? {},
-        method: options.method ?? "get",
+        method: options.method ?? 'get',
         headers: options.headers ?? {},
         responseType:
           { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 2,
@@ -146,21 +146,21 @@ export default {
 
     async confirm() {
       // 檢查連結
-      if (this.ytUrl == "")
+      if (this.ytUrl == '')
         return this.$notify({
-          group: "foo-css",
-          title: "請輸入連結！",
-          type: "error",
+          group: 'foo-css',
+          title: '請輸入連結！',
+          type: 'error',
         });
       if (/(www\.youtube\.com|be)(?=\/watch\?v=)/.test(this.ytUrl)) {
-        this.videoId = this.ytUrl.split("v=")[1].slice(0, 11);
+        this.videoId = this.ytUrl.split('v=')[1].slice(0, 11);
       } else if (/www\.youtu\.be\//.test(this.ytUrl)) {
-        this.videoId = this.ytUrl.split(".be/")[1].slice(0, 11);
+        this.videoId = this.ytUrl.split('.be/')[1].slice(0, 11);
       } else {
         return this.$notify({
-          group: "foo-css",
-          title: "連結無效！",
-          type: "error",
+          group: 'foo-css',
+          title: '連結無效！',
+          type: 'error',
         });
       }
 
@@ -168,10 +168,10 @@ export default {
         .then(() => {
           if (!this.videoTitle || !this.videoAdaptiveDownloadUrl)
             return this.$notify({
-              group: "foo-css",
-              title: "無法獲取影片資訊，連結無效？",
+              group: 'foo-css',
+              title: '無法獲取影片資訊，連結無效？',
               text: `${this.videoTitle}`,
-              type: "error",
+              type: 'error',
             });
           this.showYtDlModal = true;
         })
@@ -180,19 +180,19 @@ export default {
 
     async find_video_info(id) {
       await this.makeRequest(
-        "https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+        'https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
         {
           body: Body.json({
             videoId: id,
             context: {
               client: {
-                clientName: "ANDROID",
-                clientVersion: "16.02",
+                clientName: 'ANDROID',
+                clientVersion: '16.02',
               },
             },
           }),
-          method: "POST",
-          responseType: "JSON",
+          method: 'POST',
+          responseType: 'JSON',
         }
       )
         .then((data) => {
@@ -200,7 +200,7 @@ export default {
             var minutes = Math.floor(millis / 60000);
             var seconds = ((millis % 60000) / 1000).toFixed(0);
             return (
-              minutes + "分鐘 " + (seconds < 10 ? "0" : "") + seconds + "秒"
+              minutes + '分鐘 ' + (seconds < 10 ? '0' : '') + seconds + '秒'
             );
           }
 
@@ -212,48 +212,48 @@ export default {
             this.videoDuration,
             this.videoQualitys,
           ] = [
-            data["videoDetails"]["title"], // String - 影片標題
+            data['videoDetails']['title'], // String - 影片標題
 
-            data["streamingData"]["formats"].map((a) => {
+            data['streamingData']['formats'].map((a) => {
               var rObj = {};
-              rObj["影片畫質"] = a["qualityLabel"];
-              rObj["url"] = a["url"];
+              rObj['影片畫質'] = a['qualityLabel'];
+              rObj['url'] = a['url'];
               return rObj;
             }), // Array - 一般影片下載連結
 
-            data["streamingData"]["adaptiveFormats"]
+            data['streamingData']['adaptiveFormats']
               .filter((a) => {
-                if (a["audioQuality"]) return false;
+                if (a['audioQuality']) return false;
                 if (
-                  a["qualityLabel"].includes("144p") ||
-                  a["qualityLabel"].includes("360p") ||
-                  a["qualityLabel"].includes("720p")
+                  a['qualityLabel'].includes('144p') ||
+                  a['qualityLabel'].includes('360p') ||
+                  a['qualityLabel'].includes('720p')
                 )
                   return false;
                 return true;
               })
               .map((a) => {
                 let rObj = {};
-                rObj[a["qualityLabel"]] = a["url"];
+                rObj[a['qualityLabel']] = a['url'];
                 return rObj;
               }), //  Array - (僅視訊畫面)影片下載連結
 
-            data["videoDetails"]["author"], // String - 影片上傳者
+            data['videoDetails']['author'], // String - 影片上傳者
 
             millisToMinutesAndSeconds(
-              data["streamingData"]["formats"][0]["approxDurationMs"]
+              data['streamingData']['formats'][0]['approxDurationMs']
             ), // String - 影片時數
 
             [
               ...new Set( // 移除重複值
-                data["streamingData"]["adaptiveFormats"]
-                  .filter((a) => !a["audioQuality"]) // 將僅有音訊的檔案排除
+                data['streamingData']['adaptiveFormats']
+                  .filter((a) => !a['audioQuality']) // 將僅有音訊的檔案排除
                   .map((a) => {
-                    return a["qualityLabel"]; // 獲取可下載之影片畫質
+                    return a['qualityLabel']; // 獲取可下載之影片畫質
                   })
               ),
             ].map(
-              (a) => ("720p60" == a && (a = "720p"), a) // 當值為 "720p60" 時替換成 "720p"
+              (a) => ('720p60' == a && (a = '720p'), a) // 當值為 "720p60" 時替換成 "720p"
             ), // Array - 影片畫質
           ];
         })
