@@ -16,7 +16,7 @@
 
 <script>
 export default {
-  name: "AppUpdaterModal",
+  name: 'AppUpdaterModal',
   props: {
     showModal: Boolean,
   },
@@ -28,9 +28,9 @@ export default {
   computed: {},
 
   mounted() {
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        this.$emit("closeModal");
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.$emit('close-modal');
       }
     });
   },
@@ -61,7 +61,7 @@ export default {
     rgba(233, 233, 233, 0.8) 100%
   );
   animation: shimmer 2s ease-out infinite;
-  content: "";
+  content: '';
 }
 
 @keyframes shimmer {
