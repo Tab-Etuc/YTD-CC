@@ -132,7 +132,7 @@
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
             class="z-1 absolute right-[16vw] h-8 w-8 fill-red-500"
-            @click="$emit('closeModal')"
+            @click="$emit('close-modal')"
           >
             <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
             <path
@@ -245,36 +245,69 @@
 </template>
 
 <script>
-import { invoke } from "@tauri-apps/api";
-import { sendNotification } from "@tauri-apps/api/notification";
-import { listen } from "@tauri-apps/api/event";
-import { writeTextFile, readTextFile, BaseDirectory } from "@tauri-apps/api/fs";
-import { appDir } from "@tauri-apps/api/path";
+import { invoke } from '@tauri-apps/api';
+import { sendNotification } from '@tauri-apps/api/notification';
+import { listen } from '@tauri-apps/api/event';
+import { writeTextFile, readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { appDir } from '@tauri-apps/api/path';
 
-import { mapState, mapActions, mapGetters } from "vuex";
+import { mapState, mapActions, mapGetters } from 'vuex';
 
-var temAudio = "YTD.CC - Temporary Audio.mp4";
-var temVideo = "YTD.CC - Temporary Video.mp4";
-var targetfile = "";
+var temAudio = 'YTD.CC - Temporary Audio.mp4';
+var temVideo = 'YTD.CC - Temporary Video.mp4';
+var targetfile = '';
 
 export default {
-  name: "YtDlModal",
+  name: 'YtDlModal',
+
   props: {
-    showModal: Boolean,
-    videoId: String,
-    videoTitle: String,
-    videoAuthor: String,
-    videoAdaptiveDownloadUrl: Array,
-    videoDownloadUrl: Array,
-    videoDuration: String,
-    videoQualitys: Array,
+    showModal: {
+      type: Boolean,
+      default: true,
+      required: true,
+    },
+    videoId: {
+      type: String,
+      default: null,
+      required: true,
+    },
+    videoTitle: {
+      type: String,
+      default: '不明',
+      required: true,
+    },
+    videoAuthor: {
+      type: String,
+      default: '不明',
+      required: true,
+    },
+    videoAdaptiveDownloadUrl: {
+      type: Array,
+      default: [],
+      required: true,
+    },
+    videoDownloadUrl: {
+      type: Array,
+      default: [],
+      required: true,
+    },
+    videoDuration: {
+      type: String,
+      default: '不明',
+      required: true,
+    },
+    videoQualitys: {
+      type: Array,
+      default: [],
+      required: true,
+    },
   },
 
   data() {
     return {
-      barValue: "0%",
-      formatTitle: "檔案格式",
-      qualityTitle: "影片畫質",
+      barValue: '0%',
+      formatTitle: '檔案格式',
+      qualityTitle: '影片畫質',
       formatActive: false,
       qualityActive: false,
       needToDownloadAudioFile: false,
@@ -283,53 +316,53 @@ export default {
   },
 
   computed: {
-    ...mapState(["isDownloading", "downloadProgressBarValue"]),
+    ...mapState(['isDownloading', 'downloadProgressBarValue']),
   },
 
   mounted() {
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        this.$emit("closeModal");
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.$emit('close-modal');
       }
     });
   },
 
   methods: {
     async check() {
-      if (this.formatTitle == "檔案格式")
+      if (this.formatTitle == '檔案格式')
         return this.$notify({
-          group: "foo-css",
-          title: "請選擇檔案格式！",
-          type: "error",
+          group: 'foo-css',
+          title: '請選擇檔案格式！',
+          type: 'error',
         });
 
-      if (this.qualityTitle == "影片畫質" && this.formatTitle != "MP3")
+      if (this.qualityTitle == '影片畫質' && this.formatTitle != 'MP3')
         return this.$notify({
-          group: "foo-css",
-          title: "請選擇影片畫質！",
-          type: "error",
+          group: 'foo-css',
+          title: '請選擇影片畫質！',
+          type: 'error',
         });
 
-      this.$store.commit("UPDATE_STATUS", true);
+      this.$store.commit('UPDATE_STATUS', true);
 
-      targetfile = this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, ""); // Windows 檔案命名規則
+      targetfile = this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, ''); // Windows 檔案命名規則
 
       let onlyaudio = false;
       // 下載視訊
-      if (this.formatTitle == "MP4") {
+      if (this.formatTitle == 'MP4') {
         console.log(this.videoDownloadUrl);
         console.log(this.videoQualitys);
         console.log(this.qualityTitle);
         console.log(this.videoAdaptiveDownloadUrl);
 
         let urlTocheck = this.videoDownloadUrl.filter(
-          (a) => a["影片畫質"] == this.qualityTitle
+          (a) => a['影片畫質'] == this.qualityTitle
         )[0];
 
         if (urlTocheck) {
           this.downloadToComputer(
-            urlTocheck["url"],
-            targetfile + "." + this.formatTitle,
+            urlTocheck['url'],
+            targetfile + '.' + this.formatTitle,
             onlyaudio
           );
         } else {
@@ -348,10 +381,10 @@ export default {
         // 下載音訊
       } else {
         onlyaudio = true;
-        const tepUrl = this.videoDownloadUrl.pop()["url"];
+        const tepUrl = this.videoDownloadUrl.pop()['url'];
         this.downloadToComputer(
           tepUrl,
-          targetfile + "." + this.formatTitle,
+          targetfile + '.' + this.formatTitle,
           onlyaudio
         );
       }
@@ -362,50 +395,50 @@ export default {
       var changeBarValue;
 
       function doneMsg() {
-        that.$emit("closeModal");
+        that.$emit('close-modal');
         that.$notify({
-          group: "foo-css",
-          title: "下載成功！",
+          group: 'foo-css',
+          title: '下載成功！',
           text: `${that.videoTitle}`,
-          type: "success",
+          type: 'success',
         });
 
-        sendNotification({ title: targetfile, body: "下載成功！" });
-        that.$store.commit("UPDATE_STATUS", false);
+        sendNotification({ title: targetfile, body: '下載成功！' });
+        that.$store.commit('UPDATE_STATUS', false);
       }
 
-      await listen("inDownload", async (event) => {
+      await listen('inDownload', async (event) => {
         changeBarValue = setInterval(async () => {
-          await invoke("get_bar_size_now").then((size) => {
+          await invoke('get_bar_size_now').then((size) => {
             // console.log(size);
 
             that.$store.commit(
-              "SET_BAR_VALUE",
-              parseInt(Math.round((size / event.payload) * 100)) + "%"
+              'SET_BAR_VALUE',
+              parseInt(Math.round((size / event.payload) * 100)) + '%'
             );
           });
         }, 100);
       });
 
       console.log(url);
-      await invoke("download_youtube", {
+      await invoke('download_youtube', {
         url,
         filename,
         onlyaudio,
       }).then(() => {
         clearInterval(changeBarValue);
-        console.log("已停止迴圈");
-        that.$store.commit("SET_BAR_VALUE", "0%");
+        console.log('已停止迴圈');
+        that.$store.commit('SET_BAR_VALUE', '0%');
         if (that.needToDownloadAudioFile) {
-          let tepUrl = that.videoDownloadUrl.pop()["url"];
+          let tepUrl = that.videoDownloadUrl.pop()['url'];
           that.downloadToComputer(tepUrl, temAudio, false);
 
           that.needToDownloadAudioFile = false;
         } else if (that.needToMerge) {
-          invoke("merge", {
+          invoke('merge', {
             videofile: temVideo,
             audiofile: temAudio,
-            filename: targetfile + "." + this.formatTitle,
+            filename: targetfile + '.' + this.formatTitle,
           }).then(() => {
             doneMsg();
           });
@@ -418,30 +451,30 @@ export default {
 
       try {
         // 如果檔案存在
-        var log = await readTextFile("history.json", {
+        var log = await readTextFile('history.json', {
           dir: BaseDirectory.App,
         });
 
         try {
-          console.log("123");
+          console.log('123');
           let data = JSON.parse(log);
 
-          "MP3" == this.formatTitle
-            ? data["下載次數統計"]["MP3"]++
-            : data["下載次數統計"]["MP4"]++;
+          'MP3' == this.formatTitle
+            ? data['下載次數統計']['MP3']++
+            : data['下載次數統計']['MP4']++;
 
-          data["歷程記錄"].push({
+          data['歷程記錄'].push({
             影片名稱: targetfile,
             檔案格式: this.formatTitle,
             影片時長: this.videoDuration,
             影片背景: `//i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`,
           });
 
-          await invoke("write_file", {
+          await invoke('write_file', {
             path: `${await appDir()}/history.json`,
             contents: JSON.stringify(data),
           }).catch((err) => console.log(err));
-          this.$store.dispatch("Set_History_List");
+          this.$store.dispatch('Set_History_List');
         } catch (err) {
           console.log(err);
         }
@@ -450,7 +483,7 @@ export default {
         // 如果是第一次下載 或 檔案已遺失
         let mp3Count = 0,
           mp4Count = 0;
-        "MP3" == this.formatTitle ? mp3Count++ : mp4Count++;
+        'MP3' == this.formatTitle ? mp3Count++ : mp4Count++;
 
         const jsonData = {
           下載次數統計: {
@@ -467,11 +500,11 @@ export default {
           ],
         };
 
-        await invoke("write_file", {
+        await invoke('write_file', {
           path: `${await appDir()}/history.json`,
           contents: JSON.stringify(jsonData),
         }).catch((err) => console.log(err));
-        this.$store.dispatch("Set_History_List");
+        this.$store.dispatch('Set_History_List');
       }
     },
   },
@@ -500,7 +533,7 @@ export default {
     rgba(233, 233, 233, 0.8) 100%
   );
   animation: shimmer 2s ease-out infinite;
-  content: "";
+  content: '';
 }
 
 @keyframes shimmer {
