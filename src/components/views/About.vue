@@ -69,7 +69,7 @@
           <p
             class="cursor-defaultmt-2 ml-4 mb-10 select-none text-base font-extrabold leading-tight tracking-wide text-red-100"
           >
-            YTD.CC 版本: {{ appVersion }}
+            YTD.CC 版本: {{ appVersion || '不明' }}
           </p>
           <div class="flex w-full">
             <img
@@ -152,21 +152,21 @@
 </template>
 
 <script>
-import { open } from "@tauri-apps/api/shell";
-import { getVersion } from "@tauri-apps/api/app";
+import { open } from '@tauri-apps/api/shell';
+import { getVersion } from '@tauri-apps/api/app';
 import {
   checkUpdate,
   installUpdate,
   onUpdaterEvent,
-} from "@tauri-apps/api/updater";
+} from '@tauri-apps/api/updater';
 
 export default {
-  name: "About",
+  name: 'About',
   components: {},
 
   data() {
     return {
-      appVersion: "",
+      appVersion: '',
     };
   },
 
@@ -180,10 +180,10 @@ export default {
     },
 
     async checkAppUpdate() {
-      console.log("123");
-      const update = await checkUpdate().then(() => console.log("1233"));
+      console.log('123');
+      const update = await checkUpdate().then(() => console.log('1233'));
       const unlisten = await onUpdaterEvent(({ error, status }) => {
-        console.log("Updater event", error, status);
+        console.log('Updater event', error, status);
       });
       console.log(update);
       if (update.shouldUpdate) {
