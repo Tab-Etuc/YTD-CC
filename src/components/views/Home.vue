@@ -38,7 +38,6 @@
               placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=..."
               @keyup.enter="confirm"
             />
-
             <button
               class="mx-2 mt-3 w-16 rounded-lg bg-blue-500 p-0.5 text-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50"
               @click="confirm"
