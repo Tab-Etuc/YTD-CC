@@ -44,8 +44,6 @@
   /* Track */
   .scrollbar::-webkit-scrollbar-track {
     background: transparent;
-    margin-top: 10px;
-    margin-bottom: 50px;
   }
 
   /* Handle */
