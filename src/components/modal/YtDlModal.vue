@@ -19,6 +19,7 @@
             <div class="flex h-full w-full">
               <img
                 :src="`//i3.ytimg.com/vi/${videoId}/maxresdefault.jpg`"
+                @error="console.log('error')"
                 alt="YtVideoThumbnail"
                 class="h-[72px] w-32 rounded-md"
               />
@@ -213,7 +214,7 @@
                 "
               >
                 <ul
-                  class="scrollbar-thumb-rounded-full scrollbar-track-rounded-full absolute top-9 hidden h-[11rem] w-full overflow-auto rounded-b-md bg-white scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-900 hover:scrollbar-thumb-gray-900 data-active:block"
+                  class="absolute top-9 hidden h-[11rem] w-full overflow-auto rounded-b-md bg-white scrollbar data-active:block"
                   :data-active="qualityActive"
                 >
                   <li
@@ -248,10 +249,10 @@
 import { invoke } from '@tauri-apps/api';
 import { sendNotification } from '@tauri-apps/api/notification';
 import { listen } from '@tauri-apps/api/event';
-import { writeTextFile, readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
 import { appDir } from '@tauri-apps/api/path';
 
-import { mapState, mapActions, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 var temAudio = 'YTD.CC - Temporary Audio.mp4';
 var temVideo = 'YTD.CC - Temporary Video.mp4';
@@ -510,36 +511,3 @@ export default {
   },
 };
 </script>
-
-<style>
-/* 不知道怎麼改成 TailwindCSS 以後再說ㄅ  */
-
-.shim-green {
-  position: relative;
-  overflow: hidden;
-  background-color: rgba(65, 100, 255, 0.7);
-}
-.shim-green::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    rgba(233, 233, 233, 1) 0,
-    rgba(233, 233, 233, 0.9) 50%,
-    rgba(233, 233, 233, 0.8) 100%
-  );
-  animation: shimmer 2s ease-out infinite;
-  content: '';
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(0%);
-    opacity: 0;
-  }
-}
-</style>
