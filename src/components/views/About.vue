@@ -55,9 +55,7 @@
       </button>
     </div>
 
-    <div
-      class="scrollbar-thumb-rounded-full scrollbar-track-rounded-full mx-5 h-[90%] w-[calc(100%-22vw)] overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-gray-400 hover:scrollbar-thumb-gray-600"
-    >
+    <div class="mx-5 h-[90%] w-[calc(100%-22vw)] overflow-x-hidden scrollbar">
       <div class="">
         <div class="mb-10">
           <p
