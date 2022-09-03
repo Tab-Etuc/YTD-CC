@@ -29,9 +29,7 @@
       </div>
     </header>
 
-    <div
-      class="scrollbar-thumb-rounded-full scrollbar-track-rounded-full h-full w-full overflow-auto rounded-tr-lg scrollbar-thin scrollbar-track-slate-800 scrollbar-thumb-gray-100 hover:scrollbar-thumb-gray-200"
-    >
+    <div class="h-full w-full overflow-auto rounded-tr-lg scrollbar">
       <ui
         v-for="i in historyList"
         :key="i"
