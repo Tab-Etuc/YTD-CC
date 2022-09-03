@@ -38,36 +38,3 @@ export default {
   methods: {},
 };
 </script>
-
-<style>
-/* 不知道怎麼改成 TailwindCSS 以後再說ㄅ  */
-
-.shim-green {
-  position: relative;
-  overflow: hidden;
-  background-color: rgba(65, 100, 255, 0.7);
-}
-.shim-green::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    rgba(233, 233, 233, 1) 0,
-    rgba(233, 233, 233, 0.9) 50%,
-    rgba(233, 233, 233, 0.8) 100%
-  );
-  animation: shimmer 2s ease-out infinite;
-  content: '';
-}
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(0%);
-    opacity: 0;
-  }
-}
-</style>
