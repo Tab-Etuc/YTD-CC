@@ -6,13 +6,81 @@
       設定
     </p>
     <div
-      class="m-auto mt-6 flex h-20 w-[70%] rounded-xl bg-slate-700 p-4 shadow-2xl ring-1 ring-inset ring-white/10"
-    ></div>
+      class="m-auto mt-6 flex h-20 w-[70%] justify-between rounded-xl bg-slate-700 p-4 shadow-2xl ring-1 ring-inset ring-white/10"
+    >
+      <p class="flex items-center text-lg font-extrabold text-white">
+        視窗控制器 位置
+      </p>
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          id="window-controls-position-switch-toggle"
+          class="hidden"
+          v-model="windowControlsPositionIsActive"
+          @click="WindowControlPositionSettings"
+          checked
+        />
+        <label
+          for="window-controls-position-switch-toggle"
+          id="slider"
+          class="slider relative mr-4 h-6 w-12 cursor-pointer rounded-full bg-indigo-600"
+        ></label>
+        <label class="font-extrabold text-white">{{
+          windowControlsPositionIsActive ? '左' : '右'
+        }}</label>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { invoke } from '@tauri-apps/api';
+import { appDir } from '@tauri-apps/api/path';
+
 export default {
   name: 'Settings',
+
+  data() {
+    return {
+      windowControlsPositionIsActive: true,
+    };
+  },
+
+  methods: {
+    async WindowControlPositionSettings() {
+      try {
+        var log = await readTextFile('settings.json', {
+          dir: BaseDirectory.App,
+        });
+      } catch (err) {
+        // 當 settings.json 不存在時
+        if (err.includes('(os error 2)')) {
+          console.log('123');
+          const jsonData = {
+            WINDOW_CONTROLS_ON_THE_RIGHT: this.windowControlsPositionIsActive,
+          };
+          await invoke('write_file', {
+            path: `${await appDir()}/settings.json`,
+            contents: JSON.stringify(jsonData),
+          }).catch((err) => console.log(err));
+        } else {
+          console.log(err);
+        }
+      }
+      if (log) {
+        const jsonData = JSON.parse(log);
+        jsonData.WINDOW_CONTROLS_ON_THE_RIGHT =
+          !jsonData.WINDOW_CONTROLS_ON_THE_RIGHT;
+        await invoke('write_file', {
+          path: `${await appDir()}/settings.json`,
+          contents: JSON.stringify(jsonData),
+        }).catch((err) => console.log(err));
+      }
+      await this.$store.dispatch('Set_Settings_List').catch((err) => {
+        console.log('123');
+      });
+    },
+  },
 };
 </script>
