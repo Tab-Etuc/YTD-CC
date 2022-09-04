@@ -214,7 +214,7 @@
                 "
               >
                 <ul
-                  class="absolute top-9 hidden h-[11rem] w-full overflow-auto rounded-b-md bg-white scrollbar data-active:block"
+                  class="scrollbar absolute top-9 hidden h-[11rem] w-full overflow-auto rounded-b-md bg-white data-active:block"
                   :data-active="qualityActive"
                 >
                   <li
@@ -363,7 +363,7 @@ export default {
         if (urlTocheck) {
           this.downloadToComputer(
             urlTocheck['url'],
-            targetfile + '.' + this.formatTitle,
+            targetfile + '.' + this.formatTitle.toLowerCase(),
             onlyaudio
           );
         } else {
@@ -385,7 +385,7 @@ export default {
         const tepUrl = this.videoDownloadUrl.pop()['url'];
         this.downloadToComputer(
           tepUrl,
-          targetfile + '.' + this.formatTitle,
+          targetfile + '.' + this.formatTitle.toLowerCase(),
           onlyaudio
         );
       }
@@ -439,7 +439,7 @@ export default {
           invoke('merge', {
             videofile: temVideo,
             audiofile: temAudio,
-            filename: targetfile + '.' + this.formatTitle,
+            filename: targetfile + '.' + this.formatTitle.toLowerCase(),
           }).then(() => {
             doneMsg();
           });
@@ -457,7 +457,6 @@ export default {
         });
 
         try {
-          console.log('123');
           let data = JSON.parse(log);
 
           'MP3' == this.formatTitle
