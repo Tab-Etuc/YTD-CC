@@ -6,7 +6,8 @@
 
     <!-- window controls wrapper -->
     <div
-      class="absolute top-0 left-0 mb-3 flex h-8 w-28 rounded-xl bg-slate-700"
+      class="absolute top-0 right-0 mb-3 flex h-8 w-28 rounded-xl bg-slate-700 data-active:left-0"
+      :data-active="!windowControlOnTheRight"
     >
       <!-- Window minimize -->
       <svg
@@ -107,32 +108,40 @@
 
 <script>
 // Components
-import Sidebar from "./components/Sidebar.vue";
+import Sidebar from './components/Sidebar.vue';
 
-import { appWindow } from "@tauri-apps/api/window";
+import { mapState } from 'vuex';
+import { appWindow } from '@tauri-apps/api/window';
 import {
   isPermissionGranted,
   requestPermission,
-} from "@tauri-apps/api/notification";
+} from '@tauri-apps/api/notification';
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
     Sidebar,
+  },
+
+  computed: {
+    ...mapState(['windowControlOnTheRight']),
   },
 
   async created() {
     let permissionGranted = await isPermissionGranted();
     if (!permissionGranted) {
       const permission = await requestPermission();
-      permissionGranted = permission === "granted";
+      permissionGranted = permission === 'granted';
 
       this.$notify({
-        group: "foo-css",
-        title: "11111",
-        type: "error",
+        group: 'foo-css',
+        title: '11111',
+        type: 'error',
       });
     }
+    await this.$store.dispatch('Set_History_List').catch((err) => {
+      console.log('123');
+    });
   },
 
   methods: {
