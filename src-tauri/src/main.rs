@@ -82,17 +82,7 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
 
     let _ = copy(&mut source, &mut dest).unwrap();
 
-    if onlyaudio{    
-        let inpath = Path::new(&filename);
-        let mut outpathbuf = PathBuf::from(&filename);
 
-        outpathbuf.set_extension("mp3");
-        let outpath = &outpathbuf.as_path();
-
-        ffmpeg::to_audio(inpath, outpath);
-
-        fs::remove_file(&filename).unwrap();
-    }
 
     unsafe { PROGRESS_SIZE_NOW = 0 };
     Ok(())
