@@ -4,6 +4,32 @@
 
 @tailwind utilities;
 
+@layer components {
+  .slider {
+    transition: 0.4s;
+  }
+
+  .slider::before {
+    position: absolute;
+    content: '';
+    height: 20px;
+    width: 20px;
+    left: 22px;
+    top: 2px;
+    transition: 0.4s;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+  }
+
+  input:checked + #slider {
+    @apply bg-green-500;
+  }
+
+  input:checked + #slider:before {
+    transform: translateX(-16px);
+  }
+}
 @layer utilities {
   /* 進度條樣式 */
   .shim-green {
