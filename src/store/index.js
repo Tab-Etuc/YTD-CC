@@ -6,7 +6,8 @@ export default createStore({
     isDownloading: false,
     historyList: [],
     downloadProgressBarValue: '0%',
-    windowControlOnTheRight: false,
+    windowControlOnTheLeft: false,
+    downloadOutputPath: '',
   },
   getters: {},
   mutations: {
@@ -19,8 +20,11 @@ export default createStore({
     SET_BAR_VALUE(state, payload) {
       state.downloadProgressBarValue = payload;
     },
-    SET_WINDOW_CONTROLS_ON_THE_RIGHT(state, payload) {
-      state.windowControlOnTheRight = payload;
+    SET_WINDOW_CONTROLS_ON_THE_LEFT(state, payload) {
+      state.windowControlOnTheLeft = payload;
+    },
+    SET_DOWNLOAD_OUTPUT_PATH(state, payload) {
+      state.downloadOutputPath = payload;
     },
   },
   actions: {
@@ -40,9 +44,10 @@ export default createStore({
       }).then((log) => {
         const data = JSON.parse(log);
         commit(
-          'SET_WINDOW_CONTROLS_ON_THE_RIGHT',
-          data['WINDOW_CONTROLS_ON_THE_RIGHT']
+          'SET_WINDOW_CONTROLS_ON_THE_LEFT',
+          data['WINDOW_CONTROLS_ON_THE_LEFT']
         );
+        commit('SET_DOWNLOAD_OUTPUT_PATH', data['DOWNLOAD_OUTPUT_PATH']);
       });
       // .catch((err) => console.warn(err));
     },
