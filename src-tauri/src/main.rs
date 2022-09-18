@@ -48,7 +48,7 @@ fn main() {
 
 
 #[tauri::command]
-async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: bool) -> Result<(), String> {
+async fn download_youtube(window: Window, url: &str, filename: &str, outputpath: &str, onlyaudio: bool) -> Result<String, String> {
     let url = Url::parse(url).unwrap();
     
     let resp = ureq::get(url.as_str()).call().unwrap();
@@ -63,9 +63,10 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
 
     let pb = ProgressBar::new(total_size);
     pb.set_style(ProgressStyle::default_bar().template("{spinner:.green} [{elapsed_precise}] [{bar:40.green/blue}] {bytes}/{total_bytes} ({eta})").progress_chars("#>-"));
-    let file = Path::new(&filename);
+    let file_output_path = &(outputpath.to_owned() + filename);
+    let file = Path::new(file_output_path);
 
-    if file.exists() { return Ok(()) };
+    if file.exists() { return Ok("File exists.".to_string()) };
 
     window.emit("inDownload", total_size ).unwrap();
     let resp = request.call().unwrap();
@@ -82,10 +83,12 @@ async fn download_youtube(window: Window, url: &str, filename: &str, onlyaudio: 
 
     let _ = copy(&mut source, &mut dest).unwrap();
 
-
+    if onlyaudio {
+        ffmpeg::to_audio(&file_output_path);
+    }
 
     unsafe { PROGRESS_SIZE_NOW = 0 };
-    Ok(())
+    Ok("Downloaded success.".to_string())
 }
 
 #[tauri::command]
