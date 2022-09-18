@@ -22,19 +22,17 @@ use std::process::Command;
 // It makes very little sense to link ffmpeg statically with yaydl.
 // Just use the system's one (or inform the user if there isn't one).
 
-pub fn to_audio(inputfile: &Path, outputfile: &Path) {
+pub fn to_audio(path: &str) {
     Command::new("ffmpeg")
         .arg("-i")
-        .arg(inputfile)
+        .arg(path)
         .arg("-vn") // Skip the video streams.
         .arg("-loglevel")
         .arg("quiet") // Shut the fuck up. // O_O
-        .arg(outputfile)
+        .arg(path)
         .output()
         .expect("Could not find ffmpeg - no processing is done.");
-
 }
-
 
 pub fn merge(videofile: &Path, audiofile: &Path, filename: &Path) {
     Command::new("ffmpeg")
