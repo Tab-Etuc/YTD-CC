@@ -39,11 +39,11 @@
           <img
             :src="i.影片背景"
             loading="lazy"
-            class="my-auto ml-2 h-[80%] w-[30%] rounded-md"
+            class="my-auto ml-2 h-[80%] w-[40%] rounded-md"
           />
 
-          <div class="text-md ml-3 h-full w-full text-white">
-            <p class="w-[60%] truncate">{{ i.影片名稱 }}</p>
+          <div class="text-md ml-3 h-full w-[60%] text-white">
+            <p class="w-full truncate">{{ i.影片名稱 }}</p>
             <div class="mt-3 flex h-8 w-full flex-wrap space-x-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
