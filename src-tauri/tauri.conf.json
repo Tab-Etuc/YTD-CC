@@ -79,9 +79,12 @@
       },
       "fs": {
         "all": true,
-        "scope": ["$CONFIG", "$CONFIG/*"]
+        "scope": ["$APP", "$APP/*"]
       },
       "notification": {
+        "all": true
+      },
+      "dialog": {
         "all": true
       }
     },
