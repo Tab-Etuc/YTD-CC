@@ -7,7 +7,7 @@
     <!-- window controls wrapper -->
     <div
       class="absolute top-0 right-0 mb-3 flex h-8 w-28 rounded-xl bg-slate-700 data-active:left-0"
-      :data-active="!windowControlOnTheRight"
+      :data-active="windowControlOnTheLeft"
     >
       <!-- Window minimize -->
       <svg
@@ -124,7 +124,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['windowControlOnTheRight']),
+    ...mapState(['windowControlOnTheLeft']),
   },
 
   async created() {
@@ -132,15 +132,12 @@ export default {
     if (!permissionGranted) {
       const permission = await requestPermission();
       permissionGranted = permission === 'granted';
-
-      this.$notify({
-        group: 'foo-css',
-        title: '11111',
-        type: 'error',
-      });
     }
     await this.$store.dispatch('Set_History_List').catch((err) => {
-      console.log('123');
+      console.log(err);
+    });
+    await this.$store.dispatch('Set_Settings_List').catch((err) => {
+      console.log(err);
     });
   },
 
