@@ -18,8 +18,7 @@
           >
             <div class="flex h-full w-full">
               <img
-                :src="`//i3.ytimg.com/vi/${videoId}/maxresdefault.jpg`"
-                @error="console.log('error')"
+                :src="videoThumbnail"
                 alt="YtVideoThumbnail"
                 class="h-[72px] w-32 rounded-md"
               />
@@ -294,6 +293,11 @@ export default {
       default: '不明',
       required: true,
     },
+    videoThumbnail: {
+      type: String,
+      default: null,
+      required: true,
+    },
     videoAdaptiveDownloadUrl: {
       type: Array,
       default: [],
@@ -464,9 +468,13 @@ export default {
               that.needToDownloadAudioFile = false;
             } else if (that.needToMerge) {
               invoke('merge', {
-                videofile: temVideo,
-                audiofile: temAudio,
-                filename: targetfile + '.' + this.formatTitle.toLowerCase(),
+                videofile: this.downloadOutputPath + temVideo,
+                audiofile: this.downloadOutputPath + temAudio,
+                filename:
+                  this.downloadOutputPath +
+                  targetfile +
+                  '.' +
+                  this.formatTitle.toLowerCase(),
               }).then(() => {
                 doneMsg();
               });
@@ -493,6 +501,7 @@ export default {
 
       try {
         // 如果檔案存在
+        if (that.needToMerge) return;
         var log = await readTextFile('history.json', {
           dir: BaseDirectory.App,
         });
@@ -508,7 +517,7 @@ export default {
             影片名稱: targetfile,
             檔案格式: this.formatTitle,
             影片時長: this.videoDuration,
-            影片背景: `//i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`,
+            影片背景: this.videoThumbnail,
           });
 
           await invoke('write_file', {
@@ -536,7 +545,7 @@ export default {
               影片名稱: targetfile,
               檔案格式: this.formatTitle,
               影片時長: this.videoDuration,
-              影片背景: `//i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`,
+              影片背景: this.videoThumbnail,
             },
           ],
         };
