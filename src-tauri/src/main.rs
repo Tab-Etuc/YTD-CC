@@ -95,9 +95,7 @@ async fn download_youtube(window: Window, url: &str, filename: &str, outputpath:
 async fn merge(videofile: String, audiofile: String, filename: String) {
     let videopath = Path::new(&videofile);
     let audiopath = Path::new(&audiofile);
-    let mut outpathbuf = PathBuf::from(&filename);
-    outpathbuf.set_extension("mp4");
-    let outpath = &outpathbuf.as_path();
+    let outpath = Path::new(&filename);
 
     ffmpeg::merge(videopath, audiopath, outpath);
     fs::remove_file(&videopath).unwrap();
