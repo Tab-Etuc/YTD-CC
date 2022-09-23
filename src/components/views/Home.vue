@@ -14,6 +14,7 @@
           :videoId="videoId"
           :videoTitle="videoTitle"
           :videoAuthor="videoAuthor"
+          :videoThumbnail="videoThumbnail"
           :videoAdaptiveDownloadUrl="videoAdaptiveDownloadUrl"
           :videoDownloadUrl="videoDownloadUrl"
           :videoDuration="videoDuration"
@@ -23,14 +24,18 @@
         </YtDlModal>
       </Teleport>
 
-      <div class="flex h-full flex-wrap place-content-center justify-center">
+      <div
+        class="relative flex h-full flex-wrap place-content-center justify-center"
+      >
         <div class="p-6">
           <p
             class="cursor-defaultmt-2 mb-5 select-none text-center text-xl font-medium leading-tight tracking-wide text-white"
           >
             貼上 Youtube 影片連結
           </p>
+
           <hr class="mt-3 h-2 w-full content-center" />
+
           <div>
             <input
               v-model="ytUrl"
@@ -40,12 +45,29 @@
             />
             <button
               class="mx-2 mt-3 w-16 rounded-lg bg-blue-500 p-0.5 text-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50"
-              @click="confirm"
+              @click="confirm(false)"
             >
               確認
             </button>
           </div>
         </div>
+
+        <button
+          class="absolute right-0 bottom-0 h-10 w-20 items-center justify-center rounded-br-lg rounded-tl-lg bg-gradient-to-tr from-[#ed6ea0]/70 to-blue-500/70 text-center text-white hover:translate-y-1 hover:translate-x-2 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50"
+          @click="confirm(true)"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 384 512"
+            class="mr-2 inline-block h-6 w-6 fill-white"
+          >
+            <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+            <path
+              d="M192 0c-41.8 0-77.4 26.7-90.5 64H48C21.5 64 0 85.5 0 112V464c0 26.5 21.5 48 48 48H336c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H282.5C269.4 26.7 233.8 0 192 0zm0 128c-17.7 0-32-14.3-32-32s14.3-32 32-32s32 14.3 32 32s-14.3 32-32 32zm-80 64H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z"
+            />
+          </svg>
+          <span class="inline-block font-extrabold text-red-50">貼上</span>
+        </button>
       </div>
     </div>
 
@@ -95,6 +117,7 @@
 
 <script>
 import { Body, fetch } from '@tauri-apps/api/http';
+import { readText } from '@tauri-apps/api/clipboard';
 
 // Components
 import History from '../History.vue';
@@ -117,6 +140,7 @@ export default {
       videoId: '',
       videoTitle: '',
       videoAuthor: '',
+      videoThumbnail: '',
       videoDownloadUrl: [],
       videoAdaptiveDownloadUrl: [],
       videoDuration: '',
@@ -128,22 +152,33 @@ export default {
 
   methods: {
     async makeRequest(url, options = {}) {
-      const response = await fetch(url, {
-        body: options.body ?? Body.text(''),
-        query: options.query ?? {},
-        method: options.method ?? 'get',
-        headers: options.headers ?? {},
-        responseType:
-          { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 2,
-      });
-      if (!response.ok) throw new Error(`${response.status} ${response.data}`);
-      if (typeof response.data == JSON) {
-        response.data = JSON.parse(response.data);
+      try {
+        const response = await fetch(url, {
+          body: options.body ?? Body.text(''),
+          query: options.query ?? {},
+          method: options.method ?? 'get',
+          headers: options.headers ?? {},
+          responseType:
+            { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 2,
+        });
+        if (!response.ok)
+          throw new Error(`${response.status} ${response.data}`);
+        if (typeof response.data == JSON) {
+          response.data = JSON.parse(response.data);
+        }
+        return response.data;
+      } catch {
+        (err) => {
+          console.log(err);
+          throw 'No response';
+        };
       }
-      return response.data;
     },
 
-    async confirm() {
+    async confirm(usingClipboard) {
+      if (usingClipboard) {
+        this.ytUrl = await readText();
+      }
       // 檢查連結
       if (this.ytUrl == '')
         return this.$notify({
@@ -151,17 +186,28 @@ export default {
           title: '請輸入連結！',
           type: 'error',
         });
+
       if (/(www\.youtube\.com|be)(?=\/watch\?v=)/.test(this.ytUrl)) {
         this.videoId = this.ytUrl.split('v=')[1].slice(0, 11);
       } else if (/www\.youtu\.be\//.test(this.ytUrl)) {
         this.videoId = this.ytUrl.split('.be/')[1].slice(0, 11);
       } else {
+        this.ytUrl = '';
         return this.$notify({
           group: 'foo-css',
           title: '連結無效！',
           type: 'error',
         });
       }
+      if (this.videoId.length != 11) {
+        this.ytUrl = '';
+        return this.$notify({
+          group: 'foo-css',
+          title: '連結無效！',
+          type: 'error',
+        });
+      }
+      this.ytUrl = '';
 
       await this.find_video_info(this.videoId)
         .then(() => {
@@ -257,6 +303,17 @@ export default {
           ];
         })
         .catch();
+
+      await this.makeRequest(
+        `https://i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`
+      )
+        .then(() => {
+          this.videoThumbnail = `https://i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`;
+        })
+        .catch(() => {
+          this.videoThumbnail = `https://i3.ytimg.com/vi/${this.videoId}/hqdefault.jpg`;
+        });
+
       return;
     },
   },
