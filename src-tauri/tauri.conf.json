@@ -81,6 +81,9 @@
         "all": true,
         "scope": ["$APP", "$APP/*"]
       },
+      "clipboard": {
+        "readText": true
+      },
       "notification": {
         "all": true
       },
