@@ -34,7 +34,7 @@ pub fn to_audio(path: &str) {
         .expect("Could not find ffmpeg - no processing is done.");
 }
 
-pub fn merge(videofile: &Path, audiofile: &Path, filename: &Path) {
+pub fn merge(videofile: &Path, audiofile: &Path, outpath: &Path) {
     Command::new("ffmpeg")
         .arg("-i")
         .arg(videofile)
@@ -46,7 +46,7 @@ pub fn merge(videofile: &Path, audiofile: &Path, filename: &Path) {
         .arg("aac")
         .arg("-loglevel")
         .arg("quiet")
-        .arg(filename)
+        .arg(outpath)
         .output()
         .expect("Could not find ffmpeg - no processing is done.");
 }
