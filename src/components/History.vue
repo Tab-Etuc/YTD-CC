@@ -2,7 +2,9 @@
   <div
     class="absolute right-5 mt-6 hidden h-[90%] w-[27%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10 xl:block"
   >
-    <header class="flex h-[4rem] w-full rounded-b-xl bg-blue-500">
+    <header
+      class="flex h-[4rem] w-full rounded-b-xl bg-gradient-to-tr from-[#ed6ea0]/70 to-blue-500"
+    >
       <div class="my-auto flex h-[2rem] w-[full]">
         <!-- History icon -->
         <svg
