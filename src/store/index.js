@@ -4,7 +4,7 @@ import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
 export default createStore({
   state: {
     isDownloading: false,
-    historyList: [],
+    historyList: null,
     downloadProgressBarValue: '0%',
     windowControlOnTheLeft: false,
     downloadOutputPath: '',
@@ -33,10 +33,10 @@ export default createStore({
         dir: BaseDirectory.App,
       })
         .then((log) => {
-          const data = JSON.parse(log)['歷程記錄']?.reverse() ?? {};
+          const data = JSON.parse(log)['歷程記錄']?.reverse() ?? '';
           commit('SET_HISTORY_LIST', data);
         })
-        .catch((err) => console.warn(err));
+        .catch((err) => commit('SET_HISTORY_LIST', ''));
     },
     async Set_Settings_List({ commit }) {
       await readTextFile('settings.json', {
