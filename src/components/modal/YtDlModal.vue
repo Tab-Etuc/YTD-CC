@@ -349,15 +349,6 @@ export default {
   },
 
   methods: {
-    /*
-     * BUG
-     * 當 needToMerge 為 true 時，會導致下載進度條無法正常顯示
-     *    後端之 fn download_youtube() 會呼叫三次(預期兩次)
-     *    第一、二次呼叫同時發生，第三次於前兩次結束後發生，其接受到之 total_size 如下:
-     *      18477402 (需要下載之音訊檔大小)
-     *      98453575 (需要下載之影片檔大小)
-     *      18477402 (略)
-     */
     async check() {
       if (this.formatTitle == '檔案格式')
         return this.$notify({
@@ -380,17 +371,11 @@ export default {
       let onlyaudio = false;
       // 下載視訊
       if (this.formatTitle == 'MP4') {
-        // console.log(this.videoDownloadUrl);
-        // console.log(this.videoQualitys);
-        // console.log(this.qualityTitle);
-        // console.log(this.videoAdaptiveDownloadUrl);
-
         let urlTocheck = this.videoDownloadUrl.filter(
           (a) => a['影片畫質'] == this.qualityTitle
         )[0];
 
         if (urlTocheck) {
-          console.log(this.downloadOutputPath);
           this.downloadToComputer(
             urlTocheck['url'],
             targetfile + '.' + this.formatTitle.toLowerCase(),
@@ -441,11 +426,9 @@ export default {
         that.$store.commit('UPDATE_STATUS', false);
       }
 
-      await listen('inDownload', async (event) => {
+      const unlisten = await listen('inDownload', async (event) => {
         changeBarValue = setInterval(async () => {
           await invoke('get_bar_size_now').then((size) => {
-            // console.log(size);
-
             that.$store.commit(
               'SET_BAR_VALUE',
               parseInt(Math.round((size / event.payload) * 100)) + '%'
@@ -463,7 +446,7 @@ export default {
         .then((res) => {
           if (res == 'Downloaded success.') {
             clearInterval(changeBarValue);
-            console.log('已停止迴圈');
+            unlisten();
             that.$store.commit('SET_BAR_VALUE', '0%');
             if (that.needToDownloadAudioFile) {
               let tepUrl = that.videoDownloadUrl.pop()['url'];
