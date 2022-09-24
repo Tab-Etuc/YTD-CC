@@ -78,7 +78,7 @@ export default {
       });
       if (log == '') throw 'dataIsEmpty';
     } catch (err) {
-      // 當 settings.json 不存在時
+      // 當 settings.json 不存在 或 檔案內容為空時
       if (err.includes('(os error 2)') || err.includes('dataIsEmpty')) {
         const jsonData = {
           WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
