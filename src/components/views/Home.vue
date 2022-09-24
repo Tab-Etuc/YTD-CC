@@ -120,7 +120,7 @@ import { Body, fetch } from '@tauri-apps/api/http';
 import { readText } from '@tauri-apps/api/clipboard';
 
 // Components
-import History from '../History.vue';
+import History from '../SideHistory.vue';
 import YtDlModal from '../modal/YtDlModal.vue';
 import DownloadCountChart from '../DownloadCountChart.vue';
 
@@ -152,27 +152,19 @@ export default {
 
   methods: {
     async makeRequest(url, options = {}) {
-      try {
-        const response = await fetch(url, {
-          body: options.body ?? Body.text(''),
-          query: options.query ?? {},
-          method: options.method ?? 'get',
-          headers: options.headers ?? {},
-          responseType:
-            { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 2,
-        });
-        if (!response.ok)
-          throw new Error(`${response.status} ${response.data}`);
-        if (typeof response.data == JSON) {
-          response.data = JSON.parse(response.data);
-        }
-        return response.data;
-      } catch {
-        (err) => {
-          console.log(err);
-          throw 'No response';
-        };
+      const response = await fetch(url, {
+        body: options.body ?? Body.text(''),
+        query: options.query ?? {},
+        method: options.method ?? 'get',
+        headers: options.headers ?? {},
+        responseType:
+          { JSON: 1, Text: 2, Binary: 3 }[options.responseType] ?? 2,
+      });
+      if (!response.ok) return `${response.status} ${response.data}`;
+      if (typeof response.data == JSON) {
+        response.data = JSON.parse(response.data);
       }
+      return response.data;
     },
 
     async confirm(usingClipboard) {
@@ -307,7 +299,8 @@ export default {
       await this.makeRequest(
         `https://i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`
       )
-        .then(() => {
+        .then((res) => {
+          if (res.includes('404')) throw Error;
           this.videoThumbnail = `https://i3.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`;
         })
         .catch(() => {
