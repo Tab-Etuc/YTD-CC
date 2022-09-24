@@ -67,7 +67,7 @@ async fn download_youtube(window: Window, url: &str, filename: &str, outputpath:
     let file = Path::new(file_output_path);
 
     if file.exists() { return Ok("File exists.".to_string()) };
-
+    println!("{}", &total_size);
     window.emit("inDownload", total_size ).unwrap();
     let resp = request.call().unwrap();
     let mut source = DownloadProgress {

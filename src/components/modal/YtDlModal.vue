@@ -349,6 +349,15 @@ export default {
   },
 
   methods: {
+    /*
+     * BUG
+     * 當 needToMerge 為 true 時，會導致下載進度條無法正常顯示
+     *    後端之 fn download_youtube() 會呼叫三次(預期兩次)
+     *    第一、二次呼叫同時發生，第三次於前兩次結束後發生，其接受到之 total_size 如下:
+     *      18477402 (需要下載之音訊檔大小)
+     *      98453575 (需要下載之影片檔大小)
+     *      18477402 (略)
+     */
     async check() {
       if (this.formatTitle == '檔案格式')
         return this.$notify({
@@ -500,12 +509,12 @@ export default {
         });
 
       try {
-        // 如果檔案存在
         if (that.needToMerge) return;
         var log = await readTextFile('history.json', {
           dir: BaseDirectory.App,
         });
-
+        if (log == '') throw 'dataIsEmpty';
+        // 如果檔案存在
         try {
           let data = JSON.parse(log);
 
@@ -530,31 +539,33 @@ export default {
         }
       } catch (err) {
         console.log(err);
-        // 如果是第一次下載 或 檔案已遺失
-        let mp3Count = 0,
-          mp4Count = 0;
-        'MP3' == this.formatTitle ? mp3Count++ : mp4Count++;
+        // 如果是第一次下載 或 檔案已遺失 或 檔案內容為空
+        if (err.includes('dataIsEmpty') || err.includes('(os error 2)')) {
+          let mp3Count = 0,
+            mp4Count = 0;
+          'MP3' == this.formatTitle ? mp3Count++ : mp4Count++;
 
-        const jsonData = {
-          下載次數統計: {
-            MP3: mp3Count,
-            MP4: mp4Count,
-          },
-          歷程記錄: [
-            {
-              影片名稱: targetfile,
-              檔案格式: this.formatTitle,
-              影片時長: this.videoDuration,
-              影片背景: this.videoThumbnail,
+          const jsonData = {
+            下載次數統計: {
+              MP3: mp3Count,
+              MP4: mp4Count,
             },
-          ],
-        };
+            歷程記錄: [
+              {
+                影片名稱: targetfile,
+                檔案格式: this.formatTitle,
+                影片時長: this.videoDuration,
+                影片背景: this.videoThumbnail,
+              },
+            ],
+          };
 
-        await invoke('write_file', {
-          path: `${await appDir()}/history.json`,
-          contents: JSON.stringify(jsonData),
-        }).catch((err) => console.log(err));
-        this.$store.dispatch('Set_History_List');
+          await invoke('write_file', {
+            path: `${await appDir()}/history.json`,
+            contents: JSON.stringify(jsonData),
+          }).catch((err) => console.log(err));
+          this.$store.dispatch('Set_History_List');
+        }
       }
     },
   },
