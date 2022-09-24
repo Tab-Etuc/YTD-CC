@@ -510,6 +510,7 @@ export default {
             檔案格式: this.formatTitle,
             影片時長: this.videoDuration,
             影片背景: this.videoThumbnail,
+            下載時間: Date.now(),
           });
 
           await invoke('write_file', {
@@ -539,6 +540,7 @@ export default {
                 檔案格式: this.formatTitle,
                 影片時長: this.videoDuration,
                 影片背景: this.videoThumbnail,
+                下載時間: Date.now(),
               },
             ],
           };

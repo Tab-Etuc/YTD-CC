@@ -72,6 +72,13 @@
                 </svg>
                 <span class="h-5 truncate text-sm">{{ i.檔案格式 }}</span>
               </div>
+              <p class="w-full truncate text-slate-300">
+                {{
+                  `下載時間：${timeFormat(i.下載時間)},　${new Date(
+                    i.下載時間
+                  ).toLocaleString()}`
+                }}
+              </p>
             </div>
           </li>
         </ui>
@@ -145,13 +152,23 @@ export default {
 
   methods: {
     async clearHistory() {
-      console.log(this.historyList);
       await invoke('write_file', {
         path: `${await appDir()}/history.json`,
         contents: '',
       }).catch((err) => console.log(err));
 
       this.$store.dispatch('Set_History_List');
+    },
+    timeFormat(timestamp) {
+      var mistiming = Math.round((Date.now() - timestamp) / 1000);
+      var arrr = ['年', '個月', '週', '天', '小時', '分鐘', '秒'];
+      var arrn = [31536000, 2592000, 604800, 86400, 3600, 60, 1];
+      for (var i = 0; i < arrn.length; i++) {
+        var inm = Math.floor(mistiming / arrn[i]);
+        if (inm !== 0) {
+          return inm + arrr[i] + '前';
+        }
+      }
     },
   },
 };
