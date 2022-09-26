@@ -101,7 +101,7 @@
       >
         控制項
       </p>
-      <div class="flex h-20 w-full">
+      <div class="h-20 w-full">
         <div
           class="m-auto flex w-[90%] items-center rounded-lg bg-slate-600 p-4 shadow-2xl ring-1 ring-inset ring-white/10"
         >
@@ -120,8 +120,47 @@
               />
             </svg>
           </div>
-          <p class="w-26 ml-4 text-lg font-extrabold text-white">
+          <p class="w-26 ml-4 select-none text-lg font-extrabold text-white">
             清除歷史紀錄
+          </p>
+        </div>
+
+        <div
+          class="m-auto mt-5 flex w-[90%] items-center rounded-lg bg-slate-600 p-4 shadow-2xl ring-1 ring-inset ring-white/10"
+        >
+          <div
+            class="flex h-10 w-10 rounded-full bg-white/30 hover:bg-white/20"
+            @click="historyChronological"
+          >
+            <svg
+              v-if="chronological_OldToNew"
+              xmlns="http://www.w3.org/2000/svg"
+              class="m-auto h-6 w-6 fill-white"
+              viewBox="0 0 576 512"
+            >
+              <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+              <path
+                d="M151.6 469.6C145.5 476.2 137 480 128 480s-17.5-3.8-23.6-10.4l-88-96c-11.9-13-11.1-33.3 2-45.2s33.3-11.1 45.2 2L96 365.7V64c0-17.7 14.3-32 32-32s32 14.3 32 32V365.7l32.4-35.4c11.9-13 32.2-13.9 45.2-2s13.9 32.2 2 45.2l-88 96zM320 480c-17.7 0-32-14.3-32-32s14.3-32 32-32h32c17.7 0 32 14.3 32 32s-14.3 32-32 32H320zm0-128c-17.7 0-32-14.3-32-32s14.3-32 32-32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H320zm0-128c-17.7 0-32-14.3-32-32s14.3-32 32-32H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H320zm0-128c-17.7 0-32-14.3-32-32s14.3-32 32-32H544c17.7 0 32 14.3 32 32s-14.3 32-32 32H320z"
+              />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              class="m-auto h-6 w-6 fill-white"
+              viewBox="0 0 576 512"
+            >
+              <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+              <path
+                d="M151.6 469.6C145.5 476.2 137 480 128 480s-17.5-3.8-23.6-10.4l-88-96c-11.9-13-11.1-33.3 2-45.2s33.3-11.1 45.2 2L96 365.7V64c0-17.7 14.3-32 32-32s32 14.3 32 32V365.7l32.4-35.4c11.9-13 32.2-13.9 45.2-2s13.9 32.2 2 45.2l-88 96zM320 32h32c17.7 0 32 14.3 32 32s-14.3 32-32 32H320c-17.7 0-32-14.3-32-32s14.3-32 32-32zm0 128h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H320c-17.7 0-32-14.3-32-32s14.3-32 32-32zm0 128H480c17.7 0 32 14.3 32 32s-14.3 32-32 32H320c-17.7 0-32-14.3-32-32s14.3-32 32-32zm0 128H544c17.7 0 32 14.3 32 32s-14.3 32-32 32H320c-17.7 0-32-14.3-32-32s14.3-32 32-32z"
+              />
+            </svg>
+          </div>
+          <p class="w-26 ml-4 select-none text-lg font-extrabold text-white">
+            {{
+              chronological_OldToNew
+                ? '依時間由舊至新排序'
+                : '依時間由新至舊排序'
+            }}
           </p>
         </div>
       </div>
@@ -138,7 +177,9 @@ export default {
   components: {},
 
   data() {
-    return {};
+    return {
+      chronological_OldToNew: false,
+    };
   },
   computed: {
     historyList() {
@@ -159,6 +200,7 @@ export default {
 
       this.$store.dispatch('Set_History_List');
     },
+
     timeFormat(timestamp) {
       var mistiming = Math.round((Date.now() - timestamp) / 1000);
       var arrr = ['年', '個月', '週', '天', '小時', '分鐘', '秒'];
@@ -169,6 +211,16 @@ export default {
           return inm + arrr[i] + '前';
         }
       }
+    },
+
+    historyChronological() {
+      this.chronological_OldToNew = !this.chronological_OldToNew;
+      try {
+        this.$store.commit(
+          'SET_HISTORY_LIST',
+          this.$store.state.historyList?.reverse()
+        );
+      } catch {}
     },
   },
 };
