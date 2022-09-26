@@ -73,38 +73,41 @@
 
     <!-- Banner  -->
     <div class="absolute mt-3 h-[55%] w-[55rem]">
-      <div class="absolute right-0 h-full w-[18rem]">
-        <div class="absolute right-0 bottom-0 h-[calc(100%-2rem)] w-[18rem]" />
-        <!-- <div
-          class="h-full w-full transform rounded-b-xl bg-slate-900/60 transition duration-700 hover:backdrop-blur-sm"
+      <div class="absolute left-5 bottom-4 h-10 w-full">
+        <div
+          class="flex h-10 w-10 rounded-full bg-slate-700/80 transition-all duration-700 ease-in-out hover:w-[70%] hover:flex-none hover:bg-slate-700/90"
+          @mouseover="showBannerLink = true"
+          @mouseleave="showBannerLink = false"
         >
-          <header class="flex h-[4rem] w-[18rem] rounded-xl bg-blue-500">
-            <div class="my-auto flex h-[2rem] w-[18rem]">
-              Bar chart icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                class="static my-auto ml-4 h-7 w-7 fill-white"
-                viewBox="0 0 32 32"
-                version="1.1"
-              >
-                <g id="surface1">
-                  <path
-                    d="M 30 10 L 22 10 L 22 30 L 20 30 L 20 0 L 12 0 L 12 30 L 10 30 L 10 16 L 2 16 L 2 30 L 0 30 L 0 32 L 32 32 L 32 30 L 30 30 Z M 30 10 "
-                  />
-                </g>
-              </svg>
-              <p
-                class="font-mediu static my-auto ml-3 cursor-default select-none text-xl leading-tight tracking-wide text-white"
-              >
-                統計
-              </p>
-            </div>
-          </header>
-          <DownloadCountChart
-            class="m-atuo flex h-[calc(100%-4rem)] w-full items-center"
-          /> 
-        </div> -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+            class="absolute left-3 bottom-2.5 my-auto h-5 w-5 fill-white data-active:left-4 data-active:fill-blue-400 data-active:transition-all data-active:duration-700"
+            :data-active="showBannerLink"
+          >
+            <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+            <path
+              d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"
+            />
+          </svg>
+
+          <div
+            class="m-auto opacity-0 data-active:flex data-active:translate-x-0 data-active:opacity-100 data-active:transition-all data-active:duration-[3000ms]"
+            :data-active="showBannerLink"
+          >
+            <p class="my-auto text-center font-extrabold text-white">圖源：</p>
+            <a
+              class="my-auto cursor-pointer text-center text-blue-400 underline"
+              @click="
+                openLink(
+                  'https://twitter.com/dabidabi76/status/1369344876555481092'
+                )
+              "
+            >
+              https://twitter.com/dabidabi76/status/1369344876555481092
+            </a>
+          </div>
+        </div>
       </div>
       <img
         class="h-full w-[55rem] rounded-xl object-cover"
@@ -118,6 +121,7 @@
 <script>
 import { Body, fetch } from '@tauri-apps/api/http';
 import { readText } from '@tauri-apps/api/clipboard';
+import { open } from '@tauri-apps/api/shell';
 
 // Components
 import History from '../SideHistory.vue';
@@ -147,10 +151,15 @@ export default {
       videoQualitys: [],
       bannerImg: bannerImg,
       showYtDlModal: false,
+      showBannerLink: false,
     };
   },
 
   methods: {
+    async openLink(URL) {
+      await open(URL);
+    },
+
     async makeRequest(url, options = {}) {
       const response = await fetch(url, {
         body: options.body ?? Body.text(''),
