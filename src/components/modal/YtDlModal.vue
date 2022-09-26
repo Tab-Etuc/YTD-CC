@@ -156,18 +156,22 @@
         <div
           class="relative mx-auto flex w-[60vw] rounded-b-xl bg-slate-600 p-4"
         >
-          <div
-            v-if="isDownloading"
-            class="relative m-auto h-6 w-[90%] rounded-xl bg-gray-200"
-          >
-            <div
-              :style="{ width: downloadProgressBarValue }"
-              class="shim-green absolute top-0 h-6 rounded-xl"
+          <div v-if="isDownloading" class="relative m-auto flex h-6 w-full">
+            <span v-if="onMerge" class="absolute left-0 text-white"
+              >合併中...</span
             >
-              <span class="relative my-auto ml-8 font-medium text-blue-100">{{
-                downloadProgressBarValue
-              }}</span>
+            <span v-else class="absolute left-0 text-white">下載中...</span>
+            <div
+              class="relative m-auto flex h-6 w-[75%] rounded-xl bg-gray-200"
+            >
+              <div
+                :style="{ width: downloadProgressBarValue }"
+                class="shim-green absolute top-0 h-6 rounded-xl duration-500"
+              ></div>
             </div>
+            <span class="absolute right-5 font-medium text-blue-100">{{
+              downloadProgressBarValue
+            }}</span>
           </div>
 
           <div
@@ -184,9 +188,7 @@
               <div
                 class="absolute h-full w-full cursor-pointer before:absolute before:right-3 before:top-2 before:z-50 before:h-2 before:w-2 before:-rotate-45 before:border-2 before:border-black before:border-t-white before:border-r-white before:duration-300 data-active:before:top-3 data-active:before:-rotate-[225deg]"
                 :data-active="formatActive"
-                @click="
-                  formatActive ? (formatActive = false) : (formatActive = true)
-                "
+                @click="formatActive = !formatActive"
               >
                 <ul
                   class="absolute top-9 hidden w-full rounded-b-md bg-white data-active:block"
@@ -218,11 +220,7 @@
               <div
                 class="absolute h-full w-full cursor-pointer before:absolute before:right-3 before:top-2 before:z-50 before:h-2 before:w-2 before:-rotate-45 before:border-2 before:border-black before:border-t-white before:border-r-white before:duration-300 data-active:before:top-3 data-active:before:-rotate-[225deg]"
                 :data-active="qualityActive"
-                @click="
-                  qualityActive
-                    ? (qualityActive = false)
-                    : (qualityActive = true)
-                "
+                @click="qualityActive = !qualityActive"
               >
                 <ul
                   class="scrollbar absolute top-9 hidden h-[11rem] w-full overflow-auto rounded-b-md bg-white data-active:block"
@@ -329,6 +327,7 @@ export default {
       qualityActive: false,
       needToDownloadAudioFile: false,
       needToMerge: false,
+      onMerge: false,
     };
   },
 
@@ -337,6 +336,7 @@ export default {
       'isDownloading',
       'downloadProgressBarValue',
       'downloadOutputPath',
+      'saveHistory',
     ]),
   },
 
@@ -369,6 +369,7 @@ export default {
       targetfile = this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, ''); // Windows 檔案命名規則
 
       let onlyaudio = false;
+
       // 下載視訊
       if (this.formatTitle == 'MP4') {
         let urlTocheck = this.videoDownloadUrl.filter(
@@ -413,14 +414,18 @@ export default {
       let that = this;
       var changeBarValue;
 
-      function doneMsg() {
-        that.$emit('close-modal');
+      function downloadDone() {
+        that.writeHistory();
+
+        that.onMerge = false;
         that.$notify({
           group: 'foo-css',
           title: '下載成功！',
           text: `${that.videoTitle}`,
           type: 'success',
         });
+        that.$emit('close-modal');
+        that.$store.commit('SET_BAR_VALUE', '0%');
 
         sendNotification({ title: targetfile, body: '下載成功！' });
         that.$store.commit('UPDATE_STATUS', false);
@@ -447,7 +452,7 @@ export default {
           if (res == 'Downloaded success.') {
             clearInterval(changeBarValue);
             unlisten();
-            that.$store.commit('SET_BAR_VALUE', '0%');
+
             if (that.needToDownloadAudioFile) {
               let tepUrl = that.videoDownloadUrl.pop()['url'];
               that.downloadToComputer(
@@ -459,6 +464,7 @@ export default {
 
               that.needToDownloadAudioFile = false;
             } else if (that.needToMerge) {
+              that.onMerge = true;
               invoke('merge', {
                 videofile: this.downloadOutputPath + temVideo,
                 audiofile: this.downloadOutputPath + temAudio,
@@ -468,12 +474,12 @@ export default {
                   '.' +
                   this.formatTitle.toLowerCase(),
               }).then(() => {
-                doneMsg();
+                downloadDone();
               });
 
               that.needToMerge = false;
             } else {
-              doneMsg();
+              downloadDone();
             }
           } else if (res == 'File exists.') {
             that.$emit('close-modal');
@@ -490,9 +496,11 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
 
+    async writeHistory() {
       try {
-        if (that.needToMerge) return;
+        if (this.needToMerge || !this.saveHistory) return;
         var log = await readTextFile('history.json', {
           dir: BaseDirectory.App,
         });
@@ -552,6 +560,8 @@ export default {
           this.$store.dispatch('Set_History_List');
         }
       }
+      this.formatTitle = '檔案格式';
+      this.qualityTitle = '影片畫質';
     },
   },
 };
