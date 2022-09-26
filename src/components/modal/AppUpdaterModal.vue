@@ -10,7 +10,9 @@
     <div
       v-if="showModal"
       class="fixed bottom-0 left-0 z-50 table h-[calc(100%-32px)] w-full rounded-b-xl bg-black/50 transition duration-300"
-    ></div>
+    >
+      <!-- 待補 -->
+    </div>
   </Transition>
 </template>
 
