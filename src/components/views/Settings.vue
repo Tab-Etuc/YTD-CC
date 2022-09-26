@@ -48,6 +48,32 @@
         </a>
       </div>
     </div>
+
+    <div
+      class="m-auto mt-6 flex h-20 w-[70%] justify-between rounded-xl bg-slate-700 p-4 shadow-2xl ring-1 ring-inset ring-white/10"
+    >
+      <p class="flex items-center text-lg font-extrabold text-white">
+        是否儲存影片歷史紀錄
+      </p>
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          id="save-history-switch-toggle"
+          class="hidden"
+          v-model="saveHistory"
+          @click="SaveHistorySettings"
+          checked
+        />
+        <label
+          for="save-history-switch-toggle"
+          id="slider"
+          class="slider relative mr-4 h-6 w-12 cursor-pointer rounded-full bg-red-400"
+        ></label>
+        <label class="font-extrabold text-white">{{
+          saveHistory ? '是' : '否'
+        }}</label>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -68,7 +94,11 @@ export default {
   // },
 
   computed: {
-    ...mapState(['windowControlOnTheLeft', 'downloadOutputPath']),
+    ...mapState([
+      'windowControlOnTheLeft',
+      'downloadOutputPath',
+      'saveHistory',
+    ]),
   },
 
   async created() {
@@ -83,6 +113,7 @@ export default {
         const jsonData = {
           WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
           DOWNLOAD_OUTPUT_PATH: await downloadDir(),
+          SAVE_HISTORY: true,
         };
         await invoke('write_file', {
           path: `${await appDir()}/settings.json`,
@@ -134,6 +165,7 @@ export default {
         console.log(err);
       });
     },
+
     async DownloadOutputPathSettings() {
       // Open a selection dialog for directories
       let selected = await open({
@@ -173,6 +205,43 @@ export default {
           contents: JSON.stringify(jsonData),
         }).catch((err) => console.log(err));
       }
+      await this.$store.dispatch('Set_Settings_List').catch((err) => {
+        console.log(err);
+      });
+    },
+
+    async SaveHistorySettings() {
+      try {
+        var log = await readTextFile('settings.json', {
+          dir: BaseDirectory.App,
+        });
+        if (log == '') throw 'dataIsEmpty';
+      } catch (err) {
+        // 當 settings.json 不存在時
+        if (err.includes('(os error 2)') || err.includes('dataIsEmpty')) {
+          console.log('123');
+          const jsonData = {
+            WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
+            DOWNLOAD_OUTPUT_PATH: await downloadDir(),
+            SAVE_HISTORY: true,
+          };
+          await invoke('write_file', {
+            path: `${await appDir()}/settings.json`,
+            contents: JSON.stringify(jsonData),
+          }).catch((err) => console.log(err));
+        } else {
+          console.log(err);
+        }
+      }
+      if (log) {
+        const jsonData = JSON.parse(log);
+        jsonData.SAVE_HISTORY = !jsonData.SAVE_HISTORY;
+        await invoke('write_file', {
+          path: `${await appDir()}/settings.json`,
+          contents: JSON.stringify(jsonData),
+        }).catch((err) => console.log(err));
+      }
+      console.log(log);
       await this.$store.dispatch('Set_Settings_List').catch((err) => {
         console.log(err);
       });
