@@ -8,6 +8,7 @@ export default createStore({
     downloadProgressBarValue: '0%',
     windowControlOnTheLeft: false,
     downloadOutputPath: '',
+    saveHistory: true,
   },
   getters: {},
   mutations: {
@@ -25,6 +26,9 @@ export default createStore({
     },
     SET_DOWNLOAD_OUTPUT_PATH(state, payload) {
       state.downloadOutputPath = payload;
+    },
+    SET_SAVE_HISTORY(state, payload) {
+      state.saveHistory = payload;
     },
   },
   actions: {
@@ -48,6 +52,7 @@ export default createStore({
           data['WINDOW_CONTROLS_ON_THE_LEFT']
         );
         commit('SET_DOWNLOAD_OUTPUT_PATH', data['DOWNLOAD_OUTPUT_PATH']);
+        commit('SET_SAVE_HISTORY', data['SAVE_HISTORY']);
       });
       // .catch((err) => console.warn(err));
     },
