@@ -3,7 +3,7 @@
     <div>
       <!-- Main Download Panel -->
       <div
-        class="mt-6 h-[33%] w-[55rem] rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10 xl:w-[80rem]"
+        class="mt-6 h-[33%] w-[55rem] rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10 2xl:w-[80rem]"
       >
         <Teleport to="body">
           <!-- use the modal component, pass in the prop -->
@@ -70,7 +70,7 @@
       </div>
 
       <!-- Banner  -->
-      <div class="relative mt-3 h-[55%] w-[55rem] xl:w-[80rem]">
+      <div class="relative mt-3 h-[55%] w-[55rem] 2xl:w-[80rem]">
         <div class="absolute left-5 bottom-4 h-10 w-full">
           <div
             class="flex h-10 w-10 rounded-full bg-slate-700/80 transition-all duration-700 ease-in-out hover:w-[70%] hover:flex-none hover:bg-slate-700/90"
