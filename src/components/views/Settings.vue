@@ -109,7 +109,7 @@ export default {
       if (log == '') throw 'dataIsEmpty';
     } catch (err) {
       // 當 settings.json 不存在 或 檔案內容為空時
-      if (err.includes('(os error 2)') || err.includes('dataIsEmpty')) {
+      if (err.includes('(os error 2)') || err.includes('(os error 3)') || err.includes('dataIsEmpty')) {
         const jsonData = {
           WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
           DOWNLOAD_OUTPUT_PATH: await downloadDir(),
@@ -137,7 +137,7 @@ export default {
         if (log == '') throw 'dataIsEmpty';
       } catch (err) {
         // 當 settings.json 不存在時
-        if (err.includes('(os error 2)') || err.includes('dataIsEmpty')) {
+        if (err.includes('(os error 2)') || err.includes('(os error 3)') || err.includes('dataIsEmpty')) {
           console.log('123');
           const jsonData = {
             WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
@@ -183,7 +183,7 @@ export default {
         if (log == '') throw 'dataIsEmpty';
       } catch (err) {
         // 當 settings.json 不存在時
-        if (err.includes('(os error 2)') || err.includes('dataIsEmpty')) {
+        if (err.includes('(os error 2)') || err.includes('(os error 3)') || err.includes('dataIsEmpty')) {
           const jsonData = {
             WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
             DOWNLOAD_OUTPUT_PATH: selected,
@@ -218,7 +218,7 @@ export default {
         if (log == '') throw 'dataIsEmpty';
       } catch (err) {
         // 當 settings.json 不存在時
-        if (err.includes('(os error 2)') || err.includes('dataIsEmpty')) {
+        if (err.includes('(os error 2)') || err.includes('(os error 3)') || err.includes('dataIsEmpty')) {
           console.log('123');
           const jsonData = {
             WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,

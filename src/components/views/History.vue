@@ -2,7 +2,7 @@
   <div class="flex h-screen w-[calc(100%-7rem)]">
     <!-- 不知道為甚麼不可 import SideHistory.vue 有待研究 -w- -->
     <div
-      class="mt-6 h-[90%] w-[70%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10"
+      class="mt-6 h-[90%] w-[70%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10 "
     >
       <header
         class="flex h-[4rem] w-full rounded-b-xl bg-gradient-to-tr from-[#ed6ea0]/70 to-blue-500"
