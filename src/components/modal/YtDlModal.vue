@@ -350,6 +350,7 @@ export default {
 
   methods: {
     async check() {
+      console.log(this.downloadOutputPath)
       if (this.formatTitle == '檔案格式')
         return this.$notify({
           group: 'foo-css',
