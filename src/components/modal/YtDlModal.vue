@@ -342,15 +342,13 @@ export default {
 
   mounted() {
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !this.isDownloading) {
-        this.$emit('close-modal');
-      }
+      e.key === 'Escape' && !this.isDownloading && this.$emit('close-modal');
     });
   },
 
   methods: {
     async check() {
-      console.log(this.downloadOutputPath)
+      console.log(this.downloadOutputPath);
       if (this.formatTitle == '檔案格式')
         return this.$notify({
           group: 'foo-css',
@@ -494,9 +492,7 @@ export default {
             that.$store.commit('UPDATE_STATUS', false);
           }
         })
-        .catch((err) => {
-          console.log(err);
-        });
+        .catch(console.error());
     },
 
     async writeHistory() {
@@ -525,15 +521,14 @@ export default {
           await invoke('write_file', {
             path: `${await appDir()}/history.json`,
             contents: JSON.stringify(data),
-          }).catch((err) => console.log(err));
+          }).catch(console.error());
           this.$store.dispatch('Set_History_List');
         } catch (err) {
           console.log(err);
         }
       } catch (err) {
-        console.log(err);
         // 如果是第一次下載 或 檔案已遺失 或 檔案內容為空
-        if (err.includes('dataIsEmpty') || err.includes('(os error 2)')) {
+        if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
           let mp3Count = 0,
             mp4Count = 0;
           'MP3' == this.formatTitle ? mp3Count++ : mp4Count++;
@@ -557,7 +552,7 @@ export default {
           await invoke('write_file', {
             path: `${await appDir()}/history.json`,
             contents: JSON.stringify(jsonData),
-          }).catch((err) => console.log(err));
+          }).catch(console.error());
           this.$store.dispatch('Set_History_List');
         }
       }

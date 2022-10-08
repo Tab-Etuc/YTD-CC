@@ -130,15 +130,10 @@ export default {
   async created() {
     let permissionGranted = await isPermissionGranted();
     if (!permissionGranted) {
-      const permission = await requestPermission();
-      permissionGranted = permission === 'granted';
+      permissionGranted = (await requestPermission()) === 'granted';
     }
-    await this.$store.dispatch('Set_History_List').catch((err) => {
-      console.log(err);
-    });
-    await this.$store.dispatch('Set_Settings_List').catch((err) => {
-      console.log(err);
-    });
+    await this.$store.dispatch('Set_History_List').catch(console.error());
+    await this.$store.dispatch('Set_Settings_List').catch(console.error());
   },
 
   methods: {

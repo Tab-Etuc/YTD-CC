@@ -51,7 +51,7 @@
           </div>
 
           <button
-            class="absolute right-0 bottom-0 h-10 w-20 items-center justify-center rounded-br-lg rounded-tl-lg bg-gradient-to-tr from-[#ed6ea0]/70 to-blue-500/70 text-center text-white hover:translate-y-1 hover:translate-x-2 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50"
+            class="absolute right-0 bottom-0 h-10 w-20 items-center justify-center rounded-br-lg rounded-tl-lg bg-gradient-to-tr from-[#ed6ea0]/70 to-blue-500/70 text-center text-white transition-all duration-700 hover:translate-y-1 hover:translate-x-2 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50"
             @click="confirm(true)"
           >
             <svg
@@ -93,7 +93,9 @@
               class="m-auto opacity-0 data-active:flex data-active:translate-x-0 data-active:opacity-100 data-active:transition-all data-active:duration-[3000ms]"
               :data-active="showBannerLink"
             >
-              <p class="my-auto text-center font-extrabold text-white">圖源：</p>
+              <p class="my-auto text-center font-extrabold text-white">
+                圖源：
+              </p>
               <a
                 class="my-auto cursor-pointer text-center text-blue-400 underline"
                 @click="
@@ -113,7 +115,7 @@
           alt="banner"
         />
       </div>
-    </div>    
+    </div>
     <!-- 右側歷程記錄 History -->
     <SideHistory />
   </div>

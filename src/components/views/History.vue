@@ -2,7 +2,7 @@
   <div class="flex h-screen w-[calc(100%-7rem)]">
     <!-- 不知道為甚麼不可 import SideHistory.vue 有待研究 -w- -->
     <div
-      class="mt-6 h-[90%] w-[70%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10 "
+      class="mt-6 h-[90%] w-[70%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10"
     >
       <header
         class="flex h-[4rem] w-full rounded-b-xl bg-gradient-to-tr from-[#ed6ea0]/70 to-blue-500"
@@ -196,20 +196,18 @@ export default {
       await invoke('write_file', {
         path: `${await appDir()}/history.json`,
         contents: '',
-      }).catch((err) => console.log(err));
+      }).catch(console.error());
 
       this.$store.dispatch('Set_History_List');
     },
 
     timeFormat(timestamp) {
-      var mistiming = Math.round((Date.now() - timestamp) / 1000);
-      var arrr = ['年', '個月', '週', '天', '小時', '分鐘', '秒'];
-      var arrn = [31536000, 2592000, 604800, 86400, 3600, 60, 1];
-      for (var i = 0; i < arrn.length; i++) {
+      var mistiming = Math.round((Date.now() - timestamp) / 1000),
+        arrr = ['年', '個月', '週', '天', '小時', '分鐘', '秒'],
+        arrn = [31536000, 2592000, 604800, 86400, 3600, 60, 1];
+      for (var i = 0; i < 7; i++) {
         var inm = Math.floor(mistiming / arrn[i]);
-        if (inm !== 0) {
-          return inm + arrr[i] + '前';
-        }
+        if (inm !== 0) return inm + arrr[i] + '前';
       }
     },
 

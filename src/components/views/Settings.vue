@@ -87,12 +87,6 @@ import { open } from '@tauri-apps/api/dialog';
 export default {
   name: 'Settings',
 
-  // data() {
-  //   return {
-  //     windowControlOnTheLeft: true,
-  //   };
-  // },
-
   computed: {
     ...mapState([
       'windowControlOnTheLeft',
@@ -109,7 +103,7 @@ export default {
       if (log == '') throw 'dataIsEmpty';
     } catch (err) {
       // 當 settings.json 不存在 或 檔案內容為空時
-      if (err.includes('(os error 2)') || err.includes('(os error 3)') || err.includes('dataIsEmpty')) {
+      if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
         const jsonData = {
           WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
           DOWNLOAD_OUTPUT_PATH: await downloadDir(),
@@ -118,14 +112,12 @@ export default {
         await invoke('write_file', {
           path: `${await appDir()}/settings.json`,
           contents: JSON.stringify(jsonData),
-        }).catch((err) => console.log(err));
+        }).catch(console.error());
       } else {
         console.log(err);
       }
     }
-    await this.$store.dispatch('Set_Settings_List').catch((err) => {
-      console.log(err);
-    });
+    await this.$store.dispatch('Set_Settings_List').catch(console.error());
   },
 
   methods: {
@@ -137,7 +129,7 @@ export default {
         if (log == '') throw 'dataIsEmpty';
       } catch (err) {
         // 當 settings.json 不存在時
-        if (err.includes('(os error 2)') || err.includes('(os error 3)') || err.includes('dataIsEmpty')) {
+        if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
           console.log('123');
           const jsonData = {
             WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
@@ -146,7 +138,7 @@ export default {
           await invoke('write_file', {
             path: `${await appDir()}/settings.json`,
             contents: JSON.stringify(jsonData),
-          }).catch((err) => console.log(err));
+          }).catch(console.error());
         } else {
           console.log(err);
         }
@@ -158,12 +150,10 @@ export default {
         await invoke('write_file', {
           path: `${await appDir()}/settings.json`,
           contents: JSON.stringify(jsonData),
-        }).catch((err) => console.log(err));
+        }).catch(console.error());
       }
       console.log(log);
-      await this.$store.dispatch('Set_Settings_List').catch((err) => {
-        console.log(err);
-      });
+      await this.$store.dispatch('Set_Settings_List').catch(console.error());
     },
 
     async DownloadOutputPathSettings() {
@@ -183,7 +173,7 @@ export default {
         if (log == '') throw 'dataIsEmpty';
       } catch (err) {
         // 當 settings.json 不存在時
-        if (err.includes('(os error 2)') || err.includes('(os error 3)') || err.includes('dataIsEmpty')) {
+        if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
           const jsonData = {
             WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
             DOWNLOAD_OUTPUT_PATH: selected,
@@ -191,7 +181,7 @@ export default {
           await invoke('write_file', {
             path: `${await appDir()}/settings.json`,
             contents: JSON.stringify(jsonData),
-          }).catch((err) => console.log(err));
+          }).catch(console.error());
         } else {
           console.log(err);
         }
@@ -203,11 +193,9 @@ export default {
         await invoke('write_file', {
           path: `${await appDir()}/settings.json`,
           contents: JSON.stringify(jsonData),
-        }).catch((err) => console.log(err));
+        }).catch(console.error());
       }
-      await this.$store.dispatch('Set_Settings_List').catch((err) => {
-        console.log(err);
-      });
+      await this.$store.dispatch('Set_Settings_List').catch(console.error());
     },
 
     async SaveHistorySettings() {
@@ -218,7 +206,7 @@ export default {
         if (log == '') throw 'dataIsEmpty';
       } catch (err) {
         // 當 settings.json 不存在時
-        if (err.includes('(os error 2)') || err.includes('(os error 3)') || err.includes('dataIsEmpty')) {
+        if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
           console.log('123');
           const jsonData = {
             WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
@@ -228,7 +216,7 @@ export default {
           await invoke('write_file', {
             path: `${await appDir()}/settings.json`,
             contents: JSON.stringify(jsonData),
-          }).catch((err) => console.log(err));
+          }).catch(console.error());
         } else {
           console.log(err);
         }
@@ -239,12 +227,10 @@ export default {
         await invoke('write_file', {
           path: `${await appDir()}/settings.json`,
           contents: JSON.stringify(jsonData),
-        }).catch((err) => console.log(err));
+        }).catch(console.error());
       }
       console.log(log);
-      await this.$store.dispatch('Set_Settings_List').catch((err) => {
-        console.log(err);
-      });
+      await this.$store.dispatch('Set_Settings_List').catch(console.error());
     },
   },
 };
