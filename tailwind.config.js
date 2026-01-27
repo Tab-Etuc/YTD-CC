@@ -2,7 +2,6 @@ const plugin = require('tailwindcss/plugin');
 
 module.exports = {
   content: ['./public/**/*.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
-  presets: [],
   darkMode: 'media', // or 'class'
   theme: {
     screens: {
@@ -635,7 +634,7 @@ module.exports = {
       max: 'max-content',
       fit: 'fit-content',
     }),
-    maxWidth: ({ theme, breakpoints }) => ({
+    maxWidth: ({ theme }) => ({
       none: 'none',
       0: '0rem',
       xs: '20rem',
@@ -654,7 +653,10 @@ module.exports = {
       max: 'max-content',
       fit: 'fit-content',
       prose: '65ch',
-      ...breakpoints(theme('screens')),
+      ...Object.keys(theme('screens')).reduce((acc, key) => {
+        acc[`screen-${key}`] = theme('screens')[key];
+        return acc;
+      }, {}),
     }),
     minHeight: {
       0: '0px',

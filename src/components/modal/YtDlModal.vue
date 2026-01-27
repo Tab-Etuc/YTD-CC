@@ -255,11 +255,11 @@
 </template>
 
 <script>
-import { invoke } from '@tauri-apps/api';
-import { sendNotification } from '@tauri-apps/api/notification';
+import { invoke } from '@tauri-apps/api/core';
+import { sendNotification } from '@tauri-apps/plugin-notification';
 import { listen } from '@tauri-apps/api/event';
-import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
-import { appDir } from '@tauri-apps/api/path';
+import { readTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
+import { appDataDir } from '@tauri-apps/api/path';
 
 import { mapState } from 'vuex';
 
@@ -519,7 +519,7 @@ export default {
           });
 
           await invoke('write_file', {
-            path: `${await appDir()}/history.json`,
+            path: `${await appDataDir()}/history.json`,
             contents: JSON.stringify(data),
           }).catch(console.error());
           this.$store.dispatch('Set_History_List');
@@ -550,7 +550,7 @@ export default {
           };
 
           await invoke('write_file', {
-            path: `${await appDir()}/history.json`,
+            path: `${await appDataDir()}/history.json`,
             contents: JSON.stringify(jsonData),
           }).catch(console.error());
           this.$store.dispatch('Set_History_List');

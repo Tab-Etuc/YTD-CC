@@ -66,8 +66,9 @@
         />
         <label
           for="save-history-switch-toggle"
-          id="slider"
-          class="slider relative mr-4 h-6 w-12 cursor-pointer rounded-full bg-red-400"
+          id="slider-history"
+          class="slider relative mr-4 h-6 w-12 cursor-pointer rounded-full transition-colors duration-300"
+          :class="saveHistory ? 'bg-green-400' : 'bg-red-400'"
         ></label>
         <label class="font-extrabold text-white">{{
           saveHistory ? '是' : '否'
@@ -78,82 +79,98 @@
 </template>
 
 <script>
-import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
-import { invoke } from '@tauri-apps/api';
-import { appDir, downloadDir } from '@tauri-apps/api/path';
-import { mapState } from 'vuex';
-import { open } from '@tauri-apps/api/dialog';
+import { readTextFile, writeTextFile, mkdir, exists, BaseDirectory } from '@tauri-apps/plugin-fs';
+import { appDataDir, downloadDir } from '@tauri-apps/api/path';
+import { open } from '@tauri-apps/plugin-dialog';
 
 export default {
   name: 'Settings',
 
   computed: {
-    ...mapState([
-      'windowControlOnTheLeft',
-      'downloadOutputPath',
-      'saveHistory',
-    ]),
+    windowControlOnTheLeft: {
+      get() {
+        return this.$store.state.windowControlOnTheLeft;
+      },
+      set(value) {
+        this.$store.commit('SET_WINDOW_CONTROLS_ON_THE_LEFT', value);
+      }
+    },
+    downloadOutputPath() {
+      return this.$store.state.downloadOutputPath; 
+    },
+    saveHistory: {
+      get() {
+        return this.$store.state.saveHistory;
+      },
+      set(value) {
+        this.$store.commit('SET_SAVE_HISTORY', value);
+      }
+    },
   },
 
   async created() {
     try {
-      var log = await readTextFile('settings.json', {
-        dir: BaseDirectory.App,
-      });
-      if (log == '') throw 'dataIsEmpty';
-    } catch (err) {
-      // 當 settings.json 不存在 或 檔案內容為空時
-      if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
-        const jsonData = {
+      // Check if file exists and has content
+      let log = '';
+      try {
+        log = await readTextFile('settings.json', { baseDir: BaseDirectory.AppData });
+      } catch (e) {
+        // file not found or other error
+      }
+
+      if (!log) {
+         // Create default settings
+         const jsonData = {
           WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
           DOWNLOAD_OUTPUT_PATH: await downloadDir(),
           SAVE_HISTORY: true,
         };
-        await invoke('write_file', {
-          path: `${await appDir()}/settings.json`,
-          contents: JSON.stringify(jsonData),
-        }).catch(console.error());
-      } else {
-        console.log(err);
+        await this.saveSettingsToFile(jsonData);
       }
+    } catch (err) {
+      console.error('Error in Settings created hook:', err);
     }
     await this.$store.dispatch('Set_Settings_List').catch(console.error());
   },
 
   methods: {
+    async saveSettingsToFile(jsonData) {
+      try {
+        const dirExists = await exists('', { baseDir: BaseDirectory.AppData });
+        if (!dirExists) {
+          await mkdir('', { baseDir: BaseDirectory.AppData, recursive: true });
+        }
+        await writeTextFile('settings.json', JSON.stringify(jsonData), {
+          baseDir: BaseDirectory.AppData,
+        });
+      } catch (err) {
+        console.error('Failed to write settings.json', err);
+      }
+    },
+
     async WindowControlPositionSettings() {
       try {
-        var log = await readTextFile('settings.json', {
-          dir: BaseDirectory.App,
-        });
-        if (log == '') throw 'dataIsEmpty';
-      } catch (err) {
-        // 當 settings.json 不存在時
-        if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
-          console.log('123');
-          const jsonData = {
-            WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
-            DOWNLOAD_OUTPUT_PATH: await downloadDir(),
+        let jsonData = {};
+        try {
+          const log = await readTextFile('settings.json', { baseDir: BaseDirectory.AppData });
+          if (!log) throw new Error('Empty file');
+          jsonData = JSON.parse(log);
+        } catch {
+          // Keep existing settings if possible, or start fresh
+          jsonData = {
+             DOWNLOAD_OUTPUT_PATH: await downloadDir(),
+             SAVE_HISTORY: this.saveHistory
           };
-          await invoke('write_file', {
-            path: `${await appDir()}/settings.json`,
-            contents: JSON.stringify(jsonData),
-          }).catch(console.error());
-        } else {
-          console.log(err);
         }
+
+        // Sync file with current store state (updated by v-model)
+        jsonData.WINDOW_CONTROLS_ON_THE_LEFT = this.windowControlOnTheLeft;
+        
+        await this.saveSettingsToFile(jsonData);
+        await this.$store.dispatch('Set_Settings_List');
+      } catch (err) {
+        console.error(err);
       }
-      if (log) {
-        const jsonData = JSON.parse(log);
-        jsonData.WINDOW_CONTROLS_ON_THE_LEFT =
-          !jsonData.WINDOW_CONTROLS_ON_THE_LEFT;
-        await invoke('write_file', {
-          path: `${await appDir()}/settings.json`,
-          contents: JSON.stringify(jsonData),
-        }).catch(console.error());
-      }
-      console.log(log);
-      await this.$store.dispatch('Set_Settings_List').catch(console.error());
     },
 
     async DownloadOutputPathSettings() {
@@ -161,77 +178,66 @@ export default {
       let selected = await open({
         directory: true,
         multiple: false,
-        defaultPath: await appDir(),
+        defaultPath: await appDataDir(),
       });
       if (selected == null) return;
       selected += '\\';
 
       try {
-        var log = await readTextFile('settings.json', {
-          dir: BaseDirectory.App,
-        });
-        if (log == '') throw 'dataIsEmpty';
-      } catch (err) {
-        // 當 settings.json 不存在時
-        if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
-          const jsonData = {
-            WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
-            DOWNLOAD_OUTPUT_PATH: selected,
-          };
-          await invoke('write_file', {
-            path: `${await appDir()}/settings.json`,
-            contents: JSON.stringify(jsonData),
-          }).catch(console.error());
-        } else {
-          console.log(err);
+        let jsonData = {};
+         try {
+          const log = await readTextFile('settings.json', { baseDir: BaseDirectory.AppData });
+          if (!log) throw new Error('Empty');
+          jsonData = JSON.parse(log);
+        } catch {
+             jsonData = {
+                WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
+                // DOWNLOAD_OUTPUT_PATH updated below
+                SAVE_HISTORY: this.saveHistory
+            };
         }
-      }
 
-      if (log) {
-        const jsonData = JSON.parse(log);
         jsonData.DOWNLOAD_OUTPUT_PATH = selected;
-        await invoke('write_file', {
-          path: `${await appDir()}/settings.json`,
-          contents: JSON.stringify(jsonData),
-        }).catch(console.error());
+        await this.saveSettingsToFile(jsonData);
+        await this.$store.dispatch('Set_Settings_List');
+      } catch (err) {
+        console.error(err);
       }
-      await this.$store.dispatch('Set_Settings_List').catch(console.error());
     },
 
     async SaveHistorySettings() {
       try {
-        var log = await readTextFile('settings.json', {
-          dir: BaseDirectory.App,
-        });
-        if (log == '') throw 'dataIsEmpty';
-      } catch (err) {
-        // 當 settings.json 不存在時
-        if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
-          console.log('123');
-          const jsonData = {
-            WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
-            DOWNLOAD_OUTPUT_PATH: await downloadDir(),
-            SAVE_HISTORY: true,
-          };
-          await invoke('write_file', {
-            path: `${await appDir()}/settings.json`,
-            contents: JSON.stringify(jsonData),
-          }).catch(console.error());
-        } else {
-          console.log(err);
+        let jsonData = {};
+        try {
+          const log = await readTextFile('settings.json', { baseDir: BaseDirectory.AppData });
+          if (!log) throw new Error('Empty');
+          jsonData = JSON.parse(log);
+        } catch {
+            jsonData = {
+                WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
+                DOWNLOAD_OUTPUT_PATH: await downloadDir(),
+                // SAVE_HISTORY updated below
+            };
         }
+
+        // Sync file with current store state
+        jsonData.SAVE_HISTORY = this.saveHistory;
+        
+        await this.saveSettingsToFile(jsonData);
+        await this.$store.dispatch('Set_Settings_List');
+      } catch (err) {
+        console.error(err);
       }
-      if (log) {
-        const jsonData = JSON.parse(log);
-        jsonData.SAVE_HISTORY = !jsonData.SAVE_HISTORY;
-        await invoke('write_file', {
-          path: `${await appDir()}/settings.json`,
-          contents: JSON.stringify(jsonData),
-        }).catch(console.error());
-      }
-      console.log(log);
-      await this.$store.dispatch('Set_Settings_List').catch(console.error());
     },
   },
 };
 </script>
+
+<style scoped>
+#slider-history::before {
+  left: 4px !important; 
+}
+input:checked + #slider-history::before {
+  transform: translateX(20px) !important;
+}
+</style>

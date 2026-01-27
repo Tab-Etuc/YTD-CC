@@ -32,7 +32,7 @@
     </header>
 
     <div class="scrollbar h-full w-full overflow-auto rounded-tr-lg">
-      <ui
+      <ul
         v-for="i in historyList"
         :key="i"
         class="flex h-20 w-full list-none ring-1 ring-inset ring-white/10 odd:bg-slate-800 even:bg-slate-700"
@@ -72,7 +72,7 @@
             </div>
           </div>
         </li>
-      </ui>
+      </ul>
 
       <div
         v-if="!historyList"

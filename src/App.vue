@@ -1,13 +1,13 @@
 <template>
   <div
-    class="h-screen w-screen overflow-hidden rounded-xl bg-slate-900 ring-1 ring-inset ring-white/10"
+    class="relative h-screen w-screen overflow-hidden rounded-xl bg-slate-900/90 ring-1 ring-inset ring-white/10 pt-10"
   >
-    <div @mousedown="drag" class="right-0 flex h-8 w-[calc(100%-7rem)]" />
+    <div data-tauri-drag-region class="absolute top-0 left-0 h-8 w-[calc(100%-7rem)] z-50"></div>
 
     <!-- window controls wrapper -->
     <div
-      class="absolute top-0 right-0 mb-3 flex h-8 w-28 rounded-xl bg-slate-700 data-active:left-0"
-      :data-active="windowControlOnTheLeft"
+      class="absolute top-0 mb-3 flex h-8 w-28 rounded-xl bg-slate-700 z-50 transition-all duration-300"
+      :class="windowControlOnTheLeft ? 'left-0' : 'right-0'"
     >
       <!-- Window minimize -->
       <svg
@@ -78,7 +78,7 @@
       </svg>
     </div>
 
-    <div class="float-left h-screen w-28">
+    <div class="float-left h-full w-28">
       <Sidebar />
     </div>
 
@@ -111,11 +111,13 @@
 import Sidebar from './components/Sidebar.vue';
 
 import { mapState } from 'vuex';
-import { appWindow } from '@tauri-apps/api/window';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import {
   isPermissionGranted,
   requestPermission,
-} from '@tauri-apps/api/notification';
+} from '@tauri-apps/plugin-notification';
+
+const appWindow = getCurrentWebviewWindow();
 
 export default {
   name: 'App',
