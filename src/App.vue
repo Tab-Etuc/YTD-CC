@@ -78,23 +78,29 @@
       </svg>
     </div>
 
-    <div class="float-left h-full w-28">
-      <Sidebar />
-    </div>
+    <!-- Main Layout Container -->
+    <div class="flex h-full w-full overflow-hidden">
+      <!-- Sidebar Wrapper -->
+      <div class="h-full w-28 shrink-0">
+        <Sidebar />
+      </div>
 
-    <!-- 主畫面 -->
-    <router-view v-slot="{ Component }">
-      <Transition
-        enter-active-class="duration-500 ease-out"
-        enter-from-class="transform opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="duration-600 ease-in"
-        leave-from-class="opacity-100"
-        leave-to-class="transform opacity-0"
-      >
-        <component :is="Component" class="overflow-hidden" />
-      </Transition>
-    </router-view>
+      <!-- Main Content Area -->
+      <div class="flex-1 h-full min-w-0 relative">
+        <router-view v-slot="{ Component }">
+          <Transition
+            enter-active-class="duration-500 ease-out"
+            enter-from-class="transform opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="duration-600 ease-in"
+            leave-from-class="opacity-100"
+            leave-to-class="transform opacity-0"
+          >
+            <component :is="Component" class="h-full w-full" />
+          </Transition>
+        </router-view>
+      </div>
+    </div>
 
     <!-- 通知 -->
     <notifications

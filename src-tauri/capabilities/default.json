@@ -9,10 +9,19 @@
     "core:window:allow-close",
     "core:window:allow-start-dragging",
     "core:window:allow-toggle-maximize",
-    "shell:allow-open",
+    {
+      "identifier": "shell:allow-open",
+      "allow": [
+        {
+          "href": ".*"
+        }
+      ]
+    },
     "http:default",
     "notification:default",
     "clipboard-manager:default",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text",
     "core:path:default",
     "dialog:default",
     "updater:default",

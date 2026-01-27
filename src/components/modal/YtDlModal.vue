@@ -12,22 +12,27 @@
       class="fixed bottom-0 left-0 z-50 table h-[calc(100%-32px)] w-full rounded-b-xl bg-black/50 transition duration-300"
     >
       <div class="table-cell align-middle">
+        <!-- Content State -->
         <div class="flex w-screen">
           <div
             class="mx-auto flex w-[60vw] justify-center rounded-t-lg border-b border-slate-500 bg-slate-800 p-8 shadow-2xl ring-1 ring-inset ring-white/10 transition-all duration-300"
           >
             <div class="flex h-full w-full">
-              <img
-                :src="videoThumbnail"
-                alt="YtVideoThumbnail"
-                class="h-[72px] w-32 rounded-md"
-              />
+              <div class="relative h-[72px] w-32 shrink-0">
+                  <img
+                    :src="videoThumbnail"
+                    alt="YtVideoThumbnail"
+                    class="h-full w-full rounded-md object-cover bg-slate-700"
+                  />
+                  <!-- Loading Overlay for thumbnail if needed, or just let it load -->
+              </div>
               <div class="ml-3 h-full w-[80%]">
                 <p class="truncate text-lg text-white">
-                  {{ videoTitle }}
+                  <span v-if="isLoading" class="animate-pulse bg-slate-600 rounded text-transparent">讀取中...</span>
+                  <span v-else>{{ videoTitle }}</span>
                 </p>
                 <hr class="mt-2 h-2 w-full content-center" />
-                <div class="flex space-x-4">
+                <div class="flex space-x-4 items-center">
                   <!-- author icon -->
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -39,9 +44,10 @@
                       d="M224 256c70.7 0 128-57.31 128-128s-57.3-128-128-128C153.3 0 96 57.31 96 128S153.3 256 224 256zM274.7 304H173.3C77.61 304 0 381.6 0 477.3c0 19.14 15.52 34.67 34.66 34.67h378.7C432.5 512 448 496.5 448 477.3C448 381.6 370.4 304 274.7 304z"
                     />
                   </svg>
-                  <span class="w-1/3 truncate text-lg text-white">{{
-                    videoAuthor
-                  }}</span>
+                  <span class="w-1/3 truncate text-lg text-white">
+                    <span v-if="isLoading" class="animate-pulse bg-slate-600 rounded text-transparent">Author Name</span>
+                    <span v-else>{{ videoAuthor }}</span>
+                  </span>
 
                   <!-- play icon -->
                   <svg
@@ -121,7 +127,8 @@
                     </g>
                   </svg>
                   <span class="w-1/2 text-lg text-white">
-                    {{ videoDuration }}
+                    <span v-if="isLoading">--:--</span>
+                    <span v-else>{{ videoDuration }}</span>
                   </span>
                 </div>
               </div>
@@ -157,10 +164,7 @@
           class="relative mx-auto flex w-[60vw] rounded-b-xl bg-slate-600 p-4"
         >
           <div v-if="isDownloading" class="relative m-auto flex h-6 w-full">
-            <span v-if="onMerge" class="absolute left-0 text-white"
-              >合併中...</span
-            >
-            <span v-else class="absolute left-0 text-white">下載中...</span>
+            <span class="absolute left-0 text-white">下載中...</span>
             <div
               class="relative m-auto flex h-6 w-[75%] rounded-xl bg-gray-200"
             >
@@ -176,76 +180,105 @@
 
           <div
             v-if="!isDownloading"
-            class="my-auto mx-3 flex w-full justify-around"
+            class="my-auto mx-3 flex w-full gap-4 justify-around"
           >
-            <div class="relative flex h-7 w-[7rem]">
-              <input
-                type="text"
-                class="absolute top-0 left-0 h-full w-full cursor-pointer rounded-md border-none bg-white p-3 shadow-2xl outline-none"
-                :placeholder="formatTitle"
-                readonly
-              />
-              <div
-                class="absolute h-full w-full cursor-pointer before:absolute before:right-3 before:top-2 before:z-50 before:h-2 before:w-2 before:-rotate-45 before:border-2 before:border-black before:border-t-white before:border-r-white before:duration-300 data-active:before:top-3 data-active:before:-rotate-[225deg]"
-                :data-active="formatActive"
-                @click="formatActive = !formatActive"
+            <!-- 檔案格式選單 -->
+            <div class="relative flex h-10 w-32">
+              <div 
+                class="absolute z-0 h-full w-full rounded-lg text-white flex items-center px-3 select-none ring-1 ring-white/20 transition-colors"
+                :class="isLoading ? 'bg-slate-600 cursor-not-allowed opacity-50' : 'bg-slate-700 cursor-pointer hover:bg-slate-600'"
+                @click.stop="!isLoading && (formatActive = !formatActive, qualityActive = false)"
+              >
+                {{ formatTitle }}
+                <div 
+                  v-if="!isLoading"
+                  class="absolute right-3 top-3 h-2 w-2 border-r-2 border-b-2 border-white transform duration-300"
+                  :class="formatActive ? 'rotate-[225deg] top-4' : 'rotate-45'"
+                ></div>
+                <svg v-else class="absolute right-3 animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+
+              <Transition
+                enter-active-class="transition duration-100 ease-out"
+                enter-from-class="transform scale-95 opacity-0"
+                enter-to-class="transform scale-100 opacity-100"
+                leave-active-class="transition duration-75 ease-in"
+                leave-from-class="transform scale-100 opacity-100"
+                leave-to-class="transform scale-95 opacity-0"
               >
                 <ul
-                  class="absolute top-9 hidden w-full rounded-b-md bg-white data-active:block"
-                  :data-active="formatActive"
+                  v-if="formatActive"
+                  class="absolute bottom-full mb-1 w-full rounded-lg bg-slate-700 shadow-xl ring-1 ring-white/10 z-50 overflow-hidden"
                 >
                   <li
-                    class="relative select-none p-3 hover:bg-blue-400 hover:text-white"
-                    @click="formatTitle = 'MP3'"
+                    class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors"
+                    @click.stop="formatTitle = 'MP3'; formatActive = false"
                   >
                     MP3
                   </li>
                   <li
-                    class="relative select-none rounded-b-md p-3 hover:bg-blue-400 hover:text-white"
-                    @click="formatTitle = 'MP4'"
+                    class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors border-t border-slate-600"
+                    @click.stop="formatTitle = 'MP4'; formatActive = false"
                   >
                     MP4
                   </li>
                 </ul>
-              </div>
+              </Transition>
             </div>
 
-            <div v-if="formatTitle != 'MP3'" class="relative flex h-7 w-[7rem]">
-              <input
-                type="text"
-                class="absolute top-0 left-0 h-full w-full cursor-pointer rounded-md border-none bg-white p-3 shadow-2xl outline-none"
-                :placeholder="qualityTitle"
-                readonly
-              />
-              <div
-                class="absolute h-full w-full cursor-pointer before:absolute before:right-3 before:top-2 before:z-50 before:h-2 before:w-2 before:-rotate-45 before:border-2 before:border-black before:border-t-white before:border-r-white before:duration-300 data-active:before:top-3 data-active:before:-rotate-[225deg]"
-                :data-active="qualityActive"
-                @click="qualityActive = !qualityActive"
+            <!-- 影片畫質選單 -->
+            <div v-if="formatTitle != 'MP3'" class="relative flex h-10 w-32">
+              <div 
+                class="absolute z-0 h-full w-full rounded-lg text-white flex items-center px-3 select-none ring-1 ring-white/20 transition-colors"
+                :class="isLoading ? 'bg-slate-600 cursor-not-allowed opacity-50' : 'bg-slate-700 cursor-pointer hover:bg-slate-600'"
+                @click.stop="!isLoading && (qualityActive = !qualityActive, formatActive = false)"
+              >
+                {{ qualityTitle }}
+                <div 
+                  v-if="!isLoading"
+                  class="absolute right-3 top-3 h-2 w-2 border-r-2 border-b-2 border-white transform duration-300"
+                  :class="qualityActive ? 'rotate-[225deg] top-4' : 'rotate-45'"
+                ></div>
+                <svg v-else class="absolute right-3 animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+
+              <Transition
+                enter-active-class="transition duration-100 ease-out"
+                enter-from-class="transform scale-95 opacity-0"
+                enter-to-class="transform scale-100 opacity-100"
+                leave-active-class="transition duration-75 ease-in"
+                leave-from-class="transform scale-100 opacity-100"
+                leave-to-class="transform scale-95 opacity-0"
               >
                 <ul
-                  class="scrollbar absolute top-9 hidden h-[11rem] w-full overflow-auto rounded-b-md bg-white data-active:block"
-                  :data-active="qualityActive"
+                  v-if="qualityActive"
+                  class="scrollbar absolute bottom-full mb-1 max-h-[12rem] w-full overflow-y-auto rounded-lg bg-slate-700 shadow-xl ring-1 ring-white/10 z-50"
                 >
                   <li
-                    class="relative select-none p-3 last:rounded-b-md hover:bg-blue-400 hover:text-white"
+                    class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors border-b border-slate-600 last:border-0"
                     v-for="quality in videoQualitys"
                     :key="quality"
-                    @click="qualityTitle = quality"
+                    @click.stop="qualityTitle = quality; qualityActive = false"
                   >
                     {{ quality }}
                   </li>
                 </ul>
-              </div>
+              </Transition>
             </div>
 
             <button
-              class="float-right flex h-7 w-16 rounded-lg bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-opacity-50"
+              class="flex h-10 w-24 items-center justify-center rounded-lg text-white shadow-lg font-medium transition-colors ring-1 ring-white/10"
+              :class="isLoading ? 'bg-blue-600/50 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'"
+              :disabled="isLoading"
               @click="check"
             >
-              <a
-                class="flex h-full w-full select-none items-center justify-center text-center text-white"
-                >下載
-              </a>
+              下載
             </button>
           </div>
         </div>
@@ -256,16 +289,10 @@
 
 <script>
 import { invoke } from '@tauri-apps/api/core';
-import { sendNotification } from '@tauri-apps/plugin-notification';
 import { listen } from '@tauri-apps/api/event';
-import { readTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
-import { appDataDir } from '@tauri-apps/api/path';
-
+import { sendNotification } from '@tauri-apps/plugin-notification';
+import { readTextFile, writeTextFile, BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
 import { mapState } from 'vuex';
-
-var temAudio = 'YTD.CC - Temporary Audio.mp4';
-var temVideo = 'YTD.CC - Temporary Video.mp4';
-var targetfile = '';
 
 export default {
   name: 'YtDlModal',
@@ -281,283 +308,199 @@ export default {
       default: null,
       required: true,
     },
-    videoTitle: {
-      type: String,
-      default: '不明',
-      required: true,
-    },
-    videoAuthor: {
-      type: String,
-      default: '不明',
-      required: true,
-    },
-    videoThumbnail: {
-      type: String,
-      default: null,
-      required: true,
-    },
-    videoAdaptiveDownloadUrl: {
-      type: Array,
-      default: [],
-      required: true,
-    },
-    videoDownloadUrl: {
-      type: Array,
-      default: [],
-      required: true,
-    },
-    videoDuration: {
-      type: String,
-      default: '不明',
-      required: true,
-    },
-    videoQualitys: {
-      type: Array,
-      default: [],
-      required: true,
-    },
-  },
-
-  data() {
-    return {
-      barValue: '0%',
-      formatTitle: '檔案格式',
-      qualityTitle: '影片畫質',
-      formatActive: false,
-      qualityActive: false,
-      needToDownloadAudioFile: false,
-      needToMerge: false,
-      onMerge: false,
-    };
   },
 
   computed: {
     ...mapState([
       'isDownloading',
       'downloadProgressBarValue',
+      'windowControlOnTheLeft',
       'downloadOutputPath',
       'saveHistory',
     ]),
   },
 
-  mounted() {
-    document.addEventListener('keydown', (e) => {
-      e.key === 'Escape' && !this.isDownloading && this.$emit('close-modal');
-    });
+  data() {
+    return {
+      isLoading: false,
+      videoTitle: '載入中...',
+      videoAuthor: '',
+      videoThumbnail: '',
+      videoDuration: '00:00',
+      videoQualitys: [],
+      formatActive: false,
+      formatTitle: '檔案格式',
+      qualityActive: false,
+      qualityTitle: '影片畫質',
+    };
+  },
+
+  watch: {
+    showModal(val) {
+      if (val && this.videoId) {
+        this.fetchVideoInfo();
+      }
+    }
   },
 
   methods: {
+    async fetchVideoInfo() {
+      this.isLoading = true;
+      // Reset State with Instant Thumbnail
+      this.videoTitle = '載入中...';
+      this.videoAuthor = '';
+      // Use standard YouTube thumbnail URL for instant feedback
+      this.videoThumbnail = `https://img.youtube.com/vi/${this.videoId}/mqdefault.jpg`;
+      this.videoDuration = '00:00';
+      this.videoQualitys = [];
+      this.formatTitle = '檔案格式';
+      this.qualityTitle = '影片畫質';
+
+      const targetUrl = `https://www.youtube.com/watch?v=${this.videoId}`;
+      
+      try {
+        const info = await invoke('get_video_info', { url: targetUrl });
+        
+        this.videoTitle = info.title;
+        this.videoAuthor = info.uploader;
+        // Update with higher res or preferred thumbnail from yt-dlp if different/better
+        if (info.thumbnail) this.videoThumbnail = info.thumbnail;
+        this.videoDuration = info.duration_string;
+        
+        const formats = info.formats || [];
+        const qualities = new Set();
+        formats.forEach(f => {
+          if (f.height) qualities.add(f.height + 'p');
+        });
+        
+        this.videoQualitys = Array.from(qualities).sort((a, b) => parseInt(b) - parseInt(a));
+        
+      } catch (e) {
+         this.$notify({
+          group: 'foo-css',
+          title: '無法取得影片資訊',
+          text: e.toString(),
+          type: 'error',
+        });
+        this.$emit('close-modal');
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async check() {
-      console.log(this.downloadOutputPath);
-      if (this.formatTitle == '檔案格式')
+      if (this.formatTitle == '檔案格式') {
         return this.$notify({
           group: 'foo-css',
           title: '請選擇檔案格式！',
           type: 'error',
         });
-
-      if (this.qualityTitle == '影片畫質' && this.formatTitle != 'MP3')
+      }
+      if (this.formatTitle == 'MP4' && this.qualityTitle == '影片畫質') {
         return this.$notify({
           group: 'foo-css',
           title: '請選擇影片畫質！',
           type: 'error',
         });
-
-      this.$store.commit('UPDATE_STATUS', true);
-
-      targetfile = this.videoTitle.replace(/(\\|\/|\:|\*|\?|\"|\<|\>|\|)/g, ''); // Windows 檔案命名規則
-
-      let onlyaudio = false;
-
-      // 下載視訊
-      if (this.formatTitle == 'MP4') {
-        let urlTocheck = this.videoDownloadUrl.filter(
-          (a) => a['影片畫質'] == this.qualityTitle
-        )[0];
-
-        if (urlTocheck) {
-          this.downloadToComputer(
-            urlTocheck['url'],
-            targetfile + '.' + this.formatTitle.toLowerCase(),
-            this.downloadOutputPath,
-            onlyaudio
-          );
-        } else {
-          this.needToDownloadAudioFile = true;
-          this.needToMerge = true;
-
-          await this.downloadToComputer(
-            this.videoAdaptiveDownloadUrl.filter(
-              (a) => a[this.qualityTitle]
-            )[0][this.qualityTitle],
-            temVideo,
-            this.downloadOutputPath,
-            false
-          );
-        }
-
-        // 下載音訊
-      } else {
-        onlyaudio = true;
-        const tepUrl = this.videoDownloadUrl.pop()['url'];
-        this.downloadToComputer(
-          tepUrl,
-          targetfile + '.' + this.formatTitle.toLowerCase(),
-          this.downloadOutputPath,
-          onlyaudio
-        );
       }
+
+      await this.download();
     },
 
-    async downloadToComputer(url, filename, outputpath, onlyaudio) {
-      let that = this;
-      var changeBarValue;
-
-      function downloadDone() {
-        that.writeHistory();
-
-        that.onMerge = false;
-        that.$notify({
-          group: 'foo-css',
-          title: '下載成功！',
-          text: `${that.videoTitle}`,
-          type: 'success',
-        });
-        that.$emit('close-modal');
-        that.$store.commit('SET_BAR_VALUE', '0%');
-
-        sendNotification({ title: targetfile, body: '下載成功！' });
-        that.$store.commit('UPDATE_STATUS', false);
+    async download() {
+      const targetUrl = `https://www.youtube.com/watch?v=${this.videoId}`;
+      const isAudio = this.formatTitle === 'MP3';
+      
+      let format = '';
+      if (isAudio) {
+         format = 'mp3'; 
+      } else {
+         const height = this.qualityTitle.replace('p', '');
+         format = `bestvideo[height=${height}][ext=mp4]+bestaudio[ext=m4a]/best[height=${height}][ext=mp4]/best[ext=mp4]/best`;
       }
 
-      const unlisten = await listen('inDownload', async (event) => {
-        changeBarValue = setInterval(async () => {
-          await invoke('get_bar_size_now').then((size) => {
-            that.$store.commit(
-              'SET_BAR_VALUE',
-              parseInt(Math.round((size / event.payload) * 100)) + '%'
-            );
-          });
-        }, 100);
-      });
+      this.$store.commit('UPDATE_STATUS', true);
+      this.$store.commit('SET_BAR_VALUE', '0%');
+      
+      let unlisten;
 
-      await invoke('download_youtube', {
-        url,
-        filename,
-        outputpath,
-        onlyaudio,
-      })
-        .then((res) => {
-          if (res == 'Downloaded success.') {
-            clearInterval(changeBarValue);
-            unlisten();
+      try {
+        unlisten = await listen('download_progress', (event) => {
+            this.$store.commit('SET_BAR_VALUE', event.payload);
+        });
 
-            if (that.needToDownloadAudioFile) {
-              let tepUrl = that.videoDownloadUrl.pop()['url'];
-              that.downloadToComputer(
-                tepUrl,
-                temAudio,
-                this.downloadOutputPath,
-                false
-              );
+        await invoke('download_video', {
+          url: targetUrl,
+          path: this.downloadOutputPath,
+          format: format,
+          isAudio: isAudio
+        });
+        
+        this.$store.commit('SET_BAR_VALUE', '100%');
+        this.$store.commit('UPDATE_STATUS', false);
+        this.$notify({
+          group: 'foo-css',
+          title: '下載完成！',
+          text: `${this.videoTitle}`,
+        });
+        sendNotification({ title: this.videoTitle, body: '下載完成！' });
+        
+        await this.writeHistory();
+        this.$emit('close-modal');
 
-              that.needToDownloadAudioFile = false;
-            } else if (that.needToMerge) {
-              that.onMerge = true;
-              invoke('merge', {
-                videofile: this.downloadOutputPath + temVideo,
-                audiofile: this.downloadOutputPath + temAudio,
-                filename:
-                  this.downloadOutputPath +
-                  targetfile +
-                  '.' +
-                  this.formatTitle.toLowerCase(),
-              }).then(() => {
-                downloadDone();
-              });
-
-              that.needToMerge = false;
-            } else {
-              downloadDone();
-            }
-          } else if (res == 'File exists.') {
-            that.$emit('close-modal');
-            that.$notify({
-              group: 'foo-css',
-              title: '檔案已存在！',
-              text: `${that.videoTitle}`,
-              type: 'error',
-            });
-            sendNotification({ title: targetfile, body: '檔案已存在！' });
-            that.$store.commit('UPDATE_STATUS', false);
-          }
-        })
-        .catch(console.error());
+      } catch (err) {
+        console.error(err);
+        this.$store.commit('UPDATE_STATUS', false);
+         this.$notify({
+          group: 'foo-css',
+          title: '下載失敗！',
+          text: err.toString(),
+          type: 'error',
+        });
+      } finally {
+        if (unlisten) unlisten();
+        this.formatTitle = '檔案格式';
+        this.qualityTitle = '影片畫質';
+      }
     },
 
     async writeHistory() {
+      if (!this.saveHistory) return;
+
       try {
-        if (this.needToMerge || !this.saveHistory) return;
-        var log = await readTextFile('history.json', {
-          dir: BaseDirectory.App,
-        });
-        if (log == '') throw 'dataIsEmpty';
-        // 如果檔案存在
+        const historyPath = 'history.json';
+        if (!(await exists(historyPath, { baseDir: BaseDirectory.AppData }))) {
+           await mkdir('', { baseDir: BaseDirectory.AppData, recursive: true });
+        }
+
+        let jsonData = { 下載次數統計: { MP3: 0, MP4: 0 }, 歷程記錄: [] };
         try {
-          let data = JSON.parse(log);
+           const content = await readTextFile(historyPath, { baseDir: BaseDirectory.AppData });
+           if (content) jsonData = JSON.parse(content);
+        } catch { /* ignore */ }
+        
+        if (!jsonData.下載次數統計) jsonData.下載次數統計 = { MP3: 0, MP4: 0 };
+        if (!jsonData.歷程記錄) jsonData.歷程記錄 = [];
 
-          'MP3' == this.formatTitle
-            ? data['下載次數統計']['MP3']++
-            : data['下載次數統計']['MP4']++;
+        if (this.formatTitle === 'MP3') jsonData.下載次數統計.MP3++;
+        else jsonData.下載次數統計.MP4++;
 
-          data['歷程記錄'].push({
-            影片名稱: targetfile,
+        jsonData.歷程記錄.unshift({
+            影片名稱: this.videoTitle,
             檔案格式: this.formatTitle,
             影片時長: this.videoDuration,
             影片背景: this.videoThumbnail,
             下載時間: Date.now(),
-          });
+        });
 
-          await invoke('write_file', {
-            path: `${await appDataDir()}/history.json`,
-            contents: JSON.stringify(data),
-          }).catch(console.error());
-          this.$store.dispatch('Set_History_List');
-        } catch (err) {
-          console.log(err);
-        }
+        if (jsonData.歷程記錄.length > 50) jsonData.歷程記錄.pop();
+
+        await writeTextFile(historyPath, JSON.stringify(jsonData), { baseDir: BaseDirectory.AppData });
+        this.$store.dispatch('Set_History_List');
+
       } catch (err) {
-        // 如果是第一次下載 或 檔案已遺失 或 檔案內容為空
-        if (/(os error 2)||(os error3)||dataIsEmpty/.test('dataIsEmpty')) {
-          let mp3Count = 0,
-            mp4Count = 0;
-          'MP3' == this.formatTitle ? mp3Count++ : mp4Count++;
-
-          const jsonData = {
-            下載次數統計: {
-              MP3: mp3Count,
-              MP4: mp4Count,
-            },
-            歷程記錄: [
-              {
-                影片名稱: targetfile,
-                檔案格式: this.formatTitle,
-                影片時長: this.videoDuration,
-                影片背景: this.videoThumbnail,
-                下載時間: Date.now(),
-              },
-            ],
-          };
-
-          await invoke('write_file', {
-            path: `${await appDataDir()}/history.json`,
-            contents: JSON.stringify(jsonData),
-          }).catch(console.error());
-          this.$store.dispatch('Set_History_List');
-        }
+        console.error('Failed to save history', err);
       }
-      this.formatTitle = '檔案格式';
-      this.qualityTitle = '影片畫質';
     },
   },
 };
