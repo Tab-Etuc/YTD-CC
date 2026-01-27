@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen w-[calc(100%-7rem)]">
+  <div class="flex h-full w-[calc(100%-7rem)]">
     <!-- 不知道為甚麼不可 import SideHistory.vue 有待研究 -w- -->
     <div
       class="mt-6 h-[90%] w-[70%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10"
@@ -34,7 +34,7 @@
       </header>
 
       <div class="scrollbar h-full w-full overflow-auto rounded-tr-lg">
-        <ui
+        <ul
           v-for="i in historyList"
           :key="i"
           class="flex h-24 w-full list-none ring-1 ring-inset ring-white/10 odd:bg-slate-800 even:bg-slate-700"
@@ -81,7 +81,7 @@
               </p>
             </div>
           </li>
-        </ui>
+        </ul>
 
         <div
           v-if="!historyList"
@@ -169,8 +169,9 @@
 </template>
 
 <script>
-import { invoke } from '@tauri-apps/api';
-import { appDir } from '@tauri-apps/api/path';
+import { invoke } from '@tauri-apps/api/core';
+import { appDataDir } from '@tauri-apps/api/path';
+import { writeTextFile, BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
 
 export default {
   name: 'History',
@@ -193,10 +194,16 @@ export default {
 
   methods: {
     async clearHistory() {
-      await invoke('write_file', {
-        path: `${await appDir()}/history.json`,
-        contents: '',
-      }).catch(console.error());
+      try {
+        if (!(await exists('', { baseDir: BaseDirectory.AppData }))) {
+              await mkdir('', { baseDir: BaseDirectory.AppData, recursive: true });
+        }
+        await writeTextFile('history.json', '', {
+           baseDir: BaseDirectory.AppData
+        });
+      } catch (err) {
+        console.error('Failed to clear history:', err);
+      }
 
       this.$store.dispatch('Set_History_List');
     },

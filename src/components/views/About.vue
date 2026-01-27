@@ -1,5 +1,5 @@
 <template>
-  <div class="float-left mt-6 h-screen w-[calc(100%-7rem)] overflow-hidden">
+  <div class="float-left mt-6 h-full w-[calc(100%-7rem)] overflow-hidden">
     <div class="relative float-left h-[90%] w-[22vw]">
       <img src="../../assets/YTD.CC.png" class="mx-auto my-4 w-[60%]" />
       <hr class="w-full" />
@@ -150,13 +150,9 @@
 </template>
 
 <script>
-import { open } from '@tauri-apps/api/shell';
+import { open } from '@tauri-apps/plugin-shell';
 import { getVersion } from '@tauri-apps/api/app';
-import {
-  checkUpdate,
-  installUpdate,
-  onUpdaterEvent,
-} from '@tauri-apps/api/updater';
+import { check } from '@tauri-apps/plugin-updater';
 
 export default {
   name: 'About',
@@ -178,17 +174,16 @@ export default {
     },
 
     async checkAppUpdate() {
-      console.log('123');
-      const update = await checkUpdate().then(() => console.log('1233'));
-      const unlisten = await onUpdaterEvent(({ error, status }) => {
-        console.log('Updater event', error, status);
-      });
-      console.log(update);
-      if (update.shouldUpdate) {
-        console.log(
-          `Installing update ${update.manifest?.version}, ${update.manifest?.date}, ${update.manifest.body}`
-        );
-        await installUpdate();
+      try {
+        const update = await check();
+        if (update) {
+          console.log(
+            `Installing update ${update.version}, ${update.date}, ${update.body}`
+          );
+          await update.downloadAndInstall();
+        }
+      } catch (e) {
+        console.error(e);
       }
     },
   },

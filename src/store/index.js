@@ -1,5 +1,5 @@
 import { createStore } from 'vuex';
-import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { readTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
 
 export default createStore({
   state: {
@@ -9,6 +9,7 @@ export default createStore({
     windowControlOnTheLeft: false,
     downloadOutputPath: '',
     saveHistory: true,
+    bannerImage: '',
   },
   getters: {},
   mutations: {
@@ -30,11 +31,14 @@ export default createStore({
     SET_SAVE_HISTORY(state, payload) {
       state.saveHistory = payload;
     },
+    SET_BANNER_IMAGE(state, payload) {
+      state.bannerImage = payload;
+    },
   },
   actions: {
     async Set_History_List({ commit }) {
       await readTextFile('history.json', {
-        dir: BaseDirectory.App,
+        baseDir: BaseDirectory.AppData,
       })
         .then((log) => {
           const data = JSON.parse(log)['歷程記錄']?.reverse() ?? '';
@@ -44,17 +48,19 @@ export default createStore({
     },
     async Set_Settings_List({ commit }) {
       await readTextFile('settings.json', {
-        dir: BaseDirectory.App,
-      }).then((log) => {
-        const data = JSON.parse(log);
-        commit(
-          'SET_WINDOW_CONTROLS_ON_THE_LEFT',
-          data['WINDOW_CONTROLS_ON_THE_LEFT']
-        );
-        commit('SET_DOWNLOAD_OUTPUT_PATH', data['DOWNLOAD_OUTPUT_PATH']);
-        commit('SET_SAVE_HISTORY', data['SAVE_HISTORY']);
-      });
-      // .catch((err) => console.warn(err));
+        baseDir: BaseDirectory.AppData,
+      })
+        .then((log) => {
+          const data = JSON.parse(log);
+          commit(
+            'SET_WINDOW_CONTROLS_ON_THE_LEFT',
+            data['WINDOW_CONTROLS_ON_THE_LEFT']
+          );
+          commit('SET_DOWNLOAD_OUTPUT_PATH', data['DOWNLOAD_OUTPUT_PATH']);
+          commit('SET_SAVE_HISTORY', data['SAVE_HISTORY']);
+          commit('SET_BANNER_IMAGE', data['BANNER_IMAGE'] || '');
+        })
+        .catch((err) => console.warn('Settings file not found or empty, using defaults.'));
     },
   },
   modules: {},
