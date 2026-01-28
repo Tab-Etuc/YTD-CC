@@ -7,13 +7,24 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
+
+# Local env files
 *.local
-~
+.env
+.env.*
+!.env.example
+
+# Downloaded media files
 *.mp4
 *.mp3
+*.webm
+*.m4a
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +36,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*~
+
+# Misc directories
+~/
+portfolio/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Tauri generated
+src-tauri/gen/
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini

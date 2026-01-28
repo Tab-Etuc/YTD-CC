@@ -1,0 +1,187 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  CARGO_TERM_COLOR: always
+  NODE_VERSION: '20'
+
+jobs:
+  # 程式碼品質檢查
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run ESLint
+        run: yarn lint
+
+      - name: Check Prettier formatting
+        run: yarn format:check
+
+      - name: TypeScript type check
+        run: yarn typecheck
+
+  # 單元測試
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: yarn test:coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+          verbose: true
+
+  # Rust 程式碼檢查
+  rust-check:
+    name: Rust Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Check formatting
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+
+  # 建構測試
+  build-test:
+    name: Build Test (${{ matrix.platform }})
+    needs: [lint, test, rust-check]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'ubuntu-latest'
+            rust_target: ''
+          - platform: 'windows-latest'
+            rust_target: ''
+          - platform: 'macos-latest'
+            rust_target: ''
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Download yt-dlp sidecar
+        shell: bash
+        run: |
+          cd src-tauri
+          if [[ "${{ matrix.platform }}" == "windows-latest" ]]; then
+            curl -L -o yt-dlp-x86_64-pc-windows-msvc.exe https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
+          elif [[ "${{ matrix.platform }}" == "macos-latest" ]]; then
+            curl -L -o yt-dlp-x86_64-apple-darwin https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos
+            curl -L -o yt-dlp-aarch64-apple-darwin https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos
+            chmod +x yt-dlp-x86_64-apple-darwin yt-dlp-aarch64-apple-darwin
+          else
+            curl -L -o yt-dlp-x86_64-unknown-linux-gnu https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+            chmod +x yt-dlp-x86_64-unknown-linux-gnu
+          fi
+
+      - name: Download ffmpeg sidecar
+        shell: bash
+        run: |
+          cd src-tauri
+          if [[ "${{ matrix.platform }}" == "windows-latest" ]]; then
+            curl -L -o ffmpeg.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip
+            unzip -j ffmpeg.zip "*/bin/ffmpeg.exe" -d .
+            mv ffmpeg.exe ffmpeg-x86_64-pc-windows-msvc.exe
+            rm ffmpeg.zip
+          elif [[ "${{ matrix.platform }}" == "macos-latest" ]]; then
+            curl -L -o ffmpeg.zip https://evermeet.cx/ffmpeg/getrelease/zip
+            unzip ffmpeg.zip
+            mv ffmpeg ffmpeg-x86_64-apple-darwin
+            cp ffmpeg-x86_64-apple-darwin ffmpeg-aarch64-apple-darwin
+            chmod +x ffmpeg-x86_64-apple-darwin ffmpeg-aarch64-apple-darwin
+            rm ffmpeg.zip
+          else
+            curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+            tar -xf ffmpeg.tar.xz --wildcards "*/ffmpeg" --strip-components=1
+            mv ffmpeg ffmpeg-x86_64-unknown-linux-gnu
+            chmod +x ffmpeg-x86_64-unknown-linux-gnu
+            rm ffmpeg.tar.xz
+          fi
+
+      - name: Build frontend
+        run: yarn build
+
+      - name: Build Tauri app (dry run)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --ci
