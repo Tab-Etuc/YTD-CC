@@ -1,13 +1,45 @@
 {
   "name": "ytd.cc",
   "version": "0.2.0",
+  "description": "輕量、快速的 YouTube 影片下載器，支援 MP3 音訊和 MP4 影片格式",
+  "author": "Tab Etuc",
+  "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/YTD-CC.git"
+  },
+  "keywords": [
+    "youtube",
+    "downloader",
+    "mp3",
+    "mp4",
+    "tauri",
+    "vue",
+    "desktop-app"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
-    "build": "vite build",
     "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "tauricon": "tauricon --target ./src-tauri/icons ./src/assets/YTD.CC.png"
+    "tauricon": "tauricon --target ./src-tauri/icons ./src/assets/YTD.CC.png",
+    "lint": "eslint \"src/**/*.{vue,js,ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{vue,js,ts,tsx}\" --fix",
+    "format": "prettier --write \"src/**/*.{vue,ts,js,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{vue,ts,js,css,json}\"",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "validate": "npm run typecheck && npm run lint && npm run test:run",
+    "prepare": "node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\"",
+    "download-sidecars": "powershell -ExecutionPolicy Bypass -File ./scripts/download-sidecars.ps1",
+    "setup": "yarn install && yarn download-sidecars"
   },
   "dependencies": {
     "@kyvg/vue3-notification": "^3.4.2",
@@ -22,19 +54,42 @@
     "@tauri-apps/plugin-shell": "^2.3.4",
     "@tauri-apps/plugin-updater": "^2.9.0",
     "module-from-string": "^3.3.1",
+    "pinia": "^3.0.4",
     "vue": "^3.5.27",
-    "vue-router": "^4.6.4",
-    "vuex": "^4.1.0",
-    "yarn": "^1.22.22"
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@tauri-apps/cli": "^2.9.6",
     "@vitejs/plugin-vue": "^6.0.3",
-    "@vue/cli-plugin-vuex": "^5.0.9",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.8.1",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.7.0",
+    "globals": "^17.2.0",
+    "happy-dom": "^20.4.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
     "vite": "^7.3.1",
-    "vue-cli-plugin-tailwind": "^3.0.0"
+    "vitest": "^4.0.18",
+    "vue-cli-plugin-tailwind": "^3.0.0",
+    "vue-eslint-parser": "^10.2.0",
+    "vue-tsc": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{vue,ts,tsx,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,json,md}": [
+      "prettier --write"
+    ]
   }
 }
