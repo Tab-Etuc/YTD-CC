@@ -1,297 +1,350 @@
 <template>
-  <Transition
-    enter-active-class="duration-300 ease-out"
-    enter-from-class="opacity-0"
-    enter-to-class="opacity-100"
-    leave-active-class="duration-200 ease-in"
-    leave-from-class="opacity-100"
-    leave-to-class="opacity-0"
-  >
-    <div
-      v-if="show"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      @click.self="$emit('close')"
+    <Transition
+        enter-active-class="transition ease-out duration-300"
+        enter-from-class="transform opacity-0 scale-95"
+        enter-to-class="transform opacity-100 scale-100"
+        leave-active-class="transition ease-in duration-200"
+        leave-from-class="transform opacity-100 scale-100"
+        leave-to-class="transform opacity-0 scale-95"
     >
-      <div class="w-[70vw] max-w-4xl max-h-[80vh] bg-slate-800 rounded-2xl shadow-2xl ring-1 ring-white/10 overflow-hidden flex flex-col">
-        <!-- Header -->
-        <div class="relative p-6 bg-gradient-to-r from-purple-600 to-blue-600">
-          <button 
-            @click="$emit('close')"
-            class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          
-          <div v-if="isLoading" class="flex items-center gap-4">
-            <div class="w-20 h-12 bg-white/20 rounded animate-pulse"></div>
-            <div class="flex-1">
-              <div class="h-5 w-48 bg-white/20 rounded animate-pulse mb-2"></div>
-              <div class="h-4 w-32 bg-white/20 rounded animate-pulse"></div>
-            </div>
-          </div>
-          
-          <div v-else-if="playlistData" class="flex items-center gap-4">
-            <div class="flex items-center gap-3">
-              <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
-              </svg>
-              <div>
-                <h2 class="text-xl font-bold text-white">{{ playlistData.title }}</h2>
-                <p class="text-white/70 text-sm">{{ playlistData.uploader }} · {{ playlistData.count }} 部影片</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div
+            v-if="show"
+            class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm"
+        >
+            <div
+                class="relative flex h-[85%] w-[80%] flex-col rounded-2xl bg-slate-800 shadow-2xl ring-1 ring-white/10 ring-inset"
+            >
+                <!-- Header -->
+                <header
+                    class="flex h-16 w-full shrink-0 items-center justify-between rounded-t-2xl bg-gradient-to-r from-green-600/80 to-blue-500/80 px-6"
+                >
+                    <div class="flex items-center gap-4">
+                        <svg class="h-6 w-6 fill-white" viewBox="0 0 20 20">
+                            <path
+                                d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                            />
+                        </svg>
+                        <p class="text-xl font-medium text-white select-none">播放清單</p>
+                    </div>
+                    <button
+                        class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+                        @click="emit('close')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                </header>
 
-        <!-- Format Options -->
-        <div class="p-4 bg-slate-700/50 border-b border-slate-600 flex items-center gap-4 flex-wrap">
-          <div class="flex items-center gap-2">
-            <span class="text-white text-sm">格式：</span>
-            <DropdownSelect
-              v-model="selectedFormat"
-              :options="formatOptions"
-              placeholder="選擇格式"
-              :drop-up="false"
-              width-class="w-28"
-              @select="handleFormatChange"
-            />
-          </div>
-          
-          <div v-if="selectedFormat === 'MP4'" class="flex items-center gap-2">
-            <span class="text-white text-sm">畫質：</span>
-            <DropdownSelect
-              v-model="selectedQuality"
-              :options="qualityOptions"
-              placeholder="選擇畫質"
-              :drop-up="false"
-              width-class="w-28"
-              @select="handleQualityChange"
-            />
-          </div>
-          
-          <div v-if="selectedFormat === 'MP3'" class="flex items-center gap-2">
-            <span class="text-white text-sm">音質：</span>
-            <DropdownSelect
-              v-model="selectedAudioQuality"
-              :options="audioQualityOptions"
-              placeholder="選擇音質"
-              :drop-up="false"
-              width-class="w-36"
-              @select="handleAudioQualityChange"
-            />
-          </div>
-          
-          <div class="flex-1"></div>
-          
-          <div class="flex items-center gap-2">
-            <button
-              @click="selectAll"
-              class="px-3 py-1.5 text-sm text-white bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors"
-            >
-              全選
-            </button>
-            <button
-              @click="deselectAll"
-              class="px-3 py-1.5 text-sm text-white bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors"
-            >
-              取消全選
-            </button>
-          </div>
-        </div>
+                <!-- Loading State -->
+                <div v-if="isLoading" class="flex flex-1 items-center justify-center">
+                    <div class="text-center">
+                        <svg
+                            class="mx-auto h-12 w-12 animate-spin text-blue-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            />
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                        </svg>
+                        <p class="mt-4 text-slate-400">載入播放清單中...</p>
+                    </div>
+                </div>
 
-        <!-- Video List -->
-        <div class="flex-1 overflow-y-auto scrollbar">
-          <div v-if="isLoading" class="p-4 space-y-3">
-            <div v-for="i in 5" :key="i" class="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg animate-pulse">
-              <div class="w-6 h-6 bg-slate-600 rounded"></div>
-              <div class="w-24 h-14 bg-slate-600 rounded"></div>
-              <div class="flex-1">
-                <div class="h-4 w-3/4 bg-slate-600 rounded mb-2"></div>
-                <div class="h-3 w-1/4 bg-slate-600 rounded"></div>
-              </div>
+                <!-- Content -->
+                <div v-else class="flex flex-1 gap-6 overflow-hidden p-6">
+                    <!-- Left: Playlist Info & Options -->
+                    <div class="flex w-1/3 flex-col">
+                        <!-- Playlist Info -->
+                        <div class="mb-6">
+                            <div class="mb-4 aspect-video overflow-hidden rounded-xl bg-slate-700">
+                                <img
+                                    v-if="playlistData?.thumbnail"
+                                    :src="playlistData.thumbnail"
+                                    class="h-full w-full object-cover"
+                                    alt="Playlist thumbnail"
+                                />
+                            </div>
+                            <h2 class="line-clamp-2 text-lg font-bold text-white">
+                                {{ playlistData?.title || '未命名播放清單' }}
+                            </h2>
+                            <p class="mt-1 text-sm text-slate-400">
+                                {{ playlistData?.uploader }} · {{ playlistData?.count }} 部影片
+                            </p>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="space-y-4">
+                            <!-- Format Selection -->
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-slate-300"
+                                    >格式</label
+                                >
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 rounded-lg px-4 py-2 font-medium transition-colors"
+                                        :class="
+                                            selectedFormat === 'MP4'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                        "
+                                        @click="selectedFormat = 'MP4'"
+                                    >
+                                        MP4
+                                    </button>
+                                    <button
+                                        class="flex-1 rounded-lg px-4 py-2 font-medium transition-colors"
+                                        :class="
+                                            selectedFormat === 'MP3'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                                        "
+                                        @click="selectedFormat = 'MP3'"
+                                    >
+                                        MP3
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Quality Selection -->
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-slate-300">
+                                    {{ selectedFormat === 'MP4' ? '畫質' : '音質' }}
+                                </label>
+                                <DropdownSelect
+                                    v-if="selectedFormat === 'MP4'"
+                                    v-model="selectedQuality"
+                                    :options="videoQualityOptions"
+                                    @select="handleQualitySelect"
+                                />
+                                <DropdownSelect
+                                    v-else
+                                    v-model="selectedAudioQuality"
+                                    :options="audioQualityOptions"
+                                    @select="handleAudioQualitySelect"
+                                />
+                            </div>
+
+                            <!-- Selection Actions -->
+                            <div class="flex gap-2">
+                                <button
+                                    class="flex-1 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600"
+                                    @click="selectAll"
+                                >
+                                    全選
+                                </button>
+                                <button
+                                    class="flex-1 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-600"
+                                    @click="deselectAll"
+                                >
+                                    取消全選
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Video List -->
+                    <div class="flex flex-1 flex-col overflow-hidden">
+                        <div class="mb-4 flex items-center justify-between">
+                            <p class="text-sm text-slate-400">
+                                已選擇 {{ selectedCount }} / {{ videos.length }} 部影片
+                            </p>
+                        </div>
+
+                        <div class="scrollbar flex-1 space-y-2 overflow-y-auto">
+                            <div
+                                v-for="video in videos"
+                                :key="video.id"
+                                class="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition-colors"
+                                :class="
+                                    video.selected
+                                        ? 'bg-blue-600/20 ring-1 ring-blue-500/50'
+                                        : 'bg-slate-700/50 hover:bg-slate-700'
+                                "
+                                @click="toggleSelect(video)"
+                            >
+                                <!-- Checkbox -->
+                                <div
+                                    class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors"
+                                    :class="
+                                        video.selected
+                                            ? 'border-blue-600 bg-blue-600'
+                                            : 'border-slate-500'
+                                    "
+                                >
+                                    <svg
+                                        v-if="video.selected"
+                                        class="h-3 w-3 text-white"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                    >
+                                        <path
+                                            fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clip-rule="evenodd"
+                                        />
+                                    </svg>
+                                </div>
+
+                                <!-- Thumbnail -->
+                                <img
+                                    :src="video.thumbnail"
+                                    class="h-12 w-20 shrink-0 rounded object-cover"
+                                    alt="Video thumbnail"
+                                />
+
+                                <!-- Info -->
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="truncate text-sm font-medium text-white">
+                                        {{ video.title }}
+                                    </h4>
+                                    <p class="text-xs text-slate-400">{{ video.duration }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer
+                    class="flex h-16 w-full shrink-0 items-center justify-between border-t border-slate-700 px-6"
+                >
+                    <button
+                        class="rounded-lg px-4 py-2 font-medium text-slate-300 transition-colors hover:bg-slate-700"
+                        @click="emit('close')"
+                    >
+                        取消
+                    </button>
+
+                    <button
+                        :disabled="selectedCount === 0"
+                        class="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                        @click="confirmSelection"
+                    >
+                        加入佇列 ({{ selectedCount }})
+                    </button>
+                </footer>
             </div>
-          </div>
-          
-          <ul v-else-if="playlistData?.entries" class="divide-y divide-slate-700">
-            <li
-              v-for="(video, index) in playlistData.entries"
-              :key="video.id"
-              class="flex items-center gap-3 p-3 hover:bg-slate-700/50 transition-colors cursor-pointer"
-              @click="toggleSelect(index)"
-            >
-              <!-- Checkbox -->
-              <div 
-                class="w-6 h-6 rounded border-2 flex items-center justify-center transition-colors shrink-0"
-                :class="video.selected 
-                  ? 'bg-blue-500 border-blue-500' 
-                  : 'border-slate-500 hover:border-slate-400'"
-              >
-                <svg v-if="video.selected" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              
-              <!-- Index -->
-              <span class="w-8 text-center text-slate-400 text-sm shrink-0">{{ index + 1 }}</span>
-              
-              <!-- Thumbnail -->
-              <div class="relative w-24 h-14 shrink-0 rounded overflow-hidden bg-slate-700">
-                <img 
-                  :src="video.thumbnail" 
-                  :alt="video.title"
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <span class="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">
-                  {{ video.duration }}
-                </span>
-              </div>
-              
-              <!-- Info -->
-              <div class="flex-1 min-w-0">
-                <p class="text-white text-sm truncate">{{ video.title }}</p>
-                <p class="text-slate-400 text-xs truncate">{{ video.uploader }}</p>
-              </div>
-            </li>
-          </ul>
         </div>
-
-        <!-- Footer -->
-        <div class="p-4 bg-slate-700/50 border-t border-slate-600 flex items-center justify-between">
-          <p class="text-slate-400 text-sm">
-            已選擇 <span class="text-white font-bold">{{ selectedCount }}</span> / {{ playlistData?.entries?.length || 0 }} 部影片
-          </p>
-          
-          <div class="flex items-center gap-3">
-            <button
-              @click="$emit('close')"
-              class="px-6 py-2 text-white bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors"
-            >
-              取消
-            </button>
-            <button
-              @click="handleConfirm"
-              :disabled="selectedCount === 0 || !isOptionsValid"
-              class="px-6 py-2 rounded-lg font-medium transition-all flex items-center gap-2"
-              :class="selectedCount > 0 && isOptionsValid
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500'
-                : 'bg-slate-600 text-slate-400 cursor-not-allowed'"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              加入佇列
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </Transition>
+    </Transition>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import DropdownSelect from '../common/DropdownSelect.vue';
+import DropdownSelect from '@/components/common/DropdownSelect.vue';
+import type {
+    PlaylistData,
+    PlaylistVideoItem,
+    PlaylistDownloadOptions,
+    DropdownOption,
+} from '@/types';
 
-const props = defineProps({
-  show: { type: Boolean, default: false },
-  playlistData: { type: Object, default: null },
-  isLoading: { type: Boolean, default: false },
-});
+interface Props {
+    show: boolean;
+    playlistData: PlaylistData | null;
+    isLoading: boolean;
+}
 
-const emit = defineEmits(['close', 'confirm']);
-
-// Format options
-const formatOptions = [
-  { label: 'MP3', value: 'MP3' },
-  { label: 'MP4', value: 'MP4' },
-];
-
-const qualityOptions = [
-  { label: '2160p (4K)', value: '2160', height: 2160 },
-  { label: '1440p (2K)', value: '1440', height: 1440 },
-  { label: '1080p', value: '1080', height: 1080 },
-  { label: '720p', value: '720', height: 720 },
-  { label: '480p', value: '480', height: 480 },
-  { label: '360p', value: '360', height: 360 },
-];
-
-const audioQualityOptions = [
-  { label: '320kbps (最高)', value: '320', bitrate: '320' },
-  { label: '192kbps (高)', value: '192', bitrate: '192' },
-  { label: '128kbps (標準)', value: '128', bitrate: '128' },
-];
+const props = defineProps<Props>();
+const emit = defineEmits<{
+    close: [];
+    confirm: [videos: PlaylistVideoItem[], options: PlaylistDownloadOptions];
+}>();
 
 // State
-const selectedFormat = ref('MP4');
-const selectedQuality = ref('1080p');
-const selectedHeight = ref(1080);
-const selectedAudioQuality = ref('192kbps (高)');
-const selectedBitrate = ref('192');
+const videos = ref<PlaylistVideoItem[]>([]);
+const selectedFormat = ref<'MP3' | 'MP4'>('MP4');
+const selectedQuality = ref('720p');
+const selectedQualityHeight = ref(720);
+const selectedAudioQuality = ref('192kbps');
+const selectedAudioBitrate = ref('192');
+
+// Options
+const videoQualityOptions: DropdownOption[] = [
+    { label: '2160p (4K)', value: '2160p', height: 2160 },
+    { label: '1440p', value: '1440p', height: 1440 },
+    { label: '1080p', value: '1080p', height: 1080 },
+    { label: '720p', value: '720p', height: 720 },
+    { label: '480p', value: '480p', height: 480 },
+    { label: '360p', value: '360p', height: 360 },
+];
+
+const audioQualityOptions: DropdownOption[] = [
+    { label: '320kbps (High)', value: '320kbps', bitrate: '320' },
+    { label: '192kbps (Medium)', value: '192kbps', bitrate: '192' },
+    { label: '128kbps (Low)', value: '128kbps', bitrate: '128' },
+];
 
 // Computed
-const selectedCount = computed(() => {
-  return props.playlistData?.entries?.filter(v => v.selected).length || 0;
-});
+const selectedCount = computed(() => videos.value.filter((v) => v.selected).length);
 
-const isOptionsValid = computed(() => {
-  if (selectedFormat.value === 'MP4') {
-    return selectedQuality.value && selectedQuality.value !== '選擇畫質';
-  }
-  return selectedAudioQuality.value && selectedAudioQuality.value !== '選擇音質';
-});
+// Watchers
+watch(
+    () => props.playlistData,
+    (data) => {
+        if (data) {
+            videos.value = data.entries.map((entry) => ({ ...entry }));
+        } else {
+            videos.value = [];
+        }
+    },
+    { immediate: true }
+);
 
 // Methods
-function handleFormatChange(option) {
-  selectedFormat.value = option.value;
+function handleQualitySelect(option: DropdownOption): void {
+    selectedQuality.value = option.label;
+    selectedQualityHeight.value = option.height || 720;
 }
 
-function handleQualityChange(option) {
-  selectedQuality.value = option.label;
-  selectedHeight.value = option.height;
+function handleAudioQualitySelect(option: DropdownOption): void {
+    selectedAudioQuality.value = option.label;
+    selectedAudioBitrate.value = option.bitrate || '192';
 }
 
-function handleAudioQualityChange(option) {
-  selectedAudioQuality.value = option.label;
-  selectedBitrate.value = option.bitrate;
+function toggleSelect(video: PlaylistVideoItem): void {
+    video.selected = !video.selected;
 }
 
-function toggleSelect(index) {
-  if (props.playlistData?.entries?.[index]) {
-    props.playlistData.entries[index].selected = !props.playlistData.entries[index].selected;
-  }
+function selectAll(): void {
+    videos.value.forEach((v) => (v.selected = true));
 }
 
-function selectAll() {
-  props.playlistData?.entries?.forEach(v => v.selected = true);
+function deselectAll(): void {
+    videos.value.forEach((v) => (v.selected = false));
 }
 
-function deselectAll() {
-  props.playlistData?.entries?.forEach(v => v.selected = false);
+function confirmSelection(): void {
+    const selected = videos.value.filter((v) => v.selected);
+    const options: PlaylistDownloadOptions = {
+        format: selectedFormat.value,
+        quality: selectedQuality.value,
+        height: selectedQualityHeight.value,
+        audioQuality: selectedAudioQuality.value,
+        bitrate: selectedAudioBitrate.value,
+    };
+    emit('confirm', selected, options);
 }
-
-function handleConfirm() {
-  const selectedVideos = props.playlistData?.entries?.filter(v => v.selected) || [];
-  
-  emit('confirm', selectedVideos, {
-    format: selectedFormat.value,
-    quality: selectedQuality.value,
-    height: selectedHeight.value,
-    audioQuality: selectedAudioQuality.value,
-    bitrate: selectedBitrate.value,
-  });
-}
-
-// Reset state when modal opens
-watch(() => props.show, (val) => {
-  if (val) {
-    selectedFormat.value = 'MP4';
-    selectedQuality.value = '1080p';
-    selectedHeight.value = 1080;
-    selectedAudioQuality.value = '192kbps (高)';
-    selectedBitrate.value = '192';
-  }
-});
 </script>
