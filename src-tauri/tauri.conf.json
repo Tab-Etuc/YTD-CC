@@ -34,7 +34,10 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": ["ffmpeg"],
+    "externalBin": [
+      "ffmpeg",
+      "yt-dlp"
+    ],
     "resources": [],
     "copyright": "",
     "category": "Utility",

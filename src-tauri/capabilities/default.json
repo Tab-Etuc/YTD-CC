@@ -13,7 +13,13 @@
       "identifier": "shell:allow-open",
       "allow": [
         {
-          "href": ".*"
+          "href": "^https?://.+"
+        },
+        {
+          "href": "^mailto:.+"
+        },
+        {
+          "href": "^tel:.+"
         }
       ]
     },

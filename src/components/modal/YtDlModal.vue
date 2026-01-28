@@ -139,8 +139,8 @@
             v-if="!isDownloading"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
-            class="z-1 absolute right-[16vw] h-8 w-8 fill-red-500"
-            @click="$emit('close-modal')"
+            class="z-1 absolute right-[16vw] h-8 w-8 fill-red-500 cursor-pointer transition-all duration-200 hover:scale-110 hover:fill-red-400"
+            @click="emit('close-modal')"
           >
             <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
             <path
@@ -163,31 +163,35 @@
         <div
           class="relative mx-auto flex w-[60vw] rounded-b-xl bg-slate-600 p-4"
         >
-          <div v-if="isDownloading" class="relative m-auto flex h-6 w-full">
-            <span class="absolute left-0 text-white">下載中...</span>
-            <div
-              class="relative m-auto flex h-6 w-[75%] rounded-xl bg-gray-200"
-            >
+          <div v-if="isDownloading" class="relative m-auto flex h-auto w-full flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <span class="text-white font-medium">下載中...</span>
+              <span v-if="estimatedTime" class="text-blue-300 text-sm">
+                預估剩餘 {{ estimatedTime }}
+              </span>
+            </div>
+            <div class="relative flex h-6 w-full rounded-xl bg-gray-200 overflow-hidden">
               <div
                 :style="{ width: downloadProgressBarValue }"
-                class="shim-green absolute top-0 h-6 rounded-xl duration-500"
+                class="shim-green absolute top-0 h-6 rounded-xl duration-300 ease-out"
               ></div>
+              <span class="absolute inset-0 flex items-center justify-center font-bold text-sm text-slate-700">
+                {{ downloadProgressBarValue }}
+              </span>
             </div>
-            <span class="absolute right-5 font-medium text-blue-100">{{
-              downloadProgressBarValue
-            }}</span>
           </div>
 
           <div
             v-if="!isDownloading"
-            class="my-auto mx-3 flex w-full gap-4 justify-around"
+            class="my-auto mx-3 flex w-full gap-4 justify-around items-center"
+            @click.self="closeDropdowns"
           >
             <!-- 檔案格式選單 -->
             <div class="relative flex h-10 w-32">
               <div 
                 class="absolute z-0 h-full w-full rounded-lg text-white flex items-center px-3 select-none ring-1 ring-white/20 transition-colors"
                 :class="isLoading ? 'bg-slate-600 cursor-not-allowed opacity-50' : 'bg-slate-700 cursor-pointer hover:bg-slate-600'"
-                @click.stop="!isLoading && (formatActive = !formatActive, qualityActive = false)"
+                @click.stop="!isLoading && (formatActive = !formatActive, qualityActive = false, audioQualityActive = false)"
               >
                 {{ formatTitle }}
                 <div 
@@ -214,27 +218,29 @@
                   class="absolute bottom-full mb-1 w-full rounded-lg bg-slate-700 shadow-xl ring-1 ring-white/10 z-50 overflow-hidden"
                 >
                   <li
-                    class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors"
-                    @click.stop="formatTitle = 'MP3'; formatActive = false"
+                    class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors flex items-center gap-2"
+                    @click.stop="selectFormat('MP3')"
                   >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/></svg>
                     MP3
                   </li>
                   <li
-                    class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors border-t border-slate-600"
-                    @click.stop="formatTitle = 'MP4'; formatActive = false"
+                    class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors border-t border-slate-600 flex items-center gap-2"
+                    @click.stop="selectFormat('MP4')"
                   >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4zm2 0h1V9h-1v2zm1-4V5h-1v2h1zM5 5v2H4V5h1zm0 4H4v2h1V9zm-1 4h1v2H4v-2z" clip-rule="evenodd"/></svg>
                     MP4
                   </li>
                 </ul>
               </Transition>
             </div>
 
-            <!-- 影片畫質選單 -->
-            <div v-if="formatTitle != 'MP3'" class="relative flex h-10 w-32">
+            <!-- 影片畫質選單 (MP4) -->
+            <div v-if="formatTitle === 'MP4'" class="relative flex h-10 w-32">
               <div 
                 class="absolute z-0 h-full w-full rounded-lg text-white flex items-center px-3 select-none ring-1 ring-white/20 transition-colors"
                 :class="isLoading ? 'bg-slate-600 cursor-not-allowed opacity-50' : 'bg-slate-700 cursor-pointer hover:bg-slate-600'"
-                @click.stop="!isLoading && (qualityActive = !qualityActive, formatActive = false)"
+                @click.stop="!isLoading && (qualityActive = !qualityActive, formatActive = false, audioQualityActive = false)"
               >
                 {{ qualityTitle }}
                 <div 
@@ -263,22 +269,78 @@
                   <li
                     class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors border-b border-slate-600 last:border-0"
                     v-for="quality in videoQualitys"
-                    :key="quality"
-                    @click.stop="qualityTitle = quality; qualityActive = false"
+                    :key="quality.label"
+                    @click.stop="selectQuality(quality)"
                   >
-                    {{ quality }}
+                    {{ quality.label }}
+                  </li>
+                </ul>
+              </Transition>
+            </div>
+
+            <!-- 音訊品質選單 (MP3) - 新增功能 -->
+            <div v-if="formatTitle === 'MP3'" class="relative flex h-10 w-36">
+              <div 
+                class="absolute z-0 h-full w-full rounded-lg text-white flex items-center px-3 select-none ring-1 ring-white/20 transition-colors"
+                :class="isLoading ? 'bg-slate-600 cursor-not-allowed opacity-50' : 'bg-slate-700 cursor-pointer hover:bg-slate-600'"
+                @click.stop="!isLoading && (audioQualityActive = !audioQualityActive, formatActive = false, qualityActive = false)"
+              >
+                <span class="truncate">{{ audioQualityTitle }}</span>
+                <div 
+                  v-if="!isLoading"
+                  class="absolute right-3 top-3 h-2 w-2 border-r-2 border-b-2 border-white transform duration-300"
+                  :class="audioQualityActive ? 'rotate-[225deg] top-4' : 'rotate-45'"
+                ></div>
+              </div>
+
+              <Transition
+                enter-active-class="transition duration-100 ease-out"
+                enter-from-class="transform scale-95 opacity-0"
+                enter-to-class="transform scale-100 opacity-100"
+                leave-active-class="transition duration-75 ease-in"
+                leave-from-class="transform scale-100 opacity-100"
+                leave-to-class="transform scale-95 opacity-0"
+              >
+                <ul
+                  v-if="audioQualityActive"
+                  class="absolute bottom-full mb-1 w-full rounded-lg bg-slate-700 shadow-xl ring-1 ring-white/10 z-50 overflow-hidden"
+                >
+                  <li
+                    v-for="quality in audioQualitys"
+                    :key="quality.bitrate"
+                    class="relative cursor-pointer select-none p-3 text-white hover:bg-slate-600 transition-colors border-b border-slate-600 last:border-0"
+                    @click.stop="selectAudioQuality(quality)"
+                  >
+                    {{ quality.label }}
                   </li>
                 </ul>
               </Transition>
             </div>
 
             <button
-              class="flex h-10 w-24 items-center justify-center rounded-lg text-white shadow-lg font-medium transition-colors ring-1 ring-white/10"
-              :class="isLoading ? 'bg-blue-600/50 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'"
-              :disabled="isLoading"
+              class="flex h-10 w-24 items-center justify-center rounded-lg text-white shadow-lg font-medium transition-all ring-1 ring-white/10 gap-2"
+              :class="isLoading || isProcessing ? 'bg-blue-600/50 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 hover:scale-105 active:scale-95'"
+              :disabled="isLoading || isProcessing"
               @click="check"
             >
-              下載
+              <svg v-if="isProcessing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>下載</span>
+            </button>
+            
+            <!-- 加入佇列按鈕 -->
+            <button
+              class="flex h-10 w-10 items-center justify-center rounded-lg text-white shadow-lg transition-all ring-1 ring-white/10"
+              :class="isLoading || isProcessing ? 'bg-slate-600/50 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500 hover:scale-105 active:scale-95'"
+              :disabled="isLoading || isProcessing"
+              @click="addToQueue"
+              title="加入下載佇列"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
             </button>
           </div>
         </div>
@@ -287,221 +349,290 @@
   </Transition>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onUnmounted } from 'vue';
+import { useStore } from 'vuex';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { sendNotification } from '@tauri-apps/plugin-notification';
-import { readTextFile, writeTextFile, BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
-import { mapState } from 'vuex';
+import { useNotification } from '@kyvg/vue3-notification';
+import DropdownSelect from '../common/DropdownSelect.vue';
 
-export default {
-  name: 'YtDlModal',
+// Props & Emits
+const props = defineProps({
+  showModal: { type: Boolean, default: true, required: true },
+  videoId: { type: String, default: null, required: true },
+});
+const emit = defineEmits(['close-modal', 'add-to-queue']);
 
-  props: {
-    showModal: {
-      type: Boolean,
-      default: true,
-      required: true,
-    },
-    videoId: {
-      type: String,
-      default: null,
-      required: true,
-    },
-  },
+// Store & Notification
+const store = useStore();
+const { notify } = useNotification();
 
-  computed: {
-    ...mapState([
-      'isDownloading',
-      'downloadProgressBarValue',
-      'windowControlOnTheLeft',
-      'downloadOutputPath',
-      'saveHistory',
-    ]),
-  },
+// Computed from Store
+const isDownloading = computed(() => store.state.isDownloading);
+const downloadProgressBarValue = computed(() => store.state.downloadProgressBarValue);
+const downloadOutputPath = computed(() => store.state.downloadOutputPath);
+const saveHistory = computed(() => store.state.saveHistory);
 
-  data() {
-    return {
-      isLoading: false,
-      videoTitle: '載入中...',
-      videoAuthor: '',
-      videoThumbnail: '',
-      videoDuration: '00:00',
-      videoQualitys: [],
-      formatActive: false,
-      formatTitle: '檔案格式',
-      qualityActive: false,
-      qualityTitle: '影片畫質',
-    };
-  },
+// Local State
+const isLoading = ref(false);
+const videoTitle = ref('載入中...');
+const videoAuthor = ref('');
+const videoThumbnail = ref('');
+const videoDuration = ref('00:00');
+const videoQualitys = ref([]);
+const formatActive = ref(false);
+const formatTitle = ref('檔案格式');
+const qualityActive = ref(false);
+const qualityTitle = ref('影片畫質');
+const selectedHeight = ref(null);
 
-  watch: {
-    showModal(val) {
-      if (val && this.videoId) {
-        this.fetchVideoInfo();
-      }
-    }
-  },
+// 新增：音質選項 (MP3)
+const audioQualitys = ref([
+  { label: '320kbps (最高)', bitrate: '320' },
+  { label: '192kbps (高)', bitrate: '192' },
+  { label: '128kbps (標準)', bitrate: '128' },
+]);
+const audioQualityActive = ref(false);
+const audioQualityTitle = ref('音訊品質');
+const selectedBitrate = ref('192');
 
-  methods: {
-    async fetchVideoInfo() {
-      this.isLoading = true;
-      // Reset State with Instant Thumbnail
-      this.videoTitle = '載入中...';
-      this.videoAuthor = '';
-      // Use standard YouTube thumbnail URL for instant feedback
-      this.videoThumbnail = `https://img.youtube.com/vi/${this.videoId}/mqdefault.jpg`;
-      this.videoDuration = '00:00';
-      this.videoQualitys = [];
-      this.formatTitle = '檔案格式';
-      this.qualityTitle = '影片畫質';
+// 新增：下載速度與預估時間
+const downloadSpeed = ref('');
+const estimatedTime = ref('');
+const downloadStartTime = ref(null);
+const lastProgress = ref(0);
 
-      const targetUrl = `https://www.youtube.com/watch?v=${this.videoId}`;
-      
-      try {
-        const info = await invoke('get_video_info', { url: targetUrl });
-        
-        this.videoTitle = info.title;
-        this.videoAuthor = info.uploader;
-        // Update with higher res or preferred thumbnail from yt-dlp if different/better
-        if (info.thumbnail) this.videoThumbnail = info.thumbnail;
-        this.videoDuration = info.duration_string;
-        
-        const formats = info.formats || [];
-        const qualities = new Set();
-        formats.forEach(f => {
-          if (f.height) qualities.add(f.height + 'p');
-        });
-        
-        this.videoQualitys = Array.from(qualities).sort((a, b) => parseInt(b) - parseInt(a));
-        
-      } catch (e) {
-         this.$notify({
-          group: 'foo-css',
-          title: '無法取得影片資訊',
-          text: e.toString(),
-          type: 'error',
-        });
-        this.$emit('close-modal');
-      } finally {
-        this.isLoading = false;
-      }
-    },
+// 防抖：防止重複點擊
+const isProcessing = ref(false);
 
-    async check() {
-      if (this.formatTitle == '檔案格式') {
-        return this.$notify({
-          group: 'foo-css',
-          title: '請選擇檔案格式！',
-          type: 'error',
-        });
-      }
-      if (this.formatTitle == 'MP4' && this.qualityTitle == '影片畫質') {
-        return this.$notify({
-          group: 'foo-css',
-          title: '請選擇影片畫質！',
-          type: 'error',
-        });
-      }
+// Watcher
+watch(() => props.showModal, (val) => {
+  if (val && props.videoId) {
+    fetchVideoInfo();
+  }
+});
 
-      await this.download();
-    },
-
-    async download() {
-      const targetUrl = `https://www.youtube.com/watch?v=${this.videoId}`;
-      const isAudio = this.formatTitle === 'MP3';
-      
-      let format = '';
-      if (isAudio) {
-         format = 'mp3'; 
-      } else {
-         const height = this.qualityTitle.replace('p', '');
-         format = `bestvideo[height=${height}][ext=mp4]+bestaudio[ext=m4a]/best[height=${height}][ext=mp4]/best[ext=mp4]/best`;
-      }
-
-      this.$store.commit('UPDATE_STATUS', true);
-      this.$store.commit('SET_BAR_VALUE', '0%');
-      
-      let unlisten;
-
-      try {
-        unlisten = await listen('download_progress', (event) => {
-            this.$store.commit('SET_BAR_VALUE', event.payload);
-        });
-
-        await invoke('download_video', {
-          url: targetUrl,
-          path: this.downloadOutputPath,
-          format: format,
-          isAudio: isAudio
-        });
-        
-        this.$store.commit('SET_BAR_VALUE', '100%');
-        this.$store.commit('UPDATE_STATUS', false);
-        this.$notify({
-          group: 'foo-css',
-          title: '下載完成！',
-          text: `${this.videoTitle}`,
-        });
-        sendNotification({ title: this.videoTitle, body: '下載完成！' });
-        
-        await this.writeHistory();
-        this.$emit('close-modal');
-
-      } catch (err) {
-        console.error(err);
-        this.$store.commit('UPDATE_STATUS', false);
-         this.$notify({
-          group: 'foo-css',
-          title: '下載失敗！',
-          text: err.toString(),
-          type: 'error',
-        });
-      } finally {
-        if (unlisten) unlisten();
-        this.formatTitle = '檔案格式';
-        this.qualityTitle = '影片畫質';
-      }
-    },
-
-    async writeHistory() {
-      if (!this.saveHistory) return;
-
-      try {
-        const historyPath = 'history.json';
-        if (!(await exists(historyPath, { baseDir: BaseDirectory.AppData }))) {
-           await mkdir('', { baseDir: BaseDirectory.AppData, recursive: true });
-        }
-
-        let jsonData = { 下載次數統計: { MP3: 0, MP4: 0 }, 歷程記錄: [] };
-        try {
-           const content = await readTextFile(historyPath, { baseDir: BaseDirectory.AppData });
-           if (content) jsonData = JSON.parse(content);
-        } catch { /* ignore */ }
-        
-        if (!jsonData.下載次數統計) jsonData.下載次數統計 = { MP3: 0, MP4: 0 };
-        if (!jsonData.歷程記錄) jsonData.歷程記錄 = [];
-
-        if (this.formatTitle === 'MP3') jsonData.下載次數統計.MP3++;
-        else jsonData.下載次數統計.MP4++;
-
-        jsonData.歷程記錄.unshift({
-            影片名稱: this.videoTitle,
-            檔案格式: this.formatTitle,
-            影片時長: this.videoDuration,
-            影片背景: this.videoThumbnail,
-            下載時間: Date.now(),
-        });
-
-        if (jsonData.歷程記錄.length > 50) jsonData.歷程記錄.pop();
-
-        await writeTextFile(historyPath, JSON.stringify(jsonData), { baseDir: BaseDirectory.AppData });
-        this.$store.dispatch('Set_History_List');
-
-      } catch (err) {
-        console.error('Failed to save history', err);
-      }
-    },
-  },
+// 點擊外部關閉下拉選單
+const closeDropdowns = () => {
+  formatActive.value = false;
+  qualityActive.value = false;
+  audioQualityActive.value = false;
 };
+
+// Methods
+async function fetchVideoInfo() {
+  isLoading.value = true;
+  // Reset State with Instant Thumbnail
+  videoTitle.value = '載入中...';
+  videoAuthor.value = '';
+  videoThumbnail.value = `https://img.youtube.com/vi/${props.videoId}/mqdefault.jpg`;
+  videoDuration.value = '00:00';
+  videoQualitys.value = [];
+  formatTitle.value = '檔案格式';
+  qualityTitle.value = '影片畫質';
+  audioQualityTitle.value = '音訊品質';
+
+  const targetUrl = `https://www.youtube.com/watch?v=${props.videoId}`;
+  
+  try {
+    const info = await invoke('get_video_info', { url: targetUrl });
+    
+    videoTitle.value = info.title;
+    videoAuthor.value = info.uploader;
+    if (info.thumbnail) videoThumbnail.value = info.thumbnail;
+    videoDuration.value = info.duration_string;
+    
+    const formats = info.formats || [];
+    const qualityMap = new Map();
+
+    formats.forEach(f => {
+      if (f.vcodec !== 'none' && f.height && f.height >= 144) {
+        const p = f.width ? Math.min(f.height, f.width) : f.height;
+        qualityMap.set(p + 'p', f.height);
+      }
+    });
+    
+    videoQualitys.value = Array.from(qualityMap.keys())
+      .sort((a, b) => parseInt(b) - parseInt(a))
+      .map(label => ({ label, height: qualityMap.get(label) }));
+    
+  } catch (e) {
+    notify({
+      group: 'foo-css',
+      title: '無法取得影片資訊',
+      text: e.toString(),
+      type: 'error',
+    });
+    emit('close-modal');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function check() {
+  if (isProcessing.value) return; // 防抖
+  
+  if (formatTitle.value === '檔案格式') {
+    return notify({ group: 'foo-css', title: '請選擇檔案格式！', type: 'error' });
+  }
+  if (formatTitle.value === 'MP4' && qualityTitle.value === '影片畫質') {
+    return notify({ group: 'foo-css', title: '請選擇影片畫質！', type: 'error' });
+  }
+  if (formatTitle.value === 'MP3' && audioQualityTitle.value === '音訊品質') {
+    return notify({ group: 'foo-css', title: '請選擇音訊品質！', type: 'error' });
+  }
+
+  await download();
+}
+
+async function download() {
+  isProcessing.value = true;
+  const targetUrl = `https://www.youtube.com/watch?v=${props.videoId}`;
+  const isAudio = formatTitle.value === 'MP3';
+  
+  let format = '';
+  if (isAudio) {
+    format = 'mp3';
+  } else {
+    const height = selectedHeight.value;
+    format = `bestvideo[height=${height}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height=${height}]+bestaudio/best[height=${height}]/best`;
+  }
+
+  store.commit('UPDATE_STATUS', true);
+  store.commit('SET_BAR_VALUE', '0%');
+  downloadStartTime.value = Date.now();
+  lastProgress.value = 0;
+  downloadSpeed.value = '';
+  estimatedTime.value = '';
+  
+  let unlisten;
+
+  try {
+    unlisten = await listen('download_progress', (event) => {
+      const progress = parseFloat(event.payload);
+      store.commit('SET_BAR_VALUE', event.payload);
+      
+      // 計算下載速度與預估時間
+      if (!isNaN(progress) && progress > lastProgress.value) {
+        const elapsed = (Date.now() - downloadStartTime.value) / 1000;
+        const rate = progress / elapsed;
+        const remaining = (100 - progress) / rate;
+        
+        if (remaining > 0 && remaining < 3600) {
+          const mins = Math.floor(remaining / 60);
+          const secs = Math.floor(remaining % 60);
+          estimatedTime.value = mins > 0 ? `${mins}分${secs}秒` : `${secs}秒`;
+        }
+        lastProgress.value = progress;
+      }
+    });
+
+    await invoke('download_video', {
+      url: targetUrl,
+      path: downloadOutputPath.value,
+      format: format,
+      isAudio: isAudio,
+      bitrate: isAudio ? selectedBitrate.value : null
+    });
+    
+    store.commit('SET_BAR_VALUE', '100%');
+    store.commit('UPDATE_STATUS', false);
+    notify({
+      group: 'foo-css',
+      title: '下載完成！',
+      text: `${videoTitle.value}`,
+    });
+    sendNotification({ title: videoTitle.value, body: '下載完成！' });
+    
+    await writeHistory();
+    emit('close-modal');
+
+  } catch (err) {
+    console.error(err);
+    store.commit('UPDATE_STATUS', false);
+    notify({
+      group: 'foo-css',
+      title: '下載失敗！',
+      text: err.toString(),
+      type: 'error',
+    });
+  } finally {
+    if (unlisten) unlisten();
+    formatTitle.value = '檔案格式';
+    qualityTitle.value = '影片畫質';
+    audioQualityTitle.value = '音訊品質';
+    isProcessing.value = false;
+    estimatedTime.value = '';
+  }
+}
+
+async function writeHistory() {
+  await store.dispatch('Add_History_Item', {
+    title: videoTitle.value,
+    format: formatTitle.value,
+    duration: videoDuration.value,
+    thumbnail: videoThumbnail.value,
+    quality: formatTitle.value === 'MP3' ? audioQualityTitle.value : qualityTitle.value
+  });
+}
+
+// 格式選擇處理
+function selectFormat(format) {
+  formatTitle.value = format;
+  formatActive.value = false;
+  // 重置相關選項
+  if (format === 'MP3') {
+    qualityTitle.value = '影片畫質';
+    selectedHeight.value = null;
+  } else {
+    audioQualityTitle.value = '音訊品質';
+    selectedBitrate.value = '192';
+  }
+}
+
+function selectQuality(quality) {
+  qualityTitle.value = quality.label;
+  selectedHeight.value = quality.height;
+  qualityActive.value = false;
+}
+
+function selectAudioQuality(quality) {
+  audioQualityTitle.value = quality.label;
+  selectedBitrate.value = quality.bitrate;
+  audioQualityActive.value = false;
+}
+
+// 加入佇列功能
+function addToQueue() {
+  if (formatTitle.value === '檔案格式') {
+    return notify({ group: 'foo-css', title: '請選擇檔案格式！', type: 'error' });
+  }
+  if (formatTitle.value === 'MP4' && qualityTitle.value === '影片畫質') {
+    return notify({ group: 'foo-css', title: '請選擇影片畫質！', type: 'error' });
+  }
+  if (formatTitle.value === 'MP3' && audioQualityTitle.value === '音訊品質') {
+    return notify({ group: 'foo-css', title: '請選擇音訊品質！', type: 'error' });
+  }
+
+  const item = {
+    url: `https://www.youtube.com/watch?v=${props.videoId}`,
+    title: videoTitle.value,
+    thumbnail: videoThumbnail.value,
+    duration: videoDuration.value,
+    format: formatTitle.value,
+    quality: formatTitle.value === 'MP4' ? qualityTitle.value : audioQualityTitle.value,
+    height: selectedHeight.value,
+    bitrate: selectedBitrate.value,
+  };
+
+  emit('add-to-queue', item);
+  emit('close-modal');
+  
+  // 重置選項
+  formatTitle.value = '檔案格式';
+  qualityTitle.value = '影片畫質';
+  audioQualityTitle.value = '音訊品質';
+}
 </script>

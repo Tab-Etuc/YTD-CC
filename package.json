@@ -21,11 +21,8 @@
     "@tauri-apps/plugin-process": "*",
     "@tauri-apps/plugin-shell": "*",
     "@tauri-apps/plugin-updater": "*",
-    "chart.js": "*",
     "module-from-string": "*",
-    "tailwindcss": "*",
     "vue": "*",
-    "vue-chartjs": "*",
     "vue-router": "*",
     "vuex": "*",
     "yarn": "*"
