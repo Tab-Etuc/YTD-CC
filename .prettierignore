@@ -1,0 +1,24 @@
+# Build outputs
+dist/
+src-tauri/target/
+
+# Dependencies
+node_modules/
+
+# Lock files
+yarn.lock
+package-lock.json
+Cargo.lock
+
+# Generated files
+src-tauri/gen/
+
+# Binary files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Other
+.git/
+*.md
