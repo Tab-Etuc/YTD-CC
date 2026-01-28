@@ -11,7 +11,6 @@ export default createStore({
     downloadOutputPath: '',
     saveHistory: true,
     bannerImage: '',
-    // 下載佇列相關
     downloadQueue: [],
     isQueueProcessing: false,
     queueIdCounter: 0,
@@ -42,7 +41,6 @@ export default createStore({
     SET_BANNER_IMAGE(state, payload) {
       state.bannerImage = payload;
     },
-    // 佇列相關 mutations
     ADD_TO_QUEUE(state, item) {
       state.queueIdCounter++;
       state.downloadQueue.push({
@@ -98,7 +96,7 @@ export default createStore({
         baseDir: BaseDirectory.AppData,
       })
         .then((log) => {
-          const data = JSON.parse(log)['歷程記錄']?.reverse() ?? '';
+          const data = JSON.parse(log)['HISTORY_RECORDS']?.reverse() ?? '';
           commit('SET_HISTORY_LIST', data);
         })
         .catch((err) => commit('SET_HISTORY_LIST', ''));
@@ -124,31 +122,30 @@ export default createStore({
           await mkdir('', { baseDir: BaseDirectory.AppData, recursive: true });
         }
 
-        let jsonData = { 下載次數統計: { MP3: 0, MP4: 0 }, 歷程記錄: [] };
+        let jsonData = { DOWNLOAD_COUNT_STATISTICS: { MP3: 0, MP4: 0 }, HISTORY_RECORDS: [] };
         try {
           const content = await readTextFile(historyPath, { baseDir: BaseDirectory.AppData });
           if (content) jsonData = JSON.parse(content);
         } catch { /* ignore */ }
 
-        if (!jsonData.下載次數統計) jsonData.下載次數統計 = { MP3: 0, MP4: 0 };
-        if (!jsonData.歷程記錄) jsonData.歷程記錄 = [];
+        if (!jsonData.DOWNLOAD_COUNT_STATISTICS) jsonData.DOWNLOAD_COUNT_STATISTICS = { MP3: 0, MP4: 0 };
+        if (!jsonData.HISTORY_RECORDS) jsonData.HISTORY_RECORDS = [];
 
-        if (item.format === 'MP3') jsonData.下載次數統計.MP3++;
-        else jsonData.下載次數統計.MP4++;
+        if (item.format === 'MP3') jsonData.DOWNLOAD_COUNT_STATISTICS.MP3++;
+        else jsonData.DOWNLOAD_COUNT_STATISTICS.MP4++;
 
-        jsonData.歷程記錄.unshift({
-          影片名稱: item.title,
-          檔案格式: item.format,
-          影片時長: item.duration || '00:00',
-          影片背景: item.thumbnail,
-          下載時間: Date.now(),
-          ...(item.format === 'MP3' && { 音訊品質: item.quality }),
-          ...(item.format === 'MP4' && { 影片畫質: item.quality }),
+        jsonData.HISTORY_RECORDS.unshift({
+          VIDEO_NAME: item.title,
+          FILE_FORMAT: item.format,
+          VIDEO_DURATION: item.duration || '00:00',
+          BANNER_IMAGE: item.thumbnail,
+          DOWNLOAD_TIME: Date.now(),
+          ...(item.format === 'MP3' && { AUDIO_QUALITY: item.quality }),
+          ...(item.format === 'MP4' && { VIDEO_QUALITY: item.quality }),
         });
 
-        // 限制歷程記錄數量，避免檔案過大 (例如保留 200 筆)
-        if (jsonData.歷程記錄.length > 200) {
-          jsonData.歷程記錄 = jsonData.歷程記錄.slice(0, 200);
+        if (jsonData.HISTORY_RECORDS.length > 200) {
+          jsonData.HISTORY_RECORDS = jsonData.HISTORY_RECORDS.slice(0, 200);
         }
 
         await writeTextFile(historyPath, JSON.stringify(jsonData, null, 2), { baseDir: BaseDirectory.AppData });

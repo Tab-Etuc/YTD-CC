@@ -186,7 +186,7 @@
             class="my-auto mx-3 flex w-full gap-4 justify-around items-center"
             @click.self="closeDropdowns"
           >
-            <!-- 檔案格式選單 -->
+            <!-- FILE_FORMAT選單 -->
             <div class="relative flex h-10 w-32">
               <div 
                 class="absolute z-0 h-full w-full rounded-lg text-white flex items-center px-3 select-none ring-1 ring-white/20 transition-colors"
@@ -383,7 +383,7 @@ const videoThumbnail = ref('');
 const videoDuration = ref('00:00');
 const videoQualitys = ref([]);
 const formatActive = ref(false);
-const formatTitle = ref('檔案格式');
+const formatTitle = ref('FILE_FORMAT');
 const qualityActive = ref(false);
 const qualityTitle = ref('影片畫質');
 const selectedHeight = ref(null);
@@ -430,7 +430,7 @@ async function fetchVideoInfo() {
   videoThumbnail.value = `https://img.youtube.com/vi/${props.videoId}/mqdefault.jpg`;
   videoDuration.value = '00:00';
   videoQualitys.value = [];
-  formatTitle.value = '檔案格式';
+  formatTitle.value = 'FILE_FORMAT';
   qualityTitle.value = '影片畫質';
   audioQualityTitle.value = '音訊品質';
 
@@ -474,8 +474,8 @@ async function fetchVideoInfo() {
 async function check() {
   if (isProcessing.value) return; // 防抖
   
-  if (formatTitle.value === '檔案格式') {
-    return notify({ group: 'foo-css', title: '請選擇檔案格式！', type: 'error' });
+  if (formatTitle.value === 'FILE_FORMAT') {
+    return notify({ group: 'foo-css', title: '請選擇FILE_FORMAT！', type: 'error' });
   }
   if (formatTitle.value === 'MP4' && qualityTitle.value === '影片畫質') {
     return notify({ group: 'foo-css', title: '請選擇影片畫質！', type: 'error' });
@@ -560,7 +560,7 @@ async function download() {
     });
   } finally {
     if (unlisten) unlisten();
-    formatTitle.value = '檔案格式';
+    formatTitle.value = 'FILE_FORMAT';
     qualityTitle.value = '影片畫質';
     audioQualityTitle.value = '音訊品質';
     isProcessing.value = false;
@@ -606,8 +606,8 @@ function selectAudioQuality(quality) {
 
 // 加入佇列功能
 function addToQueue() {
-  if (formatTitle.value === '檔案格式') {
-    return notify({ group: 'foo-css', title: '請選擇檔案格式！', type: 'error' });
+  if (formatTitle.value === 'FILE_FORMAT') {
+    return notify({ group: 'foo-css', title: '請選擇FILE_FORMAT！', type: 'error' });
   }
   if (formatTitle.value === 'MP4' && qualityTitle.value === '影片畫質') {
     return notify({ group: 'foo-css', title: '請選擇影片畫質！', type: 'error' });
@@ -631,7 +631,7 @@ function addToQueue() {
   emit('close-modal');
   
   // 重置選項
-  formatTitle.value = '檔案格式';
+  formatTitle.value = 'FILE_FORMAT';
   qualityTitle.value = '影片畫質';
   audioQualityTitle.value = '音訊品質';
 }

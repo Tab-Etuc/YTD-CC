@@ -1,6 +1,5 @@
 <template>
   <div class="flex h-full w-[calc(100%-7rem)]">
-    <!-- 不知道為甚麼不可 import SideHistory.vue 有待研究 -w- -->
     <div
       class="mt-6 h-[90%] w-[70%] overflow-hidden rounded-xl bg-slate-800 shadow-2xl ring-1 ring-inset ring-white/10"
     >
@@ -41,13 +40,13 @@
         >
           <li class="flex w-full">
             <img
-              :src="i.影片背景"
+              :src="i.BANNER_IMAGE"
               loading="lazy"
               class="my-auto ml-2 h-[80%] w-28 rounded-md"
             />
 
             <div class="text-md ml-3 h-full w-[80%] text-white">
-              <p class="w-full truncate">{{ i.影片名稱 }}</p>
+              <p class="w-full truncate">{{ i.VIDEO_NAME }}</p>
               <div class="mt-3 flex h-8 w-full flex-wrap space-x-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +58,7 @@
                     d="M272 0C289.7 0 304 14.33 304 32C304 49.67 289.7 64 272 64H256V98.45C293.5 104.2 327.7 120 355.7 143L377.4 121.4C389.9 108.9 410.1 108.9 422.6 121.4C435.1 133.9 435.1 154.1 422.6 166.6L398.5 190.8C419.7 223.3 432 262.2 432 304C432 418.9 338.9 512 224 512C109.1 512 16 418.9 16 304C16 200 92.32 113.8 192 98.45V64H176C158.3 64 144 49.67 144 32C144 14.33 158.3 0 176 0L272 0zM248 192C248 178.7 237.3 168 224 168C210.7 168 200 178.7 200 192V320C200 333.3 210.7 344 224 344C237.3 344 248 333.3 248 320V192z"
                   />
                 </svg>
-                <span class="h-5 truncate text-sm">{{ i.影片時長 }}</span>
+                <span class="h-5 truncate text-sm">{{ i.VIDEO_DURATION }}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 384 512"
@@ -70,12 +69,12 @@
                     d="M0 64C0 28.65 28.65 0 64 0H224V128C224 145.7 238.3 160 256 160H384V448C384 483.3 355.3 512 320 512H64C28.65 512 0 483.3 0 448V64zM256 128V0L384 128H256z"
                   />
                 </svg>
-                <span class="h-5 truncate text-sm">{{ i.檔案格式 }}</span>
+                <span class="h-5 truncate text-sm">{{ i.FILE_FORMAT }}</span>
               </div>
               <p class="w-full truncate text-slate-300">
                 {{
-                  `下載時間：${timeFormat(i.下載時間)},　${new Date(
-                    i.下載時間
+                  `下載時間：${timeFormat(i.DOWNLOAD_TIME)},　${new Date(
+                    i.DOWNLOAD_TIME
                   ).toLocaleString()}`
                 }}
               </p>

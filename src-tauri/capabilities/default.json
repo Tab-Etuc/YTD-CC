@@ -10,6 +10,21 @@
     "core:window:allow-start-dragging",
     "core:window:allow-toggle-maximize",
     {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "yt-dlp",
+          "args": true,
+          "sidecar": true
+        },
+        {
+          "name": "ffmpeg",
+          "args": true,
+          "sidecar": true
+        }
+      ]
+    },
+    {
       "identifier": "shell:allow-open",
       "allow": [
         {

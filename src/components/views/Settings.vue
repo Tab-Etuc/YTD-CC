@@ -17,7 +17,6 @@
           id="window-controls-position-switch-toggle"
           class="hidden"
           v-model="windowControlOnTheLeft"
-          @click="WindowControlPositionSettings"
           checked
         />
         <label
@@ -61,7 +60,6 @@
           id="save-history-switch-toggle"
           class="hidden"
           v-model="saveHistory"
-          @click="SaveHistorySettings"
           checked
         />
         <label
@@ -78,159 +76,84 @@
   </div>
 </template>
 
-<script>
-import { readTextFile, writeTextFile, mkdir, exists, BaseDirectory } from '@tauri-apps/plugin-fs';
+<script setup>
+import { computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { invoke } from '@tauri-apps/api/core';
 import { appDataDir, downloadDir } from '@tauri-apps/api/path';
-import { open } from '@tauri-apps/plugin-dialog';
+import { open as openDialog } from '@tauri-apps/plugin-dialog';
 
-export default {
-  name: 'Settings',
+const store = useStore();
 
-  computed: {
-    windowControlOnTheLeft: {
-      get() {
-        return this.$store.state.windowControlOnTheLeft;
-      },
-      set(value) {
-        this.$store.commit('SET_WINDOW_CONTROLS_ON_THE_LEFT', value);
-      }
-    },
-    downloadOutputPath() {
-      return this.$store.state.downloadOutputPath; 
-    },
-    saveHistory: {
-      get() {
-        return this.$store.state.saveHistory;
-      },
-      set(value) {
-        this.$store.commit('SET_SAVE_HISTORY', value);
-      }
-    },
-  },
+const windowControlOnTheLeft = computed({
+  get: () => store.state.windowControlOnTheLeft,
+  set: (val) => {
+    store.commit('SET_WINDOW_CONTROLS_ON_THE_LEFT', val);
+    saveAllSettings();
+  }
+});
 
-  async created() {
-    try {
-      // Check if file exists and has content
-      let log = '';
-      try {
-        log = await readTextFile('settings.json', { baseDir: BaseDirectory.AppData });
-      } catch (e) {
-        // file not found or other error
-      }
+const downloadOutputPath = computed(() => store.state.downloadOutputPath);
 
-      if (!log) {
-         // Create default settings
-         const jsonData = {
-          WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
-          DOWNLOAD_OUTPUT_PATH: await downloadDir(),
-          SAVE_HISTORY: true,
-        };
-        await this.saveSettingsToFile(jsonData);
-      }
-    } catch (err) {
-      console.error('Error in Settings created hook:', err);
-    }
-    await this.$store.dispatch('Set_Settings_List').catch(console.error());
-  },
+const saveHistory = computed({
+  get: () => store.state.saveHistory,
+  set: (val) => {
+    store.commit('SET_SAVE_HISTORY', val);
+    saveAllSettings();
+  }
+});
 
-  methods: {
-    async saveSettingsToFile(jsonData) {
-      try {
-        const dirExists = await exists('', { baseDir: BaseDirectory.AppData });
-        if (!dirExists) {
-          await mkdir('', { baseDir: BaseDirectory.AppData, recursive: true });
-        }
-        await writeTextFile('settings.json', JSON.stringify(jsonData), {
-          baseDir: BaseDirectory.AppData,
-        });
-      } catch (err) {
-        console.error('Failed to write settings.json', err);
-      }
-    },
-
-    async WindowControlPositionSettings() {
-      try {
-        let jsonData = {};
-        try {
-          const log = await readTextFile('settings.json', { baseDir: BaseDirectory.AppData });
-          if (!log) throw new Error('Empty file');
-          jsonData = JSON.parse(log);
-        } catch {
-          // Keep existing settings if possible, or start fresh
-          jsonData = {
-             DOWNLOAD_OUTPUT_PATH: await downloadDir(),
-             SAVE_HISTORY: this.saveHistory
-          };
-        }
-
-        // Sync file with current store state (updated by v-model)
-        jsonData.WINDOW_CONTROLS_ON_THE_LEFT = this.windowControlOnTheLeft;
-        
-        await this.saveSettingsToFile(jsonData);
-        await this.$store.dispatch('Set_Settings_List');
-      } catch (err) {
-        console.error(err);
-      }
-    },
-
-    async DownloadOutputPathSettings() {
-      // Open a selection dialog for directories
-      let selected = await open({
-        directory: true,
-        multiple: false,
-        defaultPath: await appDataDir(),
-      });
-      if (selected == null) return;
-      selected += '\\';
-
-      try {
-        let jsonData = {};
-         try {
-          const log = await readTextFile('settings.json', { baseDir: BaseDirectory.AppData });
-          if (!log) throw new Error('Empty');
-          jsonData = JSON.parse(log);
-        } catch {
-             jsonData = {
-                WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
-                // DOWNLOAD_OUTPUT_PATH updated below
-                SAVE_HISTORY: this.saveHistory
-            };
-        }
-
-        jsonData.DOWNLOAD_OUTPUT_PATH = selected;
-        await this.saveSettingsToFile(jsonData);
-        await this.$store.dispatch('Set_Settings_List');
-      } catch (err) {
-        console.error(err);
-      }
-    },
-
-    async SaveHistorySettings() {
-      try {
-        let jsonData = {};
-        try {
-          const log = await readTextFile('settings.json', { baseDir: BaseDirectory.AppData });
-          if (!log) throw new Error('Empty');
-          jsonData = JSON.parse(log);
-        } catch {
-            jsonData = {
-                WINDOW_CONTROLS_ON_THE_LEFT: this.windowControlOnTheLeft,
-                DOWNLOAD_OUTPUT_PATH: await downloadDir(),
-                // SAVE_HISTORY updated below
-            };
-        }
-
-        // Sync file with current store state
-        jsonData.SAVE_HISTORY = this.saveHistory;
-        
-        await this.saveSettingsToFile(jsonData);
-        await this.$store.dispatch('Set_Settings_List');
-      } catch (err) {
-        console.error(err);
-      }
-    },
-  },
+const saveSettings = async (settings) => {
+  try {
+    await invoke('save_settings', { settings });
+  } catch (err) {
+    console.error('Failed to save settings:', err);
+  }
 };
+
+const saveAllSettings = async () => {
+  try {
+    const currentSettings = {
+        WINDOW_CONTROLS_ON_THE_LEFT: store.state.windowControlOnTheLeft,
+        DOWNLOAD_OUTPUT_PATH: store.state.downloadOutputPath,
+        SAVE_HISTORY: store.state.saveHistory,
+        BANNER_IMAGE: store.state.bannerImage || ''
+    };
+    
+    await saveSettings(currentSettings);
+    await store.dispatch('Set_Settings_List');
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const DownloadOutputPathSettings = async () => {
+  let selected = await openDialog({
+    directory: true,
+    multiple: false,
+    defaultPath: await appDataDir(),
+  });
+  if (selected == null) return;
+  
+
+  try {
+    const currentSettings = {
+        WINDOW_CONTROLS_ON_THE_LEFT: store.state.windowControlOnTheLeft,
+        DOWNLOAD_OUTPUT_PATH: selected,
+        SAVE_HISTORY: store.state.saveHistory,
+        BANNER_IMAGE: store.state.bannerImage || ''
+    };
+
+    await saveSettings(currentSettings);
+    await store.dispatch('Set_Settings_List');
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+onMounted(async () => {
+  await store.dispatch('Set_Settings_List').catch(console.error());
+});
 </script>
 
 <style scoped>
