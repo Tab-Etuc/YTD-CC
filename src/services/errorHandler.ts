@@ -328,10 +328,10 @@ export function withErrorHandling<T extends (...args: unknown[]) => Promise<unkn
                 error instanceof AppError
                     ? error
                     : new AppError({
-                        message: options?.fallbackMessage ?? (error as Error).message,
-                        category: options?.category ?? 'UNKNOWN',
-                        cause: error instanceof Error ? error : undefined,
-                    });
+                          message: options?.fallbackMessage ?? (error as Error).message,
+                          category: options?.category ?? 'UNKNOWN',
+                          cause: error instanceof Error ? error : undefined,
+                      });
 
             await handleError(appError);
 

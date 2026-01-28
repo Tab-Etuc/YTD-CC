@@ -51,7 +51,9 @@ export const useQueueStore = defineStore('queue', () => {
 
     /** 整體進度百分比 */
     const overallProgress = computed(() => {
-        if (items.value.length === 0) {return 0;}
+        if (items.value.length === 0) {
+            return 0;
+        }
         const total = items.value.length;
         const completed = completedCount.value;
         const downloading = downloadingItem.value;

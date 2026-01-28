@@ -158,33 +158,50 @@
                             <label class="mb-2 block text-sm font-medium text-slate-300"
                                 >下載進度</label
                             >
-                            <div class="relative h-4 w-full overflow-hidden rounded-full bg-slate-700/50 shadow-inner">
+                            <div
+                                class="relative h-4 w-full overflow-hidden rounded-full bg-slate-700/50 shadow-inner"
+                            >
                                 <!-- Progress fill -->
                                 <div
                                     class="h-full rounded-full transition-all duration-300 ease-out"
                                     :style="{
                                         width: downloadProgressBarValue,
-                                        background: 'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899)',
+                                        background:
+                                            'linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899)',
                                     }"
                                 >
                                     <!-- Shimmer overlay -->
-                                    <div class="relative h-full w-full overflow-hidden rounded-full">
-                                        <div 
-                                            class="absolute inset-0 animate-shimmer"
-                                            style="background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);"
+                                    <div
+                                        class="relative h-full w-full overflow-hidden rounded-full"
+                                    >
+                                        <div
+                                            class="animate-shimmer absolute inset-0"
+                                            style="
+                                                background: linear-gradient(
+                                                    90deg,
+                                                    transparent,
+                                                    rgba(255, 255, 255, 0.3),
+                                                    transparent
+                                                );
+                                            "
                                         ></div>
                                     </div>
                                 </div>
                                 <!-- Pulse dot at the end -->
                                 <div
-                                    v-if="parseFloat(downloadProgressBarValue) > 0 && parseFloat(downloadProgressBarValue) < 100"
+                                    v-if="
+                                        parseFloat(downloadProgressBarValue) > 0 &&
+                                        parseFloat(downloadProgressBarValue) < 100
+                                    "
                                     class="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow-lg"
-                                    :style="{ 
+                                    :style="{
                                         left: `calc(${downloadProgressBarValue} - 10px)`,
-                                        boxShadow: '0 0 12px rgba(139, 92, 246, 0.8)'
+                                        boxShadow: '0 0 12px rgba(139, 92, 246, 0.8)',
                                     }"
                                 >
-                                    <div class="absolute inset-0 animate-ping rounded-full bg-white opacity-60"></div>
+                                    <div
+                                        class="absolute inset-0 animate-ping rounded-full bg-white opacity-60"
+                                    ></div>
                                 </div>
                             </div>
                             <div class="mt-2 flex items-center justify-between text-sm">

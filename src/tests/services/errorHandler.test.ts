@@ -137,9 +137,9 @@ describe('normalizeError', () => {
 describe('logger', () => {
     beforeEach(() => {
         clearLogs();
-        vi.spyOn(console, 'log').mockImplementation(() => { });
-        vi.spyOn(console, 'warn').mockImplementation(() => { });
-        vi.spyOn(console, 'error').mockImplementation(() => { });
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+        vi.spyOn(console, 'warn').mockImplementation(() => {});
+        vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     it('應該記錄 info 日誌', () => {
@@ -166,7 +166,7 @@ describe('logger', () => {
 describe('handleError', () => {
     beforeEach(() => {
         clearErrors();
-        vi.spyOn(console, 'error').mockImplementation(() => { });
+        vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     it('應該處理 AppError', async () => {
@@ -187,7 +187,7 @@ describe('handleError', () => {
 
 describe('trySafe', () => {
     beforeEach(() => {
-        vi.spyOn(console, 'error').mockImplementation(() => { });
+        vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     it('成功時應該回傳結果', async () => {

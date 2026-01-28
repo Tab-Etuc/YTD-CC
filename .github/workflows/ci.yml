@@ -169,12 +169,15 @@ jobs:
             chmod +x ffmpeg-x86_64-apple-darwin ffmpeg-aarch64-apple-darwin
             rm ffmpeg.zip
           else
-            curl -L -o ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
-            tar -xf ffmpeg.tar.xz --wildcards "*/ffmpeg" --strip-components=1
-            mv ffmpeg ffmpeg-x86_64-unknown-linux-gnu
+            # Linux: use GitHub release from BtbN
+            curl -L -o ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+            tar -xf ffmpeg.tar.xz
+            find . -name "ffmpeg" -type f -executable | head -1 | xargs -I {} mv {} ffmpeg-x86_64-unknown-linux-gnu
             chmod +x ffmpeg-x86_64-unknown-linux-gnu
-            rm ffmpeg.tar.xz
+            rm -rf ffmpeg.tar.xz ffmpeg-master-latest-linux64-gpl
           fi
+          # Verify the file exists
+          ls -la | grep -E "ffmpeg|yt-dlp"
 
       - name: Build frontend
         run: yarn build
