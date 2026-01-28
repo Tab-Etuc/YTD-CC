@@ -6,6 +6,7 @@ use thiserror::Error;
 
 /// 應用程式錯誤類型
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum AppError {
     #[error("IO 錯誤: {0}")]
     Io(#[from] std::io::Error),

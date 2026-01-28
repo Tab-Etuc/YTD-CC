@@ -39,6 +39,7 @@ export class AppError extends Error {
     public readonly context: Record<string, unknown>;
     public readonly timestamp: Date;
     public readonly isUserFacing: boolean;
+    public readonly cause?: Error;
 
     constructor(options: {
         message: string;

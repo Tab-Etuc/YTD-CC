@@ -88,6 +88,22 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
+      - name: Download yt-dlp sidecar
+        run: |
+          cd src-tauri
+          curl -L -o yt-dlp-x86_64-unknown-linux-gnu https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp
+          chmod +x yt-dlp-x86_64-unknown-linux-gnu
+
+      - name: Download ffmpeg sidecar
+        run: |
+          cd src-tauri
+          curl -L -o ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+          tar -xf ffmpeg.tar.xz
+          find . -name "ffmpeg" -type f -executable | head -1 | xargs -I {} mv {} ffmpeg-x86_64-unknown-linux-gnu
+          chmod +x ffmpeg-x86_64-unknown-linux-gnu
+          rm -rf ffmpeg.tar.xz ffmpeg-master-latest-linux64-gpl
+          ls -la | grep -E "ffmpeg|yt-dlp"
+
       - name: Check formatting
         run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 

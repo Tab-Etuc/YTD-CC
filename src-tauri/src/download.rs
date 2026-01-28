@@ -4,7 +4,7 @@
 #[allow(unused_imports)]
 use crate::error::{AppError, AppResult};
 use serde_json::Value;
-use tauri::{AppHandle, Emitter, Manager, Window};
+use tauri::{AppHandle, Emitter, Window};
 use tauri_plugin_shell::process::CommandEvent;
 use tauri_plugin_shell::ShellExt;
 use tracing::{debug, error, info, warn};
