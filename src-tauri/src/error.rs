@@ -53,9 +53,11 @@ impl From<AppError> for ErrorResponse {
             AppError::Download(msg) => ("DOWNLOAD_ERROR", error.to_string(), Some(msg.clone())),
             AppError::FileSystem(msg) => ("FS_ERROR", error.to_string(), Some(msg.clone())),
             AppError::Settings(msg) => ("SETTINGS_ERROR", error.to_string(), Some(msg.clone())),
-            AppError::ExternalProcess(msg) => {
-                ("EXTERNAL_PROCESS_ERROR", error.to_string(), Some(msg.clone()))
-            }
+            AppError::ExternalProcess(msg) => (
+                "EXTERNAL_PROCESS_ERROR",
+                error.to_string(),
+                Some(msg.clone()),
+            ),
             AppError::Unknown(msg) => ("UNKNOWN_ERROR", error.to_string(), Some(msg.clone())),
         };
 

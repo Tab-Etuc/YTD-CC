@@ -37,7 +37,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "validate": "npm run typecheck && npm run lint && npm run test:run",
-    "prepare": "node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\"",
+    "prepare": "husky || true",
     "download-sidecars": "powershell -ExecutionPolicy Bypass -File ./scripts/download-sidecars.ps1",
     "setup": "yarn install && yarn download-sidecars"
   },

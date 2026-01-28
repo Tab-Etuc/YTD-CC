@@ -53,8 +53,6 @@ pub async fn get_video_info(app: AppHandle, url: String) -> Result<Value, String
     Ok(json)
 }
 
-
-
 /// 解析下載進度
 /// 使用字元安全的方式解析，避免在多位元組字元中間切割
 fn parse_progress(line: &str) -> Option<String> {
@@ -65,14 +63,14 @@ fn parse_progress(line: &str) -> Option<String> {
     // 尋找 '%' 的位置，然後往回找數字
     // 使用 char_indices 來安全地處理 UTF-8 字元
     let chars: Vec<(usize, char)> = line.char_indices().collect();
-    
+
     // 找到 '%' 字元的索引位置
     let percent_char_idx = chars.iter().position(|(_, c)| *c == '%')?;
-    
+
     // 從 '%' 往回收集數字和小數點
     let mut digits = String::new();
     let mut found_digit = false;
-    
+
     for i in (0..percent_char_idx).rev() {
         let ch = chars[i].1;
         if ch.is_ascii_digit() || ch == '.' {
@@ -95,10 +93,7 @@ fn parse_progress(line: &str) -> Option<String> {
         return None;
     }
 
-    digits
-        .parse::<f64>()
-        .ok()
-        .map(|_| format!("{}%", digits))
+    digits.parse::<f64>().ok().map(|_| format!("{}%", digits))
 }
 
 /// 下載影片參數 (Command Input)
@@ -135,12 +130,16 @@ pub async fn download_video(
 
     // 建構命令參數
     let mut args = vec![
-        "-P", &params.path, 
+        "-P",
+        &params.path,
         "--newline",
         "--no-check-certificates",
-        "--extractor-retries", "3",
-        "--fragment-retries", "3",
-        "--retry-sleep", "3",
+        "--extractor-retries",
+        "3",
+        "--fragment-retries",
+        "3",
+        "--retry-sleep",
+        "3",
         "--no-warnings",
     ];
 
@@ -170,8 +169,7 @@ pub async fn download_video(
                 debug!("yt-dlp stdout: {}", line.trim());
 
                 if let Some(progress) = parse_progress(&line) {
-                    let progress_value: f64 =
-                        progress.trim_end_matches('%').parse().unwrap_or(0.0);
+                    let progress_value: f64 = progress.trim_end_matches('%').parse().unwrap_or(0.0);
 
                     // 追蹤影片下載完成狀態（用於處理音訊轉換的第二階段進度）
                     if progress_value >= 100.0 {
