@@ -1,7 +1,8 @@
 {
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "YTD.CC",
-  "version": "0.1.0",
-  "identifier": "YTD.CC",
+  "version": "0.2.0",
+  "identifier": "com.ytdcc.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -14,14 +15,26 @@
         "title": "YTD.CC",
         "width": 1000,
         "height": 600,
+        "minWidth": 800,
+        "minHeight": 500,
         "resizable": true,
         "fullscreen": false,
         "transparent": true,
-        "decorations": false
+        "decorations": false,
+        "center": true
       }
     ],
     "security": {
-      "csp": null
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self'",
+        "style-src": "'self' 'unsafe-inline'",
+        "img-src": "'self' data: https://i.ytimg.com https://*.ggpht.com https://*.googleusercontent.com blob:",
+        "font-src": "'self' data:",
+        "connect-src": "'self' https://www.youtube.com https://youtube.com https://*.googlevideo.com",
+        "media-src": "'self' blob:"
+      },
+      "dangerousDisableAssetCspModification": false
     }
   },
   "bundle": {
@@ -39,25 +52,40 @@
       "yt-dlp"
     ],
     "resources": [],
-    "copyright": "",
+    "copyright": "Copyright © 2024 Tab Etuc. All rights reserved.",
     "category": "Utility",
-    "shortDescription": "download youtube video",
-    "longDescription": "download youtube video",
+    "shortDescription": "輕量、快速的 YouTube 影片下載器",
+    "longDescription": "YTD.CC 是一個使用 Tauri 建構的跨平台 YouTube 下載器，支援 MP3 音訊和 MP4 影片下載，具有直覺的使用者介面和高效的下載效能。",
     "macOS": {
-      "entitlements": null
+      "entitlements": null,
+      "minimumSystemVersion": "10.13"
     },
     "windows": {
       "wix": {
         "language": "zh-TW",
         "dialogImagePath": "icons/installer_bg.png",
         "bannerPath": "icons/installer_banner.png"
+      },
+      "nsis": {
+        "languages": [
+          "TradChinese"
+        ],
+        "displayLanguageSelector": false
+      }
+    },
+    "linux": {
+      "deb": {
+        "depends": []
       }
     }
   },
   "plugins": {
-      "updater": {
-          "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJBMTI0RjQ5QTAxNDhGQ0IKUldUTGp4U2dTVThTdXA1RXY1SER5ckEzUHRLUjF0TzlYNVRoQUNUU091eE5QUERZUVgxOWd5UC8K",
-          "endpoints": []
-      }
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJBMTI0RjQ5QTAxNDhGQ0IKUldUTGp4U2dTVThTdXA1RXY1SER5ckEzUHRLUjF0TzlYNVRoQUNUU091eE5QUERZUVgxOWd5UC8K",
+      "endpoints": []
+    },
+    "shell": {
+      "open": true
+    }
   }
 }
