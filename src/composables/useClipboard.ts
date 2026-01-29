@@ -3,10 +3,19 @@
  * 封裝剪貼簿讀寫操作
  */
 
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { readText, writeText } from '@tauri-apps/plugin-clipboard-manager';
 
-export function useClipboard() {
+/** Composable 回傳類型 */
+interface UseClipboardReturn {
+    clipboardContent: Ref<string>;
+    error: Ref<Error | null>;
+    isReading: Ref<boolean>;
+    read: () => Promise<string>;
+    write: (text: string) => Promise<boolean>;
+}
+
+export function useClipboard(): UseClipboardReturn {
     const clipboardContent = ref<string>('');
     const error = ref<Error | null>(null);
     const isReading = ref(false);

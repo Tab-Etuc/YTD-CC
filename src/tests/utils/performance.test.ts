@@ -178,7 +178,7 @@ describe('processBatch', () => {
 
     it('應該處理異步處理器', async () => {
         const items = [1, 2, 3];
-        const processor = async (x: number) => {
+        const processor = async (x: number): Promise<number> => {
             await new Promise((r) => setTimeout(r, 10));
             return x * 2;
         };

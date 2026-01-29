@@ -193,10 +193,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { invoke } from '@tauri-apps/api/core';
-import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import { sendNotification } from '@tauri-apps/plugin-notification';
 import { useAppStore } from '@/stores/app';
+import { useDownloadQueue } from '@/composables/useDownloadQueue';
 
 interface Props {
     show: boolean;
@@ -209,6 +207,7 @@ const emit = defineEmits<{
 }>();
 
 const store = useAppStore();
+const { startQueue } = useDownloadQueue();
 
 // Computed
 const queue = computed(() => store.downloadQueue);
@@ -228,63 +227,6 @@ function clearQueue(): void {
 }
 
 async function startQueueDownload(): Promise<void> {
-    store.setQueueProcessing(true);
-
-    let unlisten: UnlistenFn | null = null;
-
-    try {
-        // Listen for progress events
-        unlisten = await listen<string>('download_progress', (event) => {
-            const progress = parseInt(event.payload.replace('%', ''));
-            store.updateQueueItemProgress({ progress });
-        });
-
-        // Process each pending item
-        const pending = queue.value.filter((item) => item.status === 'pending');
-
-        for (const item of pending) {
-            store.updateQueueItemStatus({ id: item.id, status: 'downloading', progress: 0 });
-
-            try {
-                await invoke('download_video', {
-                    params: {
-                        url: item.url,
-                        path: store.downloadOutputPath,
-                        format:
-                            item.format === 'MP4'
-                                ? `bestvideo[height<=${item.height || 720}][ext=mp4]+bestaudio[ext=m4a]/best[height<=${item.height || 720}][ext=mp4]/best`
-                                : 'bestaudio/best',
-                        is_audio: item.format === 'MP3',
-                    },
-                });
-
-                store.updateQueueItemStatus({ id: item.id, status: 'completed', progress: 100 });
-
-                // Add to history
-                await store.addHistoryItem({
-                    title: item.title,
-                    format: item.format,
-                    duration: item.duration,
-                    thumbnail: item.thumbnail,
-                    quality: item.quality,
-                });
-            } catch (err) {
-                console.error(`Failed to download ${item.title}:`, err);
-                store.updateQueueItemStatus({ id: item.id, status: 'error', progress: 0 });
-            }
-        }
-
-        // Send completion notification
-        const completed = queue.value.filter((item) => item.status === 'completed').length;
-        sendNotification({
-            title: '佇列下載完成',
-            body: `成功下載 ${completed} 個影片`,
-        });
-    } finally {
-        if (unlisten) {
-            unlisten();
-        }
-        store.setQueueProcessing(false);
-    }
+    await startQueue();
 }
 </script>

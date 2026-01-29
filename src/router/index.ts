@@ -10,8 +10,12 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import Home from '@/components/views/Home.vue';
 
 // 其他頁面使用懶加載
+// TypeScript 會自動推斷類型，無需顯式指定
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const History = () => import('@/components/views/History.vue');
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const About = () => import('@/components/views/About.vue');
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const Settings = () => import('@/components/views/Settings.vue');
 
 const routes: RouteRecordRaw[] = [

@@ -17,6 +17,7 @@ import {
     clearErrors,
     trySafe,
 } from '@/services/errorHandler';
+import { writeTextFile } from '@tauri-apps/plugin-fs';
 
 describe('AppError', () => {
     it('應該建立帶有正確屬性的錯誤', () => {
@@ -137,13 +138,18 @@ describe('normalizeError', () => {
 describe('logger', () => {
     beforeEach(() => {
         clearLogs();
-        vi.spyOn(console, 'log').mockImplementation(() => {});
-        vi.spyOn(console, 'warn').mockImplementation(() => {});
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        vi.spyOn(console, 'log').mockImplementation(() => { });
+
+        vi.spyOn(console, 'warn').mockImplementation(() => { });
+
+        vi.spyOn(console, 'error').mockImplementation(() => { });
+        vi.mocked(writeTextFile).mockClear();
     });
 
     it('應該記錄 info 日誌', () => {
         logger.info('測試訊息');
+        // eslint-disable-next-line no-console
         expect(console.log).toHaveBeenCalled();
     });
 
@@ -152,13 +158,17 @@ describe('logger', () => {
         expect(console.warn).toHaveBeenCalled();
     });
 
-    it('應該記錄 error 日誌', () => {
+    it('應該記錄 error 日誌並寫入檔案', async () => {
         logger.error('錯誤訊息');
         expect(console.error).toHaveBeenCalled();
+        // 等待非同步日誌寫入
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(writeTextFile).toHaveBeenCalled();
     });
 
     it('應該接受 context 參數', () => {
         logger.info('帶有 context', { key: 'value' });
+        // eslint-disable-next-line no-console
         expect(console.log).toHaveBeenCalled();
     });
 });
@@ -166,7 +176,8 @@ describe('logger', () => {
 describe('handleError', () => {
     beforeEach(() => {
         clearErrors();
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        vi.spyOn(console, 'error').mockImplementation(() => { });
     });
 
     it('應該處理 AppError', async () => {
@@ -187,7 +198,8 @@ describe('handleError', () => {
 
 describe('trySafe', () => {
     beforeEach(() => {
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        vi.spyOn(console, 'error').mockImplementation(() => { });
     });
 
     it('成功時應該回傳結果', async () => {

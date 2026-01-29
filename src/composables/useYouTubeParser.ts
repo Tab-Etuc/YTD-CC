@@ -3,7 +3,7 @@
  * 提供響應式的 YouTube URL 解析功能
  */
 
-import { ref, computed } from 'vue';
+import { ref, computed, type Ref, type ComputedRef } from 'vue';
 import {
     parseYouTubeUrl,
     extractVideoId,
@@ -13,7 +13,24 @@ import {
     type YouTubeParseResult,
 } from '@/utils/youtube';
 
-export function useYouTubeParser() {
+/** Composable 回傳類型 */
+interface UseYouTubeParserReturn {
+    url: Ref<string>;
+    parseResult: Ref<YouTubeParseResult | null>;
+    isValid: ComputedRef<boolean>;
+    videoId: ComputedRef<string | null>;
+    isPlaylist: ComputedRef<boolean>;
+    playlistId: ComputedRef<string | null>;
+    thumbnailUrl: ComputedRef<string | null>;
+    parse: (inputUrl: string) => YouTubeParseResult;
+    clear: () => void;
+    extractVideoId: typeof extractVideoId;
+    isPlaylistUrl: typeof isPlaylistUrl;
+    getThumbnailUrl: typeof getThumbnailUrl;
+    getWatchUrl: typeof getWatchUrl;
+}
+
+export function useYouTubeParser(): UseYouTubeParserReturn {
     const url = ref('');
     const parseResult = ref<YouTubeParseResult | null>(null);
 

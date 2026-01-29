@@ -150,6 +150,7 @@ import { ref, onMounted } from 'vue';
 import { open } from '@tauri-apps/plugin-shell';
 import { getVersion } from '@tauri-apps/api/app';
 import { check } from '@tauri-apps/plugin-updater';
+import { logger } from '@/services/errorHandler';
 
 defineOptions({
     name: 'About',
@@ -167,7 +168,7 @@ async function checkAppUpdate(): Promise<void> {
     try {
         const update = await check();
         if (update) {
-            console.log(`Installing update ${update.version}, ${update.date}, ${update.body}`);
+            logger.info(`Installing update ${update.version}, ${update.date}, ${update.body}`);
             await update.downloadAndInstall();
         }
     } catch (e) {

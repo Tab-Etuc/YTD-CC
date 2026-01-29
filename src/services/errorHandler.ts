@@ -4,6 +4,7 @@
  */
 
 import { ref, readonly } from 'vue';
+import { writeTextFile, BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
 
 // ============================================================================
 // 型別定義
@@ -101,6 +102,24 @@ export function clearLogs(): void {
     logs.value = [];
 }
 
+/** 儲存錯誤日誌到檔案 */
+async function persistLogsToFile(): Promise<void> {
+    try {
+        const logContent = JSON.stringify(logs.value, null, 2);
+        const fileName = `error-log-${new Date().toISOString().split('T')[0]}.json`;
+
+        if (!(await exists('', { baseDir: BaseDirectory.AppData }))) {
+            await mkdir('', { baseDir: BaseDirectory.AppData, recursive: true });
+        }
+
+        await writeTextFile(fileName, logContent, { baseDir: BaseDirectory.AppData });
+        // Also save latest for easier access
+        await writeTextFile('latest-error.json', logContent, { baseDir: BaseDirectory.AppData });
+    } catch (err) {
+        console.error('Failed to persist logs:', err);
+    }
+}
+
 /** 記錄日誌 */
 function log(level: LogLevel, message: string, context?: Record<string, unknown>): void {
     // 檢查日誌等級
@@ -123,14 +142,21 @@ function log(level: LogLevel, message: string, context?: Record<string, unknown>
         logs.value = logs.value.slice(-MAX_LOG_ENTRIES);
     }
 
-    // 輸出到控制台
+    // 輸出到控制台 (這是 logger 的核心功能，需要使用 console)
     const consoleMethod = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
     const prefix = `[${level.toUpperCase()}] [${entry.timestamp.toISOString()}]`;
 
     if (context) {
+        // eslint-disable-next-line no-console
         console[consoleMethod](prefix, message, context);
     } else {
+        // eslint-disable-next-line no-console
         console[consoleMethod](prefix, message);
+    }
+
+    // 如果是嚴重錯誤，自動儲存日誌
+    if (level === 'error') {
+        persistLogsToFile();
     }
 }
 
@@ -141,6 +167,43 @@ export const logger = {
     warn: (message: string, context?: Record<string, unknown>) => log('warn', message, context),
     error: (message: string, context?: Record<string, unknown>) => log('error', message, context),
 };
+
+// ============================================================================
+// 全域初始化
+// ============================================================================
+
+/** 初始化全域錯誤捕捉 */
+export function initGlobalErrorHandling(app: import('vue').App): void {
+    // Vue 錯誤處理
+    app.config.errorHandler = (err, instance, info) => {
+        handleError(new AppError({
+            message: (err as Error).message,
+            category: 'UNKNOWN',
+            context: { info, component: instance?.$options.name },
+            cause: err as Error,
+        }));
+    };
+
+    // Promise 拒絕處理
+    window.addEventListener('unhandledrejection', (event) => {
+        handleError(new AppError({
+            message: `Unhandled Rejection: ${event.reason}`,
+            category: 'UNKNOWN',
+            context: { reason: event.reason },
+        }));
+    });
+
+    // 一般 JS 錯誤處理
+    window.addEventListener('error', (event) => {
+        handleError(new AppError({
+            message: event.message,
+            category: 'UNKNOWN',
+            context: { filename: event.filename, lineno: event.lineno, colno: event.colno },
+        }));
+    });
+
+    logger.info('Global error handling initialized');
+}
 
 // ============================================================================
 // 錯誤處理服務
@@ -209,8 +272,15 @@ export function normalizeError(error: unknown): AppError {
     }
 
     if (error instanceof Error) {
+        let message = error.message;
+
+        // 偵測常見的 yt-dlp 錯誤並提供建議
+        if (message.includes('HTTP Error 403') || message.includes('Sign in to confirm your age')) {
+            message = `${message}\n(建議：這可能表示 yt-dlp 版本過舊或需要 Cookie，請嘗試更新元件)`;
+        }
+
         return new AppError({
-            message: error.message,
+            message: message,
             category: categorizeError(error),
             cause: error,
         });
@@ -329,10 +399,10 @@ export function withErrorHandling<T extends (...args: unknown[]) => Promise<unkn
                 error instanceof AppError
                     ? error
                     : new AppError({
-                          message: options?.fallbackMessage ?? (error as Error).message,
-                          category: options?.category ?? 'UNKNOWN',
-                          cause: error instanceof Error ? error : undefined,
-                      });
+                        message: options?.fallbackMessage ?? (error as Error).message,
+                        category: options?.category ?? 'UNKNOWN',
+                        cause: error instanceof Error ? error : undefined,
+                    });
 
             await handleError(appError);
 

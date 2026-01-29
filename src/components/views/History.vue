@@ -32,22 +32,35 @@
                 </div>
             </header>
 
-            <div class="scrollbar h-full w-full overflow-auto rounded-tr-lg">
-                <ul
-                    v-for="item in historyList"
-                    :key="item.DOWNLOAD_TIME"
-                    class="flex h-24 w-full list-none ring-1 ring-white/10 ring-inset odd:bg-slate-800 even:bg-slate-700"
+            <div class="h-full w-full overflow-hidden rounded-tr-lg">
+                <div
+                    v-if="!historyList || historyList.length === 0"
+                    class="flex h-full w-full items-center justify-center"
                 >
-                    <li class="flex w-full">
+                    <p class="text-center text-lg text-white">空無一物</p>
+                </div>
+
+                <RecycleScroller
+                    v-else
+                    class="scroller h-full"
+                    :items="historyList"
+                    :item-size="96"
+                    key-field="DOWNLOAD_TIME"
+                    v-slot="{ item, index }"
+                >
+                    <div
+                        class="flex h-24 w-full items-center ring-1 ring-white/10 ring-inset"
+                        :class="index % 2 !== 0 ? 'bg-slate-800' : 'bg-slate-700'"
+                    >
                         <img
                             :src="item.BANNER_IMAGE"
                             loading="lazy"
-                            class="my-auto ml-2 h-[80%] w-28 rounded-md"
+                            class="ml-2 h-[80%] w-28 rounded-md object-cover"
                         />
 
-                        <div class="text-md ml-3 h-full w-[80%] text-white">
+                        <div class="text-md ml-3 h-full w-[80%] py-4 text-white">
                             <p class="w-full truncate">{{ item.VIDEO_NAME }}</p>
-                            <div class="mt-3 flex h-8 w-full flex-wrap space-x-3">
+                            <div class="mt-2 flex h-8 w-full flex-wrap space-x-3">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 448 512"
@@ -58,7 +71,9 @@
                                         d="M272 0C289.7 0 304 14.33 304 32C304 49.67 289.7 64 272 64H256V98.45C293.5 104.2 327.7 120 355.7 143L377.4 121.4C389.9 108.9 410.1 108.9 422.6 121.4C435.1 133.9 435.1 154.1 422.6 166.6L398.5 190.8C419.7 223.3 432 262.2 432 304C432 418.9 338.9 512 224 512C109.1 512 16 418.9 16 304C16 200 92.32 113.8 192 98.45V64H176C158.3 64 144 49.67 144 32C144 14.33 158.3 0 176 0L272 0zM248 192C248 178.7 237.3 168 224 168C210.7 168 200 178.7 200 192V320C200 333.3 210.7 344 224 344C237.3 344 248 333.3 248 320V192z"
                                     />
                                 </svg>
-                                <span class="h-5 truncate text-sm">{{ item.VIDEO_DURATION }}</span>
+                                <span class="h-5 truncate text-sm">{{
+                                    item.VIDEO_DURATION
+                                }}</span>
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 384 512"
@@ -79,13 +94,8 @@
                                 }}
                             </p>
                         </div>
-                    </li>
-                </ul>
-
-                <div v-if="!historyList" class="flex h-full w-full items-center justify-center">
-                    <p class="text-center text-lg text-white">空無一物</p>
-                </div>
-                <li class="flex h-20 w-full"></li>
+                    </div>
+                </RecycleScroller>
             </div>
         </div>
 
@@ -163,6 +173,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { writeTextFile, BaseDirectory, exists, mkdir } from '@tauri-apps/plugin-fs';
+import { RecycleScroller } from 'vue-virtual-scroller';
 import { useAppStore } from '@/stores/app';
 
 defineOptions({

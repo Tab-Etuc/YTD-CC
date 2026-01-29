@@ -6,7 +6,14 @@
 import { open } from '@tauri-apps/plugin-shell';
 import { invoke } from '@tauri-apps/api/core';
 
-export function useExternalLink() {
+/** Composable 回傳類型 */
+interface UseExternalLinkReturn {
+    openLink: (url: string) => Promise<void>;
+    openUrl: (url: string) => Promise<void>;
+    showInFolder: (path: string) => Promise<void>;
+}
+
+export function useExternalLink(): UseExternalLinkReturn {
     /**
      * 開啟外部連結或在檔案總管中顯示路徑
      */

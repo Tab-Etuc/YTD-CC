@@ -8,6 +8,7 @@ import { defineStore } from 'pinia';
 import { invoke } from '@tauri-apps/api/core';
 import { readTextFile, writeTextFile, exists, mkdir, BaseDirectory } from '@tauri-apps/plugin-fs';
 import type { HistoryItem, HistoryData, QueueItem, QueueItemInput, AppSettings } from '@/types';
+import { logger } from '@/services/errorHandler';
 
 export const useAppStore = defineStore('app', () => {
     // ============================================================================
@@ -203,7 +204,7 @@ export const useAppStore = defineStore('app', () => {
     async function fetchSettings(): Promise<void> {
         try {
             const data = await invoke<AppSettings>('load_settings');
-            console.log('Loaded settings:', data);
+            logger.debug('Loaded settings:', { data });
             windowControlOnTheLeft.value = data.WINDOW_CONTROLS_ON_THE_LEFT;
             downloadOutputPath.value = data.DOWNLOAD_OUTPUT_PATH;
             saveHistory.value = data.SAVE_HISTORY;
