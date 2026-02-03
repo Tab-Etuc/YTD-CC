@@ -54,11 +54,6 @@
   dependencies:
     tslib "^2.4.0"
 
-"@epic-web/invariant@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@epic-web/invariant/-/invariant-1.0.0.tgz#1073e5dee6dd540410784990eb73e4acd25c9813"
-  integrity sha512-lrTPqgvfFQtR/eY/qkIzp98OGdNJu0m5ji3q/nJI8v3SXkRKEnWiOxMmbvcSoAIzv/cGiuvRy57k4suKQSAdwA==
-
 "@esbuild/aix-ppc64@0.23.1":
   version "0.23.1"
   resolved "https://registry.yarnpkg.com/@esbuild/aix-ppc64/-/aix-ppc64-0.23.1.tgz#51299374de171dbd80bb7d838e1cfce9af36f353"
@@ -719,10 +714,10 @@
     "@tailwindcss/oxide" "4.1.18"
     tailwindcss "4.1.18"
 
-"@tauri-apps/api@^2.6.0", "@tauri-apps/api@^2.8.0", "@tauri-apps/api@^2.9.1":
-  version "2.9.1"
-  resolved "https://registry.npmjs.org/@tauri-apps/api/-/api-2.9.1.tgz"
-  integrity sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw==
+"@tauri-apps/api@^2.10.1", "@tauri-apps/api@^2.6.0", "@tauri-apps/api@^2.8.0":
+  version "2.10.1"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-2.10.1.tgz#57c1bae6114ec33d977eb2b50dfefc25fa84fc93"
+  integrity sha512-hKL/jWf293UDSUN09rR69hrToyIXBb8CjGaWC7gfinvnQrBVvnLr08FeFi38gxtugAVyVcTa5/FD/Xnkb1siBw==
 
 "@tauri-apps/cli-darwin-arm64@2.9.6":
   version "2.9.6"
@@ -1431,14 +1426,6 @@ copy-anything@^4:
   integrity sha512-7Vv6asjS4gMOuILabD3l739tsaxFQmC+a7pLZm02zyvs8p977bL3zEgq3yDk5rn9B0PbYgIv++jmHcuUab4RhA==
   dependencies:
     is-what "^5.2.0"
-
-cross-env@^10.1.0:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/cross-env/-/cross-env-10.1.0.tgz#cfd2a6200df9ed75bfb9cb3d7ce609c13ea21783"
-  integrity sha512-GsYosgnACZTADcmEyJctkJIoqAhHjttw7RsFrVoJNXbsWWqaq6Ym+7kZjq6mS45O0jij6vtiReppKQEtqWy6Dw==
-  dependencies:
-    "@epic-web/invariant" "^1.0.0"
-    cross-spawn "^7.0.6"
 
 cross-spawn@^7.0.6:
   version "7.0.6"
