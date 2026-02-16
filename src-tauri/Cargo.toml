@@ -36,7 +36,7 @@ url = "2"
 time = "0.3"
 image = "0.25"
 tokio = { version = "1.49.0", features = ["fs"] }
-thiserror = "1"
+thiserror = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
